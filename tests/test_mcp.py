@@ -60,3 +60,28 @@ def test_stdio_session_survives_tool_errors_and_reads_resources(tmp_path):
                 assert "Mod any game" in resource.contents[0].text
                 await client.send_ping()
     asyncio.run(asyncio.wait_for(exercise(), timeout=30))
+
+
+def test_stdio_validation_matches_service_for_raw_json_arguments(tmp_path):
+    async def exercise():
+        service = Service(tmp_path)
+        params = StdioServerParameters(command=sys.executable,
+                                      args=['-m', 'um', 'mcp', 'serve', '--workspace', str(tmp_path)])
+        cases = [('knowledge_search', {'query': 'terraria', 'limit': value})
+                 for value in (True, '5', 5.0, None)]
+        cases += [('project_create', {}), ('game_profiles', {'typo': True}),
+                  ('game_scan', {'path': 7})]
+        async with stdio_client(params) as (reader, writer):
+            async with ClientSession(reader, writer) as client:
+                await client.initialize()
+                tools = await client.list_tools()
+                assert all(t.inputSchema['additionalProperties'] is False for t in tools.tools)
+                for name, arguments in cases:
+                    expected = service.invoke(name, arguments)
+                    result = await client.call_tool(name, arguments)
+                    assert result.isError, (name, arguments)
+                    assert result.structuredContent == expected.to_dict(), (name, arguments)
+                valid = await client.call_tool('game_profiles', {})
+                assert valid.structuredContent == service.invoke('game_profiles').to_dict()
+        service.close()
+    asyncio.run(asyncio.wait_for(exercise(), timeout=30))

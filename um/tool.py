@@ -26,7 +26,7 @@ def main(args):
                                                "signature": str(inspect.signature(fn))}
                                               for name, fn in service.tools().items()]})
         else:
-            raw = Path(args.args_file).read_text(encoding="utf-8") if args.args_file else args.args
+            raw = Path(args.args_file).read_text(encoding="utf-8-sig") if args.args_file else args.args
             result = service.invoke(args.name, json.loads(raw))
     except (ValueError, OSError, ToolError) as exc:
         result = Result(False, error=ErrorInfo(getattr(exc, "code", "invalid_arguments"), str(exc)))

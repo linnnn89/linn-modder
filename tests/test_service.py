@@ -189,3 +189,15 @@ def test_unexpected_backend_failure_does_not_break_the_contract(tmp_path, monkey
     assert not result.ok
     assert result.error.code == "internal_error"
     assert service.invoke("game_profiles").ok
+
+
+def test_json_cli_accepts_powershell_utf8_bom(tmp_path):
+    import subprocess
+    import sys
+    arguments = tmp_path / 'args.json'
+    arguments.write_text('{}', encoding='utf-8-sig')
+    result = subprocess.run([sys.executable, '-m', 'um', 'tool', 'call', 'game_profiles',
+                             '--workspace', str(tmp_path), '--args-file', str(arguments)],
+                            capture_output=True, text=True, encoding='utf-8')
+    assert result.returncode == 0, result.stderr
+    assert json.loads(result.stdout)['ok']

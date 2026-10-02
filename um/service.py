@@ -32,7 +32,7 @@ class Service:
     def tools(self) -> dict:
         names = ["environment_check", "game_profiles", "game_scan", "knowledge_search",
                  "manual_read", "manuals_export", "project_create", "image_prepare",
-                 "backup_create", "windows_list", "window_capture"]
+                 "backup_create", "backup_list", "backup_verify", "backup_restore", "windows_list", "window_capture"]
         if self.allow_input:
             names.append("window_input")
         return {name: getattr(self, name) for name in names}
@@ -138,15 +138,68 @@ class Service:
         if not source_path.is_dir():
             raise ToolError("invalid_path", "Backup source must be a directory.")
         self.workspace.check_tree(source_path)
-        store = self.workspace.path(".um", write=True)
+        store = self._backup_store(name)
         # Avoid recursively snapshotting the store itself, including the workspace root.
         if store.is_relative_to(source_path):
             raise ToolError("recursive_backup", "Back up a specific subfolder, not an ancestor of .um.")
-        if not re.fullmatch(r"[a-zA-Z0-9_-]{1,64}", name):
-            raise ToolError("invalid_name", "Backup ID must use 1..64 ASCII letters, digits, _ or -.")
-        self.workspace.path(store / "backups" / name, write=True)
         path = backup.create(str(source_path), name, note, store=store, quiet=True)
         return Result(True, {"snapshot": str(path)}, [self._artifact(path)])
+
+    def _backup_store(self, name: str) -> Path:
+        if not re.fullmatch(r"[a-zA-Z0-9_-]{1,64}", name):
+            raise ToolError("invalid_name", "Backup ID must use 1..64 ASCII letters, digits, _ or -.")
+        store = self.workspace.path(".um", write=True)
+        self.workspace.path(backup._root(name, store), write=True)
+        return store
+
+    def _backup_snapshot(self, name: str, snapshot: str) -> Path:
+        store = self._backup_store(name)
+        if not snapshot:
+            paths = backup.snapshots(name, store=store)
+            if not paths:
+                raise ToolError("not_found", f"No snapshots for {name}")
+            snapshot = str(paths[-1])
+        path = self.workspace.path(snapshot, exists=True)
+        folder = self.workspace.path(backup._root(name, store), write=True)
+        if not path.is_relative_to(folder) or not path.is_file():
+            raise ToolError("invalid_snapshot", "Choose a snapshot inside this workspace's named backup store.")
+        return path
+
+    def backup_list(self, name: str) -> Result:
+        """List snapshots for a backup ID in this workspace, without writing files."""
+        store = self._backup_store(name)
+        folder = self.workspace.path(backup._root(name, store), write=True)
+        if folder.exists():
+            self.workspace.check_tree(folder)
+        return Result(True, {"snapshots": [
+            {"path": str(path), "size": path.stat().st_size}
+            for path in backup.snapshots(name, store=store)]})
+
+    def backup_verify(self, name: str, snapshot: str = "") -> Result:
+        """Verify all archive paths, sizes and checksums; default to the latest named snapshot."""
+        path = self._backup_snapshot(name, snapshot)
+        manifest = backup.verify_snapshot(path)
+        return Result(True, {"snapshot": str(path), "files": len(manifest["files"]),
+                             "bytes": sum(entry["size"] for entry in manifest["files"].values()), "valid": True})
+
+    def backup_restore(self, name: str, target: str, snapshot: str = "",
+                       clean: bool = False, apply: bool = False) -> Result:
+        """Preview a workspace restore. Set apply=true to restore after reviewing; save an undo snapshot first."""
+        path = self._backup_snapshot(name, snapshot)
+        destination = self.workspace.path(target, write=True)
+        store = self._backup_store(name)
+        self._backup_store(name[:52] + "-pre-restore")
+        if (store.is_relative_to(destination) or destination.is_relative_to(store)
+                or any(root.is_relative_to(destination) for root in self.workspace.game_roots)):
+            raise ToolError("invalid_target", "Restore target must not overlap the snapshot store or game roots.")
+        if destination.exists():
+            self.workspace.check_tree(destination)
+        if not apply:
+            return Result(True, backup.diff(name, str(destination), str(path), store=store)
+                          | {"applied": False, "clean": clean})
+        result = backup.restore(name, str(destination), str(path), clean=clean, yes=True, store=store, quiet=True)
+        artifacts = [self._artifact(Path(result["undo_snapshot"]), "undo")] if result["undo_snapshot"] else []
+        return Result(True, result | {"applied": True, "clean": clean}, artifacts)
 
     def windows_list(self) -> Result:
         """List visible Windows processes with exact process and window IDs."""

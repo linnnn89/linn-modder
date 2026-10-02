@@ -4,8 +4,18 @@ These checks prevent accidental traversal; they are not an OS sandbox against a
 concurrent, hostile local process. Game roots are read-only through this API.
 """
 from pathlib import Path
+import stat
 
 from um.contracts import ToolError
+
+
+def is_link(path: Path) -> bool:
+    """Include Windows junctions/reparse points on Python 3.10 and newer."""
+    try:
+        info = path.lstat()
+    except FileNotFoundError:
+        return False
+    return stat.S_ISLNK(info.st_mode) or bool(getattr(info, "st_file_attributes", 0) & 0x400)
 
 
 class Workspace:
@@ -36,5 +46,5 @@ class Workspace:
             for name in dirs + files:
                 candidate = Path(parent) / name
                 self.path(candidate, exists=True)
-                if candidate.is_symlink() or getattr(candidate, "is_junction", lambda: False)():
+                if is_link(candidate):
                     raise ToolError("linked_tree", "Recursive operations require a tree without links/junctions.")

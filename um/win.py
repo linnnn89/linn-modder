@@ -34,6 +34,7 @@ import threading
 from pathlib import Path
 
 from um.common import die, is_windows, is_wsl, to_posix, to_win
+from um.dependencies import find_ffmpeg, probe_ffmpeg
 
 HERE = Path(__file__).resolve().parent
 TOOLS = HERE / "ps1"          # shipped inside the package so `uv tool install` gets them too
@@ -84,16 +85,9 @@ def tool_path(name: str) -> str:
 
 def ffmpeg_win(required=True) -> str | None:
     """A Windows ffmpeg that has gfxcapture: $UM_FFMPEG_WIN, our download, or one on the Windows PATH."""
-    cands = [os.environ.get("UM_FFMPEG_WIN")]
-    try:
-        cands.append(str(local_appdata() / "ffmpeg" / "bin" / "ffmpeg.exe"))
-    except SystemExit:
-        pass
-    if is_windows():
-        cands.append(shutil.which("ffmpeg"))
-    for c in cands:
-        if c and Path(to_posix(c)).exists():
-            return to_posix(c) if is_wsl() else c
+    path = find_ffmpeg(windows=is_windows(), wsl=is_wsl())
+    if path:
+        return path
     if required:
         die("no Windows ffmpeg with gfxcapture yet: run `um win setup`")
     return None
@@ -116,8 +110,8 @@ def setup(args=None):
         (d / root).rename(d / "ffmpeg")
         z.unlink()
     ff = ffmpeg_win()
-    out = subprocess.run([ff, "-hide_banner", "-h", "filter=gfxcapture"], capture_output=True, text=True).stdout
-    print("ffmpeg", ff, "(gfxcapture ok)" if "gfxcapture" in out else "(WARNING: no gfxcapture in this build)")
+    probe = probe_ffmpeg(ff)
+    print("ffmpeg", ff, "(gfxcapture ok)" if probe["gfxcapture"] else "(WARNING: no gfxcapture in this build)")
     enc = pick_encoder(ff)
     (d / "config.json").write_text(json.dumps(dict(encoder=enc)))
     print("encoder", enc)

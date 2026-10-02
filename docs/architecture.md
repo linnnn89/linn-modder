@@ -27,6 +27,11 @@ use the same named parameters and result schema, set `isError` on operational
 failures, and return PNG preview content for vision-capable clients. stdout is
 reserved for the protocol; legacy diagnostics remain on stderr.
 
+FastMCP supplies named schemas and transport/lifecycle handling. Its public
+`call_tool` method is overridden to dispatch raw JSON to `Service.invoke`, keeping
+the same strict types and structured errors across CLI, SDK and MCP; this avoids
+SDK coercion and discarded unknown arguments. Schemas forbid extra properties.
+
 The MCP transport uses the official Python SDK, pinned to its stable 1.x API.
 It is an optional dependency: installing the CLI does not require MCP. Each server
 owns a service; its lifespan closes input subprocesses. Blocking work runs on a
@@ -39,6 +44,14 @@ API, not yet a persistent job scheduler.
 - A required existing workspace owns staging files, captures and backup snapshots.
 - Repeated `--game-root` options permit reads from installed game directories.
   Those roots remain read-only through the service, even when nested in a workspace.
+- Backup creation, listing, verification and restore share workspace `.um` storage.
+  Restore requires an explicit workspace target, previews by default, and rejects
+  overlapping game roots/stores. Archive paths, case collisions, sizes and checksums
+  are validated while staging all files before any target change. An undo snapshot
+  precedes replacement; each file uses a same-directory atomic replace. This is
+  not a transaction over the entire directory: a later filesystem failure can
+  leave some files restored, with the undo snapshot available for recovery.
+  Legacy backup commands accept `--store WORKSPACE/.um` to access the same files.
 - Paths are resolved before containment checks. Recursive scans/backups reject
   linked trees. This is protection from accidental traversal, not an OS sandbox
   against another local process racing filesystem changes.

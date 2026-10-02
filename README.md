@@ -72,7 +72,8 @@ uv run um doctor
 | `manuals_export` | 将完整 Skills 与知识库复制到工作区 |
 | `project_create` | 按游戏创建二次元 Mod 开发项目 |
 | `image_prepare` | 图片裁切、缩放、透明 PNG 中间产物 |
-| `backup_create` | 存档或配置快照，写入工作区 |
+| `backup_create` / `backup_list` / `backup_verify` | 工作区快照、列表及完整性校验 |
+| `backup_restore` | 预览恢复差异，执行恢复并保存撤销快照 |
 | `windows_list` / `window_capture` | 窗口发现、截图和原生 MCP 图片预览 |
 | `window_input` | 可选的按 PID 控制，显式聚焦 |
 
@@ -93,6 +94,26 @@ um tool call project_create --workspace C:\Mods --args-file create-project.json
 
 ```json
 {"destination":"projects/anime_ck3","profile":"ck3","name":"anime_ck3","game_version":"unknown"}
+```
+
+参数文件支持 UTF-8，包含 Windows PowerShell 5.1 常用的 BOM。MCP、JSON CLI
+与 Python 服务使用相同的严格参数校验；未知参数和错误类型返回结构化错误。
+
+备份默认存放在工作区的 `.um/backups/<name>/`。使用 `backup_restore` 时必须
+指定工作区内的 `target`，默认仅预览差异：
+
+```json
+{"name":"anime-saves","target":"saves","clean":false,"apply":false}
+```
+
+检查结果后设置 `apply:true` 执行恢复。工具先验证整个快照的路径、大小和校验和，
+再暂存解压文件；覆盖前将当前目录保存到 `<name>-pre-restore`，结果中的
+`undo_snapshot` 可用于撤销。`clean:true` 会删除目标中快照未包含的文件。
+服务层的恢复目标保持在工作区内，游戏目录仍只读。旧 CLI 通过相同存储位置访问：
+
+```powershell
+um backup list anime-saves --store C:\Mods\.um
+um backup diff anime-saves C:\Mods\saves --store C:\Mods\.um
 ```
 
 ```python

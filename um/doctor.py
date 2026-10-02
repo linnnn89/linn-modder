@@ -2,36 +2,19 @@
 import os
 import platform
 import shutil
-import subprocess
 import sys
-from pathlib import Path
 
 from um.common import is_windows, is_wsl
+from um.dependencies import find_ffmpeg, probe_ffmpeg
 
 
 def inspect_environment() -> dict:
     from um import resources
     windows = is_windows() or is_wsl()
     ps = shutil.which("powershell.exe" if is_wsl() else "powershell")
-    ffmpeg = os.environ.get("UM_FFMPEG_WIN") if windows else None
-    ffmpeg = ffmpeg or shutil.which("ffmpeg")
-    if not ffmpeg and is_windows():
-        candidate = Path(os.environ.get("LOCALAPPDATA", "")) / "universal-modder/ffmpeg/bin/ffmpeg.exe"
-        if candidate.is_file():
-            ffmpeg = str(candidate)
-    gfxcapture = False
-    ffmpeg_error = None
-    if ffmpeg:
-        try:
-            r = subprocess.run([ffmpeg, "-hide_banner", "-filters"], capture_output=True,
-                               text=True, encoding="utf-8", errors="replace", timeout=10)
-            gfxcapture = r.returncode == 0 and any(
-                len(parts := line.split()) > 1 and parts[1] == "gfxcapture"
-                for line in r.stdout.splitlines())
-            if r.returncode:
-                ffmpeg_error = f"ffmpeg exited with code {r.returncode}"
-        except (OSError, subprocess.TimeoutExpired) as exc:
-            ffmpeg_error = str(exc)
+    ffmpeg = find_ffmpeg(windows=is_windows(), wsl=is_wsl())
+    probe = probe_ffmpeg(ffmpeg) if ffmpeg else {"gfxcapture": False, "error": None}
+    gfxcapture, ffmpeg_error = probe["gfxcapture"], probe["error"]
     collections = {kind: str(resources.root(kind)) for kind in resources.KINDS}
     return {
         "python": platform.python_version(), "platform": sys.platform,
