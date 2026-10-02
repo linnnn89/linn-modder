@@ -4,15 +4,21 @@ from __future__ import annotations
 import argparse
 import importlib
 import sys
+import os
 
 from um import __doc__ as DOC, __version__
 
-GROUPS = ["scan", "fal", "sprite", "render3d", "video", "win", "backup", "publish", "kb"]
+GROUPS = ["scan", "fal", "sprite", "render3d", "video", "win", "backup", "publish", "kb", "doctor", "tool", "mcp"]
 
 
 def main(argv=None):
+    # Redirected Windows stdio otherwise depends on the user's ANSI codepage.
+    if os.name == "nt":
+        for stream in (sys.stdout, sys.stderr):
+            if hasattr(stream, "reconfigure"):
+                stream.reconfigure(encoding="utf-8")
     ap = argparse.ArgumentParser(prog="um", description=DOC, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--version", action="version", version=f"universal-modder {__version__}")
+    ap.add_argument("--version", action="version", version=f"linn-modder {__version__}")
     sub = ap.add_subparsers(dest="group", metavar="<group>")
     for g in GROUPS:
         importlib.import_module(f"um.{g}").register(sub)
