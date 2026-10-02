@@ -39,6 +39,14 @@ worker thread and service calls are serialized, so legacy caches cannot race.
 Capture and input subprocess waits are bounded. This is a synchronous operation
 API, not yet a persistent job scheduler.
 
+CLI command groups and service backends load when selected. Root help uses a small
+description registry; each selected module still builds its complete parser. This
+reduces fresh-process startup work without introducing a second parser or a cache.
+An optional tool allowlist limits both discovery and `Service.invoke`; it does not
+change the default tool set or replace the separate desktop input gate. Manual
+line ranges bound returned text and expose continuation metadata, while default
+full reads retain their result shape. See [measurements and rollback](performance.md).
+
 ## Workspaces and capabilities
 
 - A required existing workspace owns staging files, captures and backup snapshots.
@@ -104,6 +112,10 @@ opt-in input. Rendering, recording, paid generation and publishing remain in the
 existing CLI. Before exposing them as background MCP tasks, add persistent job
 IDs, bounded concurrency, subprocess cancellation and recoverable job manifests.
 Loading/repacking Koei archives and automatic deployment are separate adapters.
+Their acceptance workflow is [inspect, extract, prove a no-change repack, edit and validate](../skills/reverse-engineering/references/archive-roundtrip.md).
+Adapters must report read and write capability separately for each game build and
+preserve untouched entries, original files and a recovery manifest. A recognized
+header or successful extraction alone does not establish safe repacking support.
 
 Tests use synthetic game folders, images, saves, fake Windows backends and a real
 stdio MCP client. Windows CI additionally compiles WinDrive without opening or

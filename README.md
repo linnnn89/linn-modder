@@ -12,6 +12,7 @@ agent harness 复用同一套操作。Agent 负责规划和代码，工具负责
 | 让 agent 选择当前任务的技能 | [技能导航](skills/README.md)；已知任务直接读对应 `SKILL.md` |
 | 做二次元策略游戏 Mod | [anime-strategy-mod](skills/anime-strategy-mod/SKILL.md) · [工作流与支持范围](docs/anime-mods.md) |
 | 开发或修改工具本身 | [开发指南](docs/development.md) · [架构](docs/architecture.md) |
+| 查看效率实测、专用工具配置与回退方法 | [效率报告](docs/performance.md) |
 | 查已有游戏经验 | [知识库索引](knowledge/INDEX.md) |
 
 ## Windows 快速开始

@@ -47,8 +47,8 @@ def create_server(service: Service):
 
     server = ModderMCP(
         "linn-modder", lifespan=lifespan,
-        instructions="Read um://guide only when choosing a workflow; otherwise read the matching SKILL.md "
-                     "and only the current step's reference via manual_read. Game roots are read-only. "
+        instructions="Use the tools exposed by this server. Read um://guide only when choosing a workflow; "
+                     "otherwise read the matching SKILL.md and current reference via manual_read when enabled. Game roots are read-only. "
                      "Report prepared art, format validation and in-game verification separately.")
 
     def adapt(name, fn):

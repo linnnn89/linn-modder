@@ -50,6 +50,11 @@ Maintain trigger wording and relative links when splitting references. Run `chec
 and build the installed wheel after moves, then verify a MCP client can read the routed files.
 Do not add tests that simply assert prose; validate links, resource paths and protocol behavior.
 
+CLI groups load on demand. When adding a group, also register its short root-help
+description in `um/cli.py`; exercise that group's help and an actual operation.
+Performance comparisons and rollback instructions live in [the efficiency report](performance.md).
+Run the paired benchmark on one machine; do not gate CI on absolute timing from unrelated runners.
+
 ## Changes and publication
 
 Run checks relevant to the change; record what was and was not verified. Reuse the user's
