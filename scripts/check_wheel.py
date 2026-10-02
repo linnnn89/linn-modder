@@ -32,6 +32,9 @@ def main():
         assert result.ok, result.to_dict()
         data = json.loads((Path(directory) / "project/project.json").read_text(encoding="utf-8"))
         assert data["profile"] == "ck3"
+        assert (Path(directory) / "project" / data["asset_workflow"]).read_text(encoding="utf-8") == resources.read(
+            "skills", "asset-pipeline/references/sourcing-and-psd.md")
+        assert json.loads((Path(directory) / "project" / data["reference_manifest"]).read_text(encoding="utf-8"))["references"] == []
         saves = Path(directory) / "saves"
         saves.mkdir()
         (saves / "save.dat").write_bytes(b"fixture")

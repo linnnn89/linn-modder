@@ -33,16 +33,22 @@ def create(destination: Path, profile_id: str, name: str, game_version: str = "u
     manifest = {"schema_version": 1, "name": name, "profile": profile_id,
                 "game_version": game_version, "verification": "not-tested-in-game",
                 "style": {"direction": "anime", "palette": [], "character_consistency": "Record references and variant rules in ART_DIRECTION.md"},
-                "asset_manifest": "assets/manifest.json", "support": spec["support"]}
+                "asset_manifest": "assets/manifest.json", "reference_manifest": "references/manifest.json",
+                "asset_workflow": "ASSET_WORKFLOW.md", "support": spec["support"]}
     destination.mkdir(parents=True)
     try:
-        for relative in ("assets/source", "assets/prepared", "references", "verification"):
+        for relative in ("assets/source", "assets/prepared", "assets/layers", "assets/editable", "references", "verification"):
             (destination / relative).mkdir(parents=True)
         (destination / "project.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
         (destination / "assets/manifest.json").write_text('{"schema_version": 1, "assets": []}\n', encoding="utf-8")
+        (destination / "references/manifest.json").write_text('{"schema_version": 1, "references": []}\n', encoding="utf-8")
+        from um.resources import read
+        (destination / "ASSET_WORKFLOW.md").write_text(
+            read("skills", "asset-pipeline/references/sourcing-and-psd.md"), encoding="utf-8")
         (destination / "ART_DIRECTION.md").write_text(
             "# Art direction\n\nRecord the cast, palette, line style, lighting, costume rules, expressions and framing.\n"
             "Keep a stable character ID across crops and variants. Record authorship/license and generation provenance.\n"
+            "Follow ASSET_WORKFLOW.md: official references first; available GPT Image for needed artwork; real layered export for PSD.\n"
             "Measure required sizes and formats in the exact target version before preparing assets.\n", encoding="utf-8")
         (destination / "MODLOG.md").write_text(
             f"# {name}\n\nGame profile: {profile_id}\nVersion: {game_version}\nVerification: not tested in game.\n\n"

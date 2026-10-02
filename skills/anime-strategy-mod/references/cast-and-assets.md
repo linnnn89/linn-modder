@@ -4,7 +4,9 @@ Read when preparing a character set, portraits, flags or illustrations. Follow t
 
 ## Build a consistent cast
 
-Write ART_DIRECTION.md before batch asset generation. Record stable character IDs,
+Retrieve official character references first and record source URLs/hashes in
+`references/manifest.json`; follow [sourcing and PSD](../../asset-pipeline/references/sourcing-and-psd.md)
+for Codex GPT Image generation and genuine layered masters. Write ART_DIRECTION.md before batch generation. Record stable character IDs,
 reference sheets, palette, line style, lighting, costumes, expressions and crop
 rules. Maintain the same identity across face, bust, full-body and event variants.
 Do not invent mandatory texture dimensions from memory: record measured target
@@ -14,8 +16,9 @@ Keep source assets in `assets/source`, intermediate artwork in `assets/prepared`
 and provenance/character mappings in `assets/manifest.json`. `image_prepare`
 supports alpha-preserving PNG output, contain/cover fitting and center/top anchors.
 Its output includes source and output hashes; copy those to the asset manifest.
-Use a chosen generation provider (such as existing `um fal`) only when requested
-and configured. Local image preparation does not require a provider.
+Use Codex's available GPT Image tool for needed bases/edits, or another selected and
+configured provider. Existing `um fal` commands are one option. Local PNG preparation
+does not require a provider; PSD assembly requires an actual PSD-capable writer.
 
 ## Stage a small slice
 
