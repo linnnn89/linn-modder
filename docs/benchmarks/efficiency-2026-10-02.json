@@ -1,0 +1,274 @@
+{
+  "recorded_utc": "2026-10-02T16:08:36.293248+00:00",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "dependencies": {
+    "mcp": "1.29.0",
+    "tiktoken": "0.14.0"
+  },
+  "before": {
+    "commit": "4e983f16aaa3c4e33b56d953472ec2d541d2c9fb",
+    "runtime_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "runtime_dirty": false,
+    "python_sources_sha256": "37e941a4a2a87a7f19ccdaa3b58d59b106ba807189a2e8b78dfe4a01e7d1c3cf"
+  },
+  "after": {
+    "commit": "4e983f16aaa3c4e33b56d953472ec2d541d2c9fb",
+    "runtime_diff_sha256": "bc6bd7abf8ce30f72e37b5563283b04eef224c9e94cc2a714c3a907f80a51fe4",
+    "runtime_dirty": true,
+    "python_sources_sha256": "0dc3f207a7607dbc2870707e52c661bd2c4db254a699417e96c50ec2611b626f"
+  },
+  "runs": 25,
+  "method": "Fresh subprocesses, 2 warmups, alternating checkout order; same interpreter and workspace. Token counts use compact MCP JSON, including compatibility text and structured results. Opt-in comparisons change catalog/page scope; full behavior is also measured.",
+  "timings": {
+    "version": {
+      "before": {
+        "median_ms": 82.606,
+        "p95_ms": 104.553,
+        "samples_ms": [
+          81.587,
+          86.672,
+          88.366,
+          88.568,
+          80.702,
+          82.096,
+          88.142,
+          79.566,
+          106.304,
+          104.553,
+          78.242,
+          88.596,
+          82.606,
+          73.22,
+          78.161,
+          85.276,
+          77.792,
+          94.559,
+          74.304,
+          86.72,
+          86.197,
+          80.696,
+          78.312,
+          73.397,
+          82.926
+        ]
+      },
+      "after": {
+        "median_ms": 24.042,
+        "p95_ms": 28.131,
+        "samples_ms": [
+          26.544,
+          24.78,
+          29.891,
+          27.739,
+          24.042,
+          25.508,
+          21.654,
+          27.6,
+          24.979,
+          22.101,
+          24.956,
+          21.621,
+          25.413,
+          21.599,
+          20.718,
+          22.872,
+          24.314,
+          22.65,
+          28.131,
+          20.565,
+          22.365,
+          23.862,
+          24.095,
+          21.183,
+          20.456
+        ]
+      },
+      "median_reduction_pct": 70.9,
+      "stdout_identical": true
+    },
+    "game_profiles": {
+      "before": {
+        "median_ms": 75.296,
+        "p95_ms": 90.786,
+        "samples_ms": [
+          86.955,
+          76.979,
+          76.146,
+          75.394,
+          90.786,
+          96.474,
+          84.473,
+          72.702,
+          78.439,
+          74.586,
+          78.777,
+          75.951,
+          75.531,
+          73.766,
+          72.855,
+          71.963,
+          74.438,
+          74.132,
+          73.921,
+          75.296,
+          74.31,
+          71.516,
+          73.284,
+          75.328,
+          72.668
+        ]
+      },
+      "after": {
+        "median_ms": 49.806,
+        "p95_ms": 67.578,
+        "samples_ms": [
+          49.959,
+          53.167,
+          50.179,
+          51.053,
+          70.303,
+          67.578,
+          54.005,
+          62.726,
+          49.977,
+          49.806,
+          48.137,
+          51.826,
+          50.596,
+          54.886,
+          47.156,
+          48.28,
+          48.819,
+          49.017,
+          47.21,
+          48.823,
+          47.655,
+          47.117,
+          47.448,
+          47.738,
+          48.107
+        ]
+      },
+      "median_reduction_pct": 33.85,
+      "stdout_identical": true
+    }
+  },
+  "payloads": {
+    "default_catalog": {
+      "before": {
+        "utf8_bytes": 18835,
+        "tokens": {
+          "cl100k_base": 4366,
+          "o200k_base": 4606
+        }
+      },
+      "after": {
+        "utf8_bytes": 18983,
+        "tokens": {
+          "cl100k_base": 4405,
+          "o200k_base": 4647
+        }
+      },
+      "token_reduction_pct": {
+        "cl100k_base": -0.89,
+        "o200k_base": -0.89
+      },
+      "byte_reduction_pct": -0.79
+    },
+    "authoring_catalog": {
+      "before": {
+        "utf8_bytes": 18835,
+        "tokens": {
+          "cl100k_base": 4366,
+          "o200k_base": 4606
+        }
+      },
+      "after": {
+        "utf8_bytes": 7170,
+        "tokens": {
+          "cl100k_base": 1664,
+          "o200k_base": 1757
+        }
+      },
+      "token_reduction_pct": {
+        "cl100k_base": 61.89,
+        "o200k_base": 61.85
+      },
+      "byte_reduction_pct": 61.93
+    },
+    "manual_first_page": {
+      "before": {
+        "utf8_bytes": 28829,
+        "tokens": {
+          "cl100k_base": 7770,
+          "o200k_base": 7712
+        }
+      },
+      "after": {
+        "utf8_bytes": 5346,
+        "tokens": {
+          "cl100k_base": 1572,
+          "o200k_base": 1571
+        }
+      },
+      "token_reduction_pct": {
+        "cl100k_base": 79.77,
+        "o200k_base": 79.63
+      },
+      "byte_reduction_pct": 81.46
+    },
+    "manual_all_pages_total": {
+      "utf8_bytes": 31533,
+      "tokens": {
+        "cl100k_base": 8546,
+        "o200k_base": 8502
+      },
+      "note": "Reading every page costs more requests and repeated metadata than one full read."
+    }
+  },
+  "targets": {
+    "version": {
+      "minimum_reduction_pct": 50,
+      "actual_pct": 70.9,
+      "passed": true
+    },
+    "game_profiles": {
+      "minimum_reduction_pct": 20,
+      "actual_pct": 33.85,
+      "passed": true
+    },
+    "authoring_catalog": {
+      "minimum_reduction_pct": 50,
+      "actual_pct": {
+        "cl100k_base": 61.89,
+        "o200k_base": 61.85
+      },
+      "passed": true
+    },
+    "manual_first_page": {
+      "minimum_reduction_pct": 60,
+      "actual_pct": {
+        "cl100k_base": 79.77,
+        "o200k_base": 79.63
+      },
+      "passed": true
+    }
+  },
+  "scope": {
+    "default_tools_before": 14,
+    "default_tools_after": 14,
+    "authoring_tools": [
+      "game_profiles",
+      "manual_read",
+      "project_create",
+      "image_prepare",
+      "backup_create"
+    ],
+    "manual": "games/gta-v/minecraft-passthrough.md",
+    "first_page_lines": 40,
+    "total_lines": 215,
+    "default_manual_identical": true,
+    "pages_to_read_all": 6
+  }
+}

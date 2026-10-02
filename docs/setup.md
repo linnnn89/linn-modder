@@ -59,8 +59,28 @@ stdio 配置本身不提供远程 PC 访问。
 将这组参数传给 `manual_read`。技能中的 `references/targets.md` 是相对链接，下一次
 读取使用 `anime-strategy-mod/references/targets.md`。只读取当前步骤需要的文件。
 
+长手册可以传 `start_line:1,max_lines:40`，按返回的 `next_line` 续读；`next_line:null`
+表示已读完。默认参数仍返回全文。分页可减少首次上下文，全文必读时直接读取全文更省调用。
+
 仅有本项目 MCP 的 harness 还需自己的文件编辑能力，才能编写 Mod 脚本、本地化和
 清单。Linn Modder 当前不提供通用文件读写工具。
+
+### 专用任务的工具清单
+
+通用配置默认暴露全部 14 个工具；`--allow-input` 额外启用输入工具。
+专用 harness 可以重复传 `--enable-tool NAME`，只加载当前任务所需的 schema，例如：
+
+```powershell
+um mcp serve --workspace C:\Mods --enable-tool game_profiles --enable-tool manual_read --enable-tool project_create --enable-tool image_prepare --enable-tool backup_create
+```
+
+这是项目创建和素材准备配置；需要扫描、恢复或窗口操作时，将对应工具加入配置并重启
+server。`--enable-tool` 不会自动启用桌面输入；选入 `window_input` 仍需 `--allow-input`。
+未知工具名在启动时失败，避免配置错误被忽略。JSON CLI 接受相同选项，Python 使用
+`Service(..., enabled_tools=("game_profiles", "manual_read"))`。
+
+筛选同时作用于工具发现与 `Service.invoke`。它是工具配置，不是操作系统权限隔离；
+只读 MCP 导航资源仍可读取。实测收益、适用范围与复现方法见[效率报告](performance.md)。
 
 ## JSON CLI
 

@@ -136,6 +136,40 @@ def test_bundled_knowledge_and_resource_paths(tmp_path):
     assert not service.invoke("manuals_export", {"destination": "manuals"}).ok
 
 
+def test_manual_pages_reassemble_exact_text_and_preserve_default_contract(tmp_path):
+    service = Service(tmp_path)
+    args = {"collection": "knowledge", "path": "games/gta-v/minecraft-passthrough.md"}
+    original = service.invoke("manual_read", args).data
+    assert set(original) == {"collection", "path", "text"}
+    pages, line = [], 1
+    while line is not None:
+        result = service.invoke("manual_read", args | {"start_line": line, "max_lines": 40})
+        assert result.ok
+        assert len(result.data["text"].splitlines()) <= 40
+        pages.append(result.data["text"])
+        line = result.data["next_line"]
+    assert "".join(pages) == original["text"]
+    for invalid in ({"start_line": 0}, {"start_line": 100000}, {"max_lines": -1},
+                    {"max_lines": 1001}, {"start_line": True}, {"max_lines": "40"}):
+        assert not service.invoke("manual_read", args | invalid).ok
+    assert not service.invoke("manual_read", args | {"path": "../../pyproject.toml", "max_lines": 1}).ok
+
+
+def test_tool_allowlist_is_enforced_by_service_and_input_policy(tmp_path):
+    backend = FakeWindows()
+    service = Service(tmp_path, windows=backend, enabled_tools=("game_profiles", "manual_read"))
+    assert set(service.tools()) == {"game_profiles", "manual_read"}
+    assert service.invoke("game_profiles").ok
+    assert service.invoke("windows_list").error.code == "unknown_tool"
+    assert not backend.actions
+    for names in ((), ("invented",), ("window_input",)):
+        with pytest.raises(ToolError, match="enabled service"):
+            Service(tmp_path, enabled_tools=names)
+    enabled = Service(tmp_path, allow_input=True, windows=backend, enabled_tools=("window_input",))
+    assert enabled.invoke("window_input", {"pid": 123, "action": "focus"}).ok
+    assert backend.actions == [(123, "focus")]
+
+
 class FakeWindows:
     def __init__(self):
         self.actions = []

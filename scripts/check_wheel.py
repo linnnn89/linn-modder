@@ -20,6 +20,14 @@ def main():
         service = Service(directory)
         assert len(service.invoke("game_profiles").data["profiles"]) == 4
         assert service.invoke("knowledge_search", {"query": "terraria"}).data["matches"]
+        args = {"collection": "knowledge", "path": "games/gta-v/minecraft-passthrough.md"}
+        first = service.invoke("manual_read", args | {"max_lines": 40})
+        assert first.ok and first.data["next_line"] == 41
+        assert service.invoke("manual_read", args).data["text"].startswith(first.data["text"])
+        scoped = Service(directory, enabled_tools=("manual_read",))
+        assert set(scoped.tools()) == {"manual_read"}
+        assert scoped.invoke("project_create", {}).error.code == "unknown_tool"
+        scoped.close()
         result = service.invoke("project_create", {"destination": "project", "profile": "ck3", "name": "wheel_test"})
         assert result.ok, result.to_dict()
         data = json.loads((Path(directory) / "project/project.json").read_text(encoding="utf-8"))
