@@ -91,3 +91,27 @@ def test_stdio_validation_matches_service_for_raw_json_arguments(tmp_path):
                 assert valid.structuredContent == service.invoke('game_profiles').to_dict()
         service.close()
     asyncio.run(asyncio.wait_for(exercise(), timeout=30))
+
+
+def test_stdio_allowlist_and_paged_manuals(tmp_path):
+    async def exercise():
+        params = StdioServerParameters(command=sys.executable,
+            args=['-m', 'um', 'mcp', 'serve', '--workspace', str(tmp_path),
+                  '--enable-tool', 'manual_read', '--enable-tool', 'game_profiles'])
+        async with stdio_client(params) as (reader, writer):
+            async with ClientSession(reader, writer) as client:
+                await client.initialize()
+                listed = await client.list_tools()
+                assert {t.name for t in listed.tools} == {'manual_read', 'game_profiles'}
+                assert (await client.call_tool('project_create', {})).isError
+                args = {'collection': 'knowledge', 'path': 'games/gta-v/minecraft-passthrough.md'}
+                full = await client.call_tool('manual_read', args)
+                first = await client.call_tool('manual_read', args | {'max_lines': 40})
+                data = first.structuredContent['data']
+                assert data['next_line'] == 41
+                assert full.structuredContent['data']['text'].startswith(data['text'])
+                assert json.loads(first.content[0].text) == first.structuredContent
+                invalid = await client.call_tool('manual_read', args | {'max_lines': True})
+                assert invalid.structuredContent['error']['code'] == 'invalid_arguments'
+                await client.send_ping()
+    asyncio.run(asyncio.wait_for(exercise(), timeout=30))

@@ -11,10 +11,13 @@ def options(parser):
     parser.add_argument("--workspace", default=".", help="existing writable staging workspace")
     parser.add_argument("--game-root", action="append", default=[], help="additional read-only game directory (repeatable)")
     parser.add_argument("--allow-input", action="store_true", help="enable Windows input after user consent")
+    parser.add_argument("--enable-tool", action="append", default=None, metavar="NAME",
+                        help="expose only named service tools (repeatable); default: all enabled tools")
 
 
 def make_service(args) -> Service:
-    return Service(args.workspace, tuple(args.game_root), allow_input=args.allow_input)
+    return Service(args.workspace, tuple(args.game_root), allow_input=args.allow_input,
+                   enabled_tools=None if args.enable_tool is None else tuple(args.enable_tool))
 
 
 def main(args):

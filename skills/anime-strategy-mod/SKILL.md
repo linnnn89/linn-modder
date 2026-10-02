@@ -22,6 +22,7 @@ Game roots stay read-only; use a generation provider only when requested and con
 | Choose CK3, Victoria II or a Koei edition/route | [Target games](references/targets.md) |
 | Character identity, crops, flags, provenance or a first slice | [Cast and assets](references/cast-and-assets.md) |
 | Encoding, asset-format or runtime checks | [Verification](references/verification.md) |
+| Read, modify and repack a version-specific game container | [Archive round trips](../reverse-engineering/references/archive-roundtrip.md) |
 | Tool parameters or MCP-only access | [Tool interfaces](../references/tools.md) |
 
 Output: a staging project, measured asset requirements and an honest verification record.

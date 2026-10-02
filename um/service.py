@@ -9,18 +9,23 @@ import threading
 import uuid
 from pathlib import Path
 
-from um import backup, doctor, kb, projects, resources, scan
 from um.contracts import Artifact, ErrorInfo, Result, ToolError
 from um.workspace import Workspace
 
 
 class Service:
     def __init__(self, workspace: str | Path, game_roots: tuple[str | Path, ...] = (),
-                 allow_input: bool = False, windows=None):
+                 allow_input: bool = False, windows=None, enabled_tools: tuple[str, ...] | None = None):
         self.workspace = Workspace(workspace, game_roots)
         self.allow_input = allow_input
         self._windows = windows
         self._lock = threading.RLock()
+        self._enabled_tools = None
+        if enabled_tools is not None:
+            available = self.tools()
+            if not enabled_tools or any(name not in available for name in enabled_tools):
+                raise ToolError("invalid_tools", "Choose one or more enabled service tool names; input also requires --allow-input.")
+            self._enabled_tools = frozenset(enabled_tools)
 
     @property
     def windows(self):
@@ -35,7 +40,8 @@ class Service:
                  "backup_create", "backup_list", "backup_verify", "backup_restore", "windows_list", "window_capture"]
         if self.allow_input:
             names.append("window_input")
-        return {name: getattr(self, name) for name in names}
+        return {name: getattr(self, name) for name in names
+                if self._enabled_tools is None or name in self._enabled_tools}
 
     def invoke(self, name: str, arguments: dict | None = None) -> Result:
         try:
@@ -87,6 +93,7 @@ class Service:
 
     def environment_check(self) -> Result:
         """Report dependency and platform capabilities without installing anything."""
+        from um import doctor
         data = doctor.inspect_environment()
         data["workspace"] = str(self.workspace.root)
         data["input_enabled"] = self.allow_input
@@ -94,10 +101,12 @@ class Service:
 
     def game_profiles(self) -> Result:
         """List game-specific routes, localization rules and current support levels."""
+        from um import projects
         return Result(True, {"profiles": projects.profiles()})
 
     def game_scan(self, path: str) -> Result:
         """Identify a game in the workspace or an explicitly configured read-only game root."""
+        from um import scan
         target = self.workspace.path(path, exists=True)
         if not target.is_dir():
             raise ToolError("invalid_path", "Game path must be a directory.")
@@ -106,20 +115,35 @@ class Service:
 
     def knowledge_search(self, query: str, limit: int = 10) -> Result:
         """Search bundled field notes offline; no network synchronization occurs."""
+        from um import kb, resources
         if not 1 <= limit <= 50:
             raise ToolError("invalid_limit", "Limit must be 1..50.")
         return Result(True, {"matches": kb.search(resources.root("knowledge"), query.split(), limit=limit)})
 
-    def manual_read(self, collection: str, path: str) -> Result:
-        """Read a bundled skill or field note; paths are relative to skills/ or knowledge/."""
-        return Result(True, {"collection": collection, "path": path, "text": resources.read(collection, path)})
+    def manual_read(self, collection: str, path: str, start_line: int = 1, max_lines: int = 0) -> Result:
+        """Read a bundled manual. Default: full text. Use max_lines for pages with next_line; lines start at 1."""
+        from um import resources
+        if start_line < 1 or not 0 <= max_lines <= 1000:
+            raise ToolError("invalid_range", "start_line must be >=1; max_lines must be 0 (all remaining) or 1..1000.")
+        text = resources.read(collection, path)
+        data = {"collection": collection, "path": path, "text": text}
+        if start_line != 1 or max_lines:
+            lines = text.splitlines(keepends=True)
+            if start_line > max(1, len(lines)):
+                raise ToolError("invalid_range", "start_line exceeds the manual's line count.")
+            end = min(len(lines), start_line - 1 + max_lines) if max_lines else len(lines)
+            data.update(text="".join(lines[start_line - 1:end]), start_line=start_line,
+                        end_line=end, total_lines=len(lines), next_line=end + 1 if end < len(lines) else None)
+        return Result(True, data)
 
     def manuals_export(self, destination: str) -> Result:
         """Copy bundled skills and knowledge into a new workspace folder, without symlinks."""
+        from um import resources
         return Result(True, resources.export(self.workspace.path(destination, write=True)))
 
     def project_create(self, destination: str, profile: str, name: str, game_version: str = "unknown") -> Result:
         """Create an anime-mod staging project; game installation directories stay read-only."""
+        from um import projects
         path = self.workspace.path(destination, write=True)
         data = projects.create(path, profile, name, game_version)
         return Result(True, data, [self._artifact(path / "project.json")])
@@ -127,6 +151,7 @@ class Service:
     def image_prepare(self, source: str, output: str, width: int, height: int,
                       mode: str = "contain", anchor: str = "center") -> Result:
         """Prepare an RGBA PNG with explicit dimensions/crop; does not claim engine-ready conversion."""
+        from um import projects
         src = self.workspace.path(source, exists=True)
         dst = self.workspace.path(output, write=True)
         data = projects.prepare_image(src, dst, width, height, mode, anchor)
@@ -134,6 +159,7 @@ class Service:
 
     def backup_create(self, source: str, name: str, note: str = "") -> Result:
         """Snapshot a bounded source folder into workspace/.um/backups with a manifest."""
+        from um import backup
         source_path = self.workspace.path(source, exists=True)
         if not source_path.is_dir():
             raise ToolError("invalid_path", "Backup source must be a directory.")
@@ -146,6 +172,7 @@ class Service:
         return Result(True, {"snapshot": str(path)}, [self._artifact(path)])
 
     def _backup_store(self, name: str) -> Path:
+        from um import backup
         if not re.fullmatch(r"[a-zA-Z0-9_-]{1,64}", name):
             raise ToolError("invalid_name", "Backup ID must use 1..64 ASCII letters, digits, _ or -.")
         store = self.workspace.path(".um", write=True)
@@ -153,6 +180,7 @@ class Service:
         return store
 
     def _backup_snapshot(self, name: str, snapshot: str) -> Path:
+        from um import backup
         store = self._backup_store(name)
         if not snapshot:
             paths = backup.snapshots(name, store=store)
@@ -167,6 +195,7 @@ class Service:
 
     def backup_list(self, name: str) -> Result:
         """List snapshots for a backup ID in this workspace, without writing files."""
+        from um import backup
         store = self._backup_store(name)
         folder = self.workspace.path(backup._root(name, store), write=True)
         if folder.exists():
@@ -177,6 +206,7 @@ class Service:
 
     def backup_verify(self, name: str, snapshot: str = "") -> Result:
         """Verify all archive paths, sizes and checksums; default to the latest named snapshot."""
+        from um import backup
         path = self._backup_snapshot(name, snapshot)
         manifest = backup.verify_snapshot(path)
         return Result(True, {"snapshot": str(path), "files": len(manifest["files"]),
@@ -185,6 +215,7 @@ class Service:
     def backup_restore(self, name: str, target: str, snapshot: str = "",
                        clean: bool = False, apply: bool = False) -> Result:
         """Preview a workspace restore. Set apply=true to restore after reviewing; save an undo snapshot first."""
+        from um import backup
         path = self._backup_snapshot(name, snapshot)
         destination = self.workspace.path(target, write=True)
         store = self._backup_store(name)

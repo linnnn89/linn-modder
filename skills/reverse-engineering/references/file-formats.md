@@ -2,6 +2,10 @@
 
 Read when reading an unknown archive or proving an encoder round trip. Follow the user's requested scope and validation level.
 
+For modifications inside containers, follow the [archive workflow](archive-roundtrip.md):
+source backup, explicit read/write capabilities, no-change repack, isolated modification,
+validated output and a recovery manifest.
+
 ## Data files and asset formats
 Use the community tool first:
 - Unity: UABEA, AssetRipper

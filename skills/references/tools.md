@@ -16,7 +16,11 @@ These interfaces share strict argument validation and
 MCP returns `isError` plus structured errors and PNG content for capture previews.
 PowerShell JSON files may use UTF-8 with or without BOM.
 
-## Operations currently exposed
+Servers can select tools with repeated `--enable-tool NAME` options. Use only the
+discovered tools; omitted operations require a configuration change and server restart.
+With no selection all default tools remain available; input still needs `--allow-input`.
+
+## Operations available by default
 
 | Task | Operation |
 |---|---|
@@ -48,6 +52,16 @@ Use the tool's discovered schema for exact parameters. Do not guess operations s
 - `manual_read` accepts `skills` or `knowledge` collection paths. Checkout-only `docs/` and
   `examples/` are not exposed through that tool. Reference prose mentioning those files
   describes checkout examples, not extra MCP operations.
+
+## Reading a long manual
+
+`manual_read(collection, path)` returns the full text with its existing result fields.
+For an initial bounded read, add `start_line:1,max_lines:40`. Ranged results include
+`start_line`, `end_line`, `total_lines` and `next_line`; continue with `next_line` until
+it is `null`. `max_lines` accepts 1..1000; 0 means all remaining lines. Line numbers
+start at 1. These are line limits, not token limits, and a page can cut a code block.
+Read the continuation before using an incomplete example. If the whole document is
+needed, one full read avoids repeated requests and page metadata.
 
 ## Backups and recovery
 
