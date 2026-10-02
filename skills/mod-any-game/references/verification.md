@@ -2,10 +2,13 @@
 
 Read when integrating artwork or checking a completed slice. Follow the user's requested scope and validation level.
 
-### Assets (fal-assets and asset-pipeline skills)
-Study the game's own assets first: size, palette, outline, camera angle, facing, frame layout. Then generate
-with `um fal`. Every call is recorded in `fal_manifest.jsonl`. Convert with `um sprite` / `um render3d` into
-exactly what the engine loads.
+### Assets (asset-pipeline; fal-assets when fal is selected)
+Retrieve official references first, then measure the game's own asset requirements:
+size, palette, outline, camera angle, facing and frame layout. Follow
+[sourcing and PSD](../../asset-pipeline/references/sourcing-and-psd.md). Codex can use
+available GPT Image for needed generation/edits; record the actual provider and references.
+When using fal, preserve `fal_manifest.jsonl`. Convert with the appropriate pipeline
+and validate the exact engine format separately.
 - **Consistency across many angles and frames:** generate one concept, turn it into 3D
   (`um fal model3d`), then render every heading from the game's camera (`um render3d --preset aoe2`).
 - **Pixel-art games:** generate on a flat background or with transparency, cut out, then do one

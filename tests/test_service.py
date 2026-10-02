@@ -68,6 +68,13 @@ def test_game_specific_scaffolds(tmp_path, profile):
     assert result.data["verification"] == "not-tested-in-game"
     manifest = json.loads((project / "project.json").read_text(encoding="utf-8"))
     assert manifest["profile"] == profile
+    refs = json.loads((project / manifest["reference_manifest"]).read_text(encoding="utf-8"))
+    assert refs == {"schema_version": 1, "references": []}
+    from um import resources
+    assert (project / manifest["asset_workflow"]).read_text(encoding="utf-8") == resources.read(
+        "skills", "asset-pipeline/references/sourcing-and-psd.md")
+    assert (project / "assets/layers").is_dir()
+    assert (project / "assets/editable").is_dir()
     if profile == "ck3":
         loc = project / "mod/anime_test/localization/simp_chinese/anime_test_l_simp_chinese.yml"
         assert loc.read_bytes().startswith(codecs.BOM_UTF8)

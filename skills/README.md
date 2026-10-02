@@ -13,7 +13,7 @@ read every skill, engine playbook or historical example.
 | Anime cast/portraits/flags/localization for strategy games | [anime-strategy-mod](anime-strategy-mod/SKILL.md) | Versioned staging project and asset requirements |
 | Inspect internals or an undocumented file format | [reverse-engineering](reverse-engineering/SKILL.md) | Findings or a proven reader/writer |
 | Generate new assets specifically with fal | [fal-assets](fal-assets/SKILL.md) | Downloaded assets and provenance |
-| Convert/crop existing art or render sprite frames | [asset-pipeline](asset-pipeline/SKILL.md) | Prepared files and a conversion recipe |
+| Find official references, use GPT Image, prepare PSD/art or render frames | [asset-pipeline](asset-pipeline/SKILL.md) | Traceable references, prepared files or an editable master |
 | Capture/control a game or diagnose runtime behavior | [game-automation](game-automation/SKILL.md) | Runtime observations and repeatable steps |
 | Combine two games' mechanics or simulations | [mashup-mods](mashup-mods/SKILL.md) | Integration design and a minimal slice |
 | Make a demo/trailer/montage | [showcase-video](showcase-video/SKILL.md) | Video, edit recipe and credits |
