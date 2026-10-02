@@ -5,12 +5,16 @@ from pathlib import Path
 
 from um import resources
 from um.service import Service
+from check_docs import check_skill_tree
 
 
 def main():
     for kind in resources.KINDS:
         assert "data" in resources.root(kind).parts, "resources resolved to a checkout, not the wheel"
     assert "Mod any game" in resources.read("skills", "mod-any-game/SKILL.md")
+    assert not check_skill_tree(resources.root("skills")), "Installed skill links or entry metadata are invalid"
+    assert "anime-strategy-mod/SKILL.md" in resources.read("skills", "README.md")
+    assert "ck3" in resources.read("skills", "anime-strategy-mod/references/targets.md")
     assert (Path(__import__("um").__file__).parent / "ps1/WinDrive.ps1").is_file()
     with tempfile.TemporaryDirectory() as directory:
         service = Service(directory)

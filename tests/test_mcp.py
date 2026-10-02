@@ -58,6 +58,12 @@ def test_stdio_session_survives_tool_errors_and_reads_resources(tmp_path):
                 assert len(profiles.structuredContent["data"]["profiles"]) == 4
                 resource = await client.read_resource("um://workflow")
                 assert "Mod any game" in resource.contents[0].text
+                guide = await client.read_resource("um://guide")
+                assert "anime-strategy-mod/SKILL.md" in guide.contents[0].text
+                reference = await client.call_tool("manual_read", {"collection": "skills",
+                    "path": "anime-strategy-mod/references/targets.md"})
+                assert not reference.isError
+                assert "planning only" in reference.structuredContent["data"]["text"]
                 await client.send_ping()
     asyncio.run(asyncio.wait_for(exercise(), timeout=30))
 

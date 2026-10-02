@@ -70,7 +70,10 @@ Both `um` and `linn-modder` entry points invoke the same CLI. The Windows checko
 launcher is `bin/um.cmd`; installed console entry points do not need Bash.
 Wheels bundle PowerShell helpers, fonts, profiles, skills and an offline knowledge
 snapshot. `manuals_export` copies real directories, avoiding Windows symlink
-requirements. `manual_read` exposes the same instructions to MCP-only harnesses.
+requirements. `manual_read` exposes selected instructions to MCP-only harnesses. `um://guide`
+returns the skill router; `um://workflow` retains the compact general entry. Fixed project
+context, discovery metadata, task entries and references are separated as described in
+[skill design](skill-design.md); clients load details only for the current step.
 
 MCP starts over stdio using `um mcp serve --workspace PATH`. It does not open a TCP
 listener or install a system service. A remote/cloud harness needs an explicitly
