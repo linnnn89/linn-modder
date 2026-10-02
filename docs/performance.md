@@ -112,6 +112,10 @@ git worktree add --detach ../linn-modder-previous 4e983f16aaa3c4e33b56d953472ec2
 uv tool install --reinstall "linn-modder[mcp] @ git+https://github.com/linnnn89/linn-modder@4e983f16aaa3c4e33b56d953472ec2d541d2c9fb"
 ```
 
+若已启用本轮新增配置，回退时同时移除 harness 启动参数中的 `--enable-tool NAME`，
+将 `manual_read` 调用恢复为 `collection`、`path` 两个参数，并重启 MCP 客户端以刷新 schema。
+原有默认配置无需变更。备份代码不会自动回退用户单独编辑的 harness 配置。
+
 如需让主分支撤销整轮改动，对本轮 squash 合并提交执行 `git revert <合并提交SHA>`，
 经检查后正常推送。这样保留改动历史和后续工作；不要用强制推送覆盖主分支。
 
