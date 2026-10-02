@@ -1,174 +1,145 @@
-<p align="center">
-  <img src="docs/media/banner.png" alt="universal-modder" width="100%">
-</p>
+# Linn Modder
 
-<p align="center">
-  <b>Skills, tools and a shared knowledge base that let any AI coding agent mod almost any PC game you own.</b><br>
-  Works with Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, OpenCode, or anything that reads <code>AGENTS.md</code>.<br>
-  The agent finds the game, works out the engine and the route, reads the real code, builds the mod, makes art, 3D and sound
-  with <a href="https://fal.ai">fal</a>, tests it in the running game, cuts the video, and writes down what it learned for the next agent.
-</p>
+Windows 优先、与 agent harness 解耦的游戏 Mod 工具。由
+[universal-modder](https://github.com/rehan-remade/universal-modder) 派生，
+保留其 Python CLI、素材工具和知识库，并增加共享服务层、JSON 接口和 MCP stdio server。
 
-<p align="center">
-  <a href="#install"><img alt="any agent" src="https://img.shields.io/badge/agents-Claude%20Code%20·%20Codex%20·%20Cursor%20·%20Gemini%20·%20Copilot-B6FF3B?labelColor=0A0D12"></a>
-  <a href="knowledge/INDEX.md"><img alt="knowledge base" src="https://img.shields.io/badge/knowledge%20base-field%20notes-B6FF3B?labelColor=0A0D12"></a>
-  <a href="https://fal.ai"><img alt="assets by fal" src="https://img.shields.io/badge/assets-fal-B6FF3B?labelColor=0A0D12"></a>
-  <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-B6FF3B?labelColor=0A0D12"></a>
-</p>
+当前关注 CK3、维多利亚 2、三国志和信长之野望的二次元化 Mod。
+**CK3/Victoria II 提供项目脚手架；光荣系列提供规划配置，尚无通用归档导入器。**
 
-<p align="center">
-  <img src="docs/media/teaser.gif" alt="A tactical nuke in Terraria and robotaxis in Age of Empires II, both built with universal-modder" width="560">
-</p>
+- [项目结构与设计参考](docs/architecture.md)
+- [二次元 Mod 工作流与游戏支持范围](docs/anime-mods.md)
+- [已有游戏实战知识库](knowledge/INDEX.md)
 
-## Install
+## 安装：原生 Windows，不需要 WSL
 
-Pick your agent. Each gets the same skills (Agent Skills format), the fal MCP server, and the `um` CLI.
+需要 Python 3.10+、Git 和 [uv](https://docs.astral.sh/uv/)。
+在 PowerShell 执行（代码合并到默认分支后使用此安装地址）：
 
-| Agent | Install |
-|---|---|
-| **Claude Code** | `/plugin marketplace add rehan-remade/universal-modder`, then `/plugin install universal-modder@universal-modder` |
-| **Codex** | `codex plugin marketplace add rehan-remade/universal-modder`, then `codex plugin add universal-modder@universal-modder` |
-| **Gemini CLI** | `gemini extensions install https://github.com/rehan-remade/universal-modder` |
-| **VS Code / Copilot** | Enable `chat.plugins.enabled`, run **Chat: Install Plugin From Source**, and enter this repo's URL |
-| **Cursor** | Cursor Marketplace, or clone (Cursor reads `AGENTS.md` and `.cursor/mcp.json`) |
-| **Skills only** (any agent) | `npx skills add https://github.com/rehan-remade/universal-modder` |
-| **Anything else** | `git clone https://github.com/rehan-remade/universal-modder` and start your agent inside it |
-
-Inside a clone, each agent finds the skills where it looks for them: `.agents/skills` (Codex and friends),
-`.claude/skills`, `.gemini/skills` and `.github/skills` all link to `skills/`. Instructions are in
-`AGENTS.md`, which `CLAUDE.md` and `GEMINI.md` point to. MCP config is in `.mcp.json`, `.codex/config.toml`,
-`.cursor/mcp.json` and `.vscode/mcp.json`.
-
-**The `um` CLI.** Plugin installs and clones put it on PATH. Anywhere else:
-```bash
-uv tool install git+https://github.com/rehan-remade/universal-modder     # or: pipx install git+...
+```powershell
+uv tool install "linn-modder[mcp] @ git+https://github.com/linnnn89/linn-modder"
+um --version
+um doctor
 ```
-**For assets,** get a [fal API key](https://fal.ai/dashboard/keys). It powers both the fal MCP server and
-`um fal`:
-```bash
-export FAL_KEY=...
+
+在当前 checkout 中开发：
+
+```powershell
+uv sync --extra mcp --extra dev
+uv run um doctor
+.\bin\um.cmd tool list
 ```
-You also need Python 3.10+ and ffmpeg. `uv` is recommended. Blender is needed for 3D → sprite renders.
-Windows games are driven natively or from WSL.
 
-## Try it
-> Mod Terraria: add a homing missile launcher and a tactical nuke that craters the world. Make the sprites with fal.
+安装包同时提供 `um` 和 `linn-modder` 两个入口。只需 CLI 时可不安装
+`mcp` extra。FFmpeg、Blender 和 fal key 按功能需要配置；扫描、知识库、
+项目脚手架和本地图片处理不需要 fal key。
 
-> Make a new civilization for Age of Empires II with a unique unit rendered from 3D.
+`um win setup` 可下载 Windows 截图所需的 FFmpeg 并放置 PowerShell 工具。
+`um doctor` 只检查环境，不安装依赖。窗口捕获需要带 `gfxcapture` 的 FFmpeg。
 
-> Put real Minecraft inside GTA V story mode. Minecraft's camera should follow GTA's, and its TNT should blow up GTA cars.
+## 接入 agent harness
 
-> What engine is `C:\Games\Foo`, and has anyone modded it before?
+### MCP
 
-The agent starts with the **mod-any-game** skill and runs the same loop every time:
-1. search the knowledge base;
-2. recon, then pick a route;
-3. set up a safe lab (saves backed up);
-4. read the actual code;
-5. build one working slice;
-6. generate assets;
-7. verify in the real game;
-8. record;
-9. package;
-10. write a field note for the next agent.
+先创建工作目录。在支持 stdio MCP 的客户端中添加以下 server；顶层配置键可能
+因客户端不同而变化，使用绝对路径避免工作目录歧义：
 
-## A knowledge base that AIs write for AIs
-[`knowledge/`](knowledge/) holds **field notes**: how specific games were actually modded, decompiled and
-reverse-engineered. Each note gives:
-- the exact versions that worked;
-- the route, and why;
-- what the engine really does;
-- how it was verified;
-- the gotchas (symptom → cause → fix).
-
-**Every agent that finishes a mod can open a pull request with its note**, so the next agent starts where it
-left off instead of rediscovering the same traps.
-
-```bash
-um kb search "grand theft auto"                 # before you start: prior art (works outside the repo too)
-um kb new --game "Hades II" --title "A new boon god" --from-scan hades --agent "Codex (gpt-6)"
-um kb check knowledge/games/hades-ii/a-new-boon-god.md
-um kb pr knowledge/games/hades-ii/a-new-boon-god.md --yes    # after your human says OK: branch, push, PR
+```json
+{
+  "mcpServers": {
+    "linn-modder": {
+      "command": "um",
+      "args": [
+        "mcp", "serve",
+        "--workspace", "C:\\Mods",
+        "--game-root", "D:\\Games"
+      ]
+    }
+  }
+}
 ```
-Browse [`knowledge/INDEX.md`](knowledge/INDEX.md). Contribution rules, for humans and AIs, are in
-[`CONTRIBUTING.md`](CONTRIBUTING.md): no game files, no decompiled dumps, nothing that helps cheat online,
-and an honest status and verification.
 
-## What's inside
+客户端需能在 PATH 找到已安装的 `um`；也可填写 `um.exe` 的绝对路径。
+只有在用户同意桌面控制后才添加 `--allow-input`。默认工具列表不含输入操作。
+`--game-root` 可重复指定，通过服务层始终只读。远端 agent 需要额外的认证桥接，
+本项目当前提供本机 stdio 接入。
 
-**Skills** (`skills/`, Agent Skills format)
-
-| Skill | What it does |
+| 工具 | 用途 |
 |---|---|
-| `mod-any-game` | The whole loop, hard safety rules, and **12 engine playbooks**: Unity, Unreal, .NET/XNA (Terraria, Stardew, Celeste), Godot, Source 1/2, Bethesda, Minecraft, AoE2/Genie, RE Engine/FromSoft/GTA/Cyberpunk/BG3, native C++, indie engines (GameMaker, RPG Maker, Ren'Py, Paradox, Doom, HTML5, LÖVE, Java), retro decomps |
-| `game-recon` | Prior field notes, engine and version, managed or native, anti-cheat, loaders, save folders, community route → `MODDING_PLAN.md` |
-| `reverse-engineering` | ILSpy / Cpp2IL / Vineflower / Ghidra and IDA over MCP / Cheat Engine / Frida / RenderDoc; reverse-engineer a file format and prove it with a round trip |
-| `fal-assets` | Sprites with real transparency, consistent variants, pixel art, seamless textures, PBR maps, image-to-3D, auto-rigging, SFX, music, voice, cutscene video |
-| `asset-pipeline` | Art → engine-exact frames: cutout, nearest-neighbour fit, palettes, sheets, team-colour masks, 3D → 8/16-heading sprites |
-| `game-automation` | Launch, screenshot (GPU-safe), click/type safely, windowed mode, crash-reporter cleanup, in-game agent bridges |
-| `showcase-video` | Record the window with only the game's audio, pick moments, cut a styled video from an EDL |
-| `mashup-mods` | Game inside a game: content ports, passthrough mods (worked example: Minecraft × GTA V), decomps as libraries, reimplementations |
-| `publish-mod` | Lint, package per platform, credits, the post |
-| `share-field-notes` | Search the knowledge base, write your own note, open the PR |
+| `environment_check` | 平台、依赖与能力诊断 |
+| `game_profiles` / `game_scan` | 游戏适配范围、安装目录指纹 |
+| `knowledge_search` / `manual_read` | 离线知识库、引擎与操作手册 |
+| `manuals_export` | 将完整 Skills 与知识库复制到工作区 |
+| `project_create` | 按游戏创建二次元 Mod 开发项目 |
+| `image_prepare` | 图片裁切、缩放、透明 PNG 中间产物 |
+| `backup_create` | 存档或配置快照，写入工作区 |
+| `windows_list` / `window_capture` | 窗口发现、截图和原生 MCP 图片预览 |
+| `window_input` | 可选的按 PID 控制，显式聚焦 |
 
-**The `um` CLI** (Python). Every command has `--help` with examples.
+每个工具有独立参数 schema。结果包含 `ok`、`data`、`artifacts` 和 `error`；
+文件产物附带路径、类型、大小和 SHA-256。MCP 错误同时设置 `isError`。
 
-| | |
-|---|---|
-| `um scan` | Find Steam/Epic/Xbox installs; fingerprint engine and version, .NET vs native, anti-cheat, installed loaders, save folders, ranked routes |
-| `um fal` | `sprite`, `image`, `edit`, `rmbg`, `pixelate`, `upscale`, `texture`, `pbr`, `model3d`, `rig`, `sfx`, `music`, `voice`, `video`, `run`, `search`, `schema`, `price`. Plain REST, with a manifest of every generation |
-| `um sprite` | `cutout`, `fit`, `pixelate`, `palette`, `sheet`, `slice`, `frames`, `team-mask`, `seamless`, `preview` |
-| `um render3d` | GLB → sprite frames from the game's camera (`aoe2`, `iso8`, `trueiso`, `topdown`, `side`, `turntable`) with Blender |
-| `um win` | `shot`, `record` (gfxcapture + process-loopback audio), `drive` (input that only reaches the game), `ps`, `kill`, `launch`, `reg` |
-| `um video` | `contact` sheets, `compile` (EDL → titled, beat-cut video with music), `mux`, `beats`, `first-frame` |
-| `um backup` | Snapshot, diff and restore save folders |
-| `um publish check` | Blocks shipping game files, decompiled code and leaked keys |
-| `um kb` | The knowledge base: `search`, `show`, `new`, `check`, `index`, `sync`, `pr` |
+### CLI 与 Python SDK
 
-Two no-build Windows tools ship inside the package (`um/ps1/`): WinDrive input and ProcLoopback game-only
-audio, both PowerShell with embedded C#.
+能执行命令的 harness 使用相同服务层：
 
-<p align="center"><img src="docs/media/pipeline.png" alt="3D route: fal concept to 3D to 16 AoE2 headings. 2D route: fal art to cutout to a 64x26 Terraria sprite in game." width="100%"></p>
+```powershell
+um tool list --workspace C:\Mods
+um tool call game_profiles --workspace C:\Mods
+um tool call project_create --workspace C:\Mods --args-file create-project.json
+```
 
-## Built with it
-- **[examples/terraria-tmodloader](examples/terraria-tmodloader)**: *Fal Arsenal* for tModLoader.
-  - Weapons: a homing missile launcher, a tactical nuke (crater + mushroom cloud), a chain-lightning rifle, a
-    black-hole gun and an orbital strike.
-  - Three new enemies and a two-phase Drone Mothership boss.
-  - Every sprite came from fal.
-- **[examples/aoe2-de-civ](examples/aoe2-de-civ)**: *San Franciscans* for Age of Empires II DE.
-  - A new civilization with a Robotaxi unique unit and Delivery Drones, rendered from fal image-to-3D models
-    at AoE2's camera angle.
-  - A Transamerica Pyramid wonder.
-  - A reverse-engineered `.sld` sprite writer.
-- **[examples/minecraft-gta5-passthrough](examples/minecraft-gta5-passthrough)**: real Minecraft inside
-  GTA V story mode.
-  - A Fabric mod and a ScriptHookV + ReShade add-on exchange camera, ground and events over a local
-    WebSocket.
-  - Minecraft's colour + depth are depth-composited into GTA's frame.
-  - Minecraft TNT, arrows and fireworks become GTA explosions and bullets, and Minecraft mobs fight the
-    police.
+参数文件避免 PowerShell 对内联 JSON 引号的不同处理：
 
-Each has a field note with every non-obvious lesson: [knowledge/INDEX.md](knowledge/INDEX.md).
+```json
+{"destination":"projects/anime_ck3","profile":"ck3","name":"anime_ck3","game_version":"unknown"}
+```
 
-## Rules it follows
-- **Single-player and offline, on games you own.** It refuses to inject into online games with anti-cheat,
-  write multiplayer cheats, or bypass anti-cheat, DRM or ownership checks.
-- **It never ships game files or decompiled code.** Mods ship as code, your own assets, patches or
-  converters.
-- **It backs up before touching saves**, and kills processes by PID only.
-- **It asks before** driving your mouse and keyboard, installing loaders into game folders, or publishing,
-  PRs included.
+```python
+from um.service import Service
 
-Full reasoning: [`skills/mod-any-game/references/safety.md`](skills/mod-any-game/references/safety.md).
+service = Service(r"C:\Mods", game_roots=(r"D:\Games",))
+try:
+    result = service.invoke("game_profiles", {})
+    print(result.to_dict())
+finally:
+    service.close()
+```
 
-## Credits
-- Built from real agent sessions modding Terraria, Age of Empires II and GTA V × Minecraft.
-- Assets: [fal](https://fal.ai) (GPT Image 2, Nano Banana 2, FLUX, Trellis 2, ElevenLabs...).
-- Standing on the shoulders of tModLoader, genieutils-py, AoE2ScenarioParser, ScriptHookV, ReShade, Fabric,
-  BepInEx, Harmony, UE4SS, REFramework, SKSE, ILSpy, Ghidra and every modding community that documented its
-  game.
-- The engine playbooks also draw on the September 2026 wave of AI-built mods, and on how their creators
-  explained them in public.
+Skills 和知识库随 wheel 一同发布，可离线读取，无需依赖 Windows 符号链接。
+原有各厂商插件清单保留了上游接入方式；本 fork 推荐使用这里的 MCP 或 CLI 配置。
 
-MIT licensed. Fonts: Space Grotesk and JetBrains Mono (SIL OFL).
+## 保留的底层工具
+
+原有 `um scan`、`fal`、`sprite`、`render3d`、`video`、`win`、`backup`、
+`publish` 和 `kb` 命令仍可使用，每组有 `--help`。
+生成素材可选用 fal；3D 转精灵图依赖 Blender；视频处理依赖 FFmpeg。
+这些直接 CLI 命令不继承新 Service 的目录限制。
+
+上游的 [Terraria](examples/terraria-tmodloader)、
+[AoE2](examples/aoe2-de-civ) 和
+[Minecraft × GTA V](examples/minecraft-gta5-passthrough) 实例作为参考保留。
+它们不构成本 fork 对新目标游戏的实机验证。
+
+## 开发与验证
+
+```powershell
+uv run --extra mcp --extra dev pytest -q tests
+uv run um kb check --index
+uv run um publish check .
+uv run --extra dev python -m build
+```
+
+CI 覆盖 Ubuntu/Windows 和 Python 3.10/3.12，并验证独立安装的 wheel。
+测试使用模拟游戏目录、合成图片/存档、fake Windows backend 和真实 MCP stdio
+会话。Windows CI 编译 WinDrive，但不安装或控制真实游戏。
+
+当前服务层没有通用的 Mod 编译/安装引擎，也未提供持久后台任务、远程 HTTP
+控制或光荣资源包回写。对应扩展边界见 [architecture.md](docs/architecture.md)。
+
+## Credits and license
+
+Fork of [Rehan's universal-modder](https://github.com/rehan-remade/universal-modder).
+MIT licensed; upstream copyright and [LICENSE](LICENSE) are retained.
+Bundled Space Grotesk and JetBrains Mono fonts use SIL OFL.
+Design references and adopted patterns are documented in [architecture.md](docs/architecture.md).

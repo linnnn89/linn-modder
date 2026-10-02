@@ -29,6 +29,8 @@ import sys
 import time
 import urllib.request
 import zipfile
+import queue
+import threading
 from pathlib import Path
 
 from um.common import die, is_windows, is_wsl, to_posix, to_win
@@ -50,7 +52,9 @@ def ps_exe() -> str:
 
 def powershell(script: str, timeout: float = 60) -> str:
     _check_platform()
+    script = "[Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false); " + script
     r = subprocess.run([ps_exe(), "-NoProfile", "-NonInteractive", "-Command", script], capture_output=True, text=True, timeout=timeout,
+                       encoding="utf-8", errors="replace",
                        cwd="/mnt/c" if is_wsl() else None)
     if r.returncode:
         die(f"powershell failed: {r.stderr.strip()[-1500:]}")
@@ -289,16 +293,48 @@ class Recorder:
 class Drive:
     """Python side of WinDrive: d = Drive("AoE2DE_s"); d.focus(); d.click(640, 360); d.key("0x1B")."""
 
-    def __init__(self, proc: str):
+    def __init__(self, proc: str | None = None, *, pid: int | None = None, timeout: float = 15):
         _check_platform()
-        self.p = subprocess.Popen([ps_exe(), "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", tool_path("WinDrive.ps1"), "-Proc", proc],
-                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, bufsize=1, cwd="/mnt/c" if is_wsl() else None)
-        self.ready = self.p.stdout.readline().strip()
+        if (proc is None) == (pid is None):
+            raise ValueError("provide exactly one process name or PID")
+        if pid is not None and (type(pid) is not int or pid <= 0):
+            raise ValueError("PID must be positive")
+        target = ["-TargetPid", str(pid)] if pid is not None else ["-Proc", proc]
+        self.p = subprocess.Popen([ps_exe(), "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", tool_path("WinDrive.ps1"), *target],
+                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, encoding="utf-8", bufsize=1,
+                                  cwd="/mnt/c" if is_wsl() else None)
+        self.timeout = timeout
+        self._replies = queue.Queue()
+        def read_replies():
+            try:
+                for line in self.p.stdout:
+                    self._replies.put(line.strip())
+            finally:
+                self._replies.put(None)
+        self._reader = threading.Thread(target=read_replies, daemon=True)
+        self._reader.start()
+        self.ready = self._read()
+        if self.ready != "ready window":
+            self.close()
+            raise RuntimeError("WinDrive could not bind a visible target window: " + self.ready)
 
-    def cmd(self, line: str, retry: bool = True) -> str:
+    def _read(self) -> str:
+        try:
+            reply = self._replies.get(timeout=self.timeout)
+        except queue.Empty:
+            self.close()
+            raise RuntimeError("WinDrive timed out") from None
+        if reply is None:
+            self.close()
+            raise RuntimeError("WinDrive exited before replying")
+        return reply
+
+    def cmd(self, line: str, retry: bool = False) -> str:
+        if "\n" in line or "\r" in line:
+            raise ValueError("WinDrive commands must be one line")
         self.p.stdin.write(line + "\n")
         self.p.stdin.flush()
-        out = self.p.stdout.readline().strip()
+        out = self._read()
         if out.startswith("error") and "foreground" in out and retry:
             self.cmd("focus", retry=False)     # nobody at the PC: the foreground drifts; take it back once
             time.sleep(0.3)
@@ -336,10 +372,12 @@ class Drive:
 
     def close(self):
         try:
-            self.p.stdin.close()
+            if not self.p.stdin.closed:
+                self.p.stdin.close()
             self.p.wait(5)
         except (OSError, subprocess.TimeoutExpired):
             self.p.kill()
+            self.p.wait(5)
 
 
 # --------------------------------------------------------------------------- registry

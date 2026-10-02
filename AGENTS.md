@@ -1,4 +1,18 @@
-# universal-modder
+# Linn Modder
+
+## Working on this fork
+
+This fork adds a harness-independent service, JSON CLI and optional MCP stdio server.
+Read `docs/architecture.md` before changing service boundaries. Target projects include
+anime mods for CK3, Victoria II, Romance of the Three Kingdoms and Nobunaga's Ambition;
+see `docs/anime-mods.md` and the support levels in `um/data/game_profiles.json`.
+
+- Put new agent operations in `um/service.py`; keep transport code in `um/tool.py` and `um/mcp.py` thin.
+- Preserve JSON stdout and structured errors. Never put progress prints on MCP stdout.
+- Keep game roots read-only through the service; stage changes under its workspace.
+- Test with synthetic fixtures/fake Windows backends. Real game installation is not required.
+- Run `uv run --extra mcp --extra dev pytest -q tests` and build/installed-wheel checks.
+- Document unsupported game formats honestly; series-level profiles are not working archive adapters.
 
 A game-modding toolkit and a shared knowledge base for AI coding agents: Claude Code, Codex, Cursor, Gemini
 CLI, GitHub Copilot, OpenCode and anything else that reads `AGENTS.md`. When someone opens an agent in this
@@ -15,7 +29,7 @@ repo, they almost always want to **mod a game**, or to learn how a game was modd
 ## Tools
 - **`bin/um`** is the Python CLI, and it sets itself up with `uv`.
   - Put it on PATH: `export PATH="$PWD/bin:$PATH"`, or install it anywhere with
-    `uv tool install git+https://github.com/rehan-remade/universal-modder`.
+    `uv tool install "linn-modder[mcp] @ git+https://github.com/linnnn89/linn-modder"`.
   - Every group has `--help`:
     - `scan`: installed games, engine, anti-cheat, loaders, saves, routes
     - `fal`: sprites, textures, PBR, 3D, rigs, SFX, music, voice, video via fal's REST API

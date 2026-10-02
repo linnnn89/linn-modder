@@ -25,13 +25,17 @@
   Safety: input is only sent while the target window is the foreground window (or nothing is, and the
   cursor is over the game), so keys never leak into other apps. Close stdin to quit.
 #>
-param([Parameter(Mandatory = $true)][string]$Proc)
+param([string]$Proc = "", [int]$TargetPid = 0)
+
+[Console]::InputEncoding = New-Object System.Text.UTF8Encoding($false)
+[Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
 
 $src = @"
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Collections.Generic;
 
 public static class WinDrive
 {
@@ -63,13 +67,19 @@ public static class WinDrive
     [DllImport("user32.dll")] static extern IntPtr GetAncestor(IntPtr h, uint flags);
 
     static string proc;
+    static Process boundProcess;
+    static Dictionary<string, INPUT> held = new Dictionary<string, INPUT>();
     static bool scanMode = false;
 
     static IntPtr Window()
     {
-        foreach (var p in Process.GetProcessesByName(proc))
-            if (p.MainWindowHandle != IntPtr.Zero) return p.MainWindowHandle;
-        return IntPtr.Zero;
+        try
+        {
+            if (boundProcess == null || boundProcess.HasExited) return IntPtr.Zero;
+            boundProcess.Refresh();
+            return boundProcess.MainWindowHandle;
+        }
+        catch { return IntPtr.Zero; }
     }
 
     static string ProcName(IntPtr h)
@@ -82,7 +92,10 @@ public static class WinDrive
     static bool IsForeground()
     {
         var fg = GetForegroundWindow();
-        return fg != IntPtr.Zero && ProcName(fg).Equals(proc, StringComparison.OrdinalIgnoreCase);
+        uint pid;
+        if (fg == IntPtr.Zero || Window() == IntPtr.Zero) return false;
+        GetWindowThreadProcessId(fg, out pid);
+        return pid == (uint)boundProcess.Id;
     }
 
     static INPUT Mouse(uint flags, uint data, int dx, int dy)
@@ -132,6 +145,7 @@ public static class WinDrive
     // foreground on clicks) and the cursor is over the game - then input can only reach the game.
     static bool Safe()
     {
+        if (Window() == IntPtr.Zero) return false;
         if (IsForeground()) return true;
         if (GetForegroundWindow() != IntPtr.Zero) return false;
         POINT p; GetCursorPos(out p);
@@ -143,11 +157,40 @@ public static class WinDrive
     static void Send(params INPUT[] i)
     {
         if (!Safe()) throw new InvalidOperationException("target window is not in the foreground (foreground: " + ProcName(GetForegroundWindow()) + ")");
-        SendInput((uint)i.Length, i, Marshal.SizeOf(typeof(INPUT)));
+        uint sent = SendInput((uint)i.Length, i, Marshal.SizeOf(typeof(INPUT)));
+        for (int n = 0; n < sent; n++)
+        {
+            var v = i[n];
+            if (v.type == 1)
+            {
+                string key = "k:" + v.u.ki.vk + ":" + v.u.ki.scan;
+                if ((v.u.ki.flags & 2u) != 0) held.Remove(key);
+                else { v.u.ki.flags |= 2u; held[key] = v; }
+            }
+            else if (v.u.mi.flags == 2u || v.u.mi.flags == 8u)
+            {
+                string key = v.u.mi.flags == 2u ? "left" : "right";
+                v.u.mi.flags = v.u.mi.flags == 2u ? 4u : 16u; held[key] = v;
+            }
+            else if (v.u.mi.flags == 4u) held.Remove("left");
+            else if (v.u.mi.flags == 16u) held.Remove("right");
+        }
+        if (sent != i.Length) throw new InvalidOperationException("SendInput was blocked or incomplete");
+    }
+
+    static void ReleaseHeld()
+    {
+        // Only release inputs this process successfully pressed; also works after focus changes.
+        foreach (var v in held.Values) SendInput(1, new INPUT[] { v }, Marshal.SizeOf(typeof(INPUT)));
+        held.Clear();
     }
 
     static void MoveTo(int x, int y)
     {
+        if (!Safe()) throw new InvalidOperationException("target window is not in the foreground");
+        RECT r; GetClientRect(Window(), out r);
+        if (x < 0 || y < 0 || x >= r.R - r.L || y >= r.B - r.T)
+            throw new ArgumentOutOfRangeException("coordinates", "point is outside the game client area");
         var p = new POINT(); p.X = x; p.Y = y;
         ClientToScreen(Window(), ref p);
         SetCursorPos(p.X, p.Y);
@@ -234,9 +277,14 @@ public static class WinDrive
         }
     }
 
-    public static void Run(string p)
+    public static void Run(string p, int targetPid)
     {
         proc = p.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) ? p.Substring(0, p.Length - 4) : p;
+        if (targetPid > 0) boundProcess = Process.GetProcessById(targetPid);
+        else
+            foreach (var candidate in Process.GetProcessesByName(proc))
+                if (candidate.MainWindowHandle != IntPtr.Zero) { boundProcess = candidate; break; }
+        if (boundProcess != null) proc = boundProcess.ProcessName;
         Console.Out.WriteLine("ready " + (Window() != IntPtr.Zero ? "window" : "no-window"));
         Console.Out.Flush();
         string line;
@@ -244,13 +292,14 @@ public static class WinDrive
         {
             if (line.Trim().Length == 0) continue;
             string reply;
-            try { reply = Do(line); } catch (Exception e) { reply = "error " + e.Message; }
+            try { reply = Do(line); } catch (Exception e) { ReleaseHeld(); reply = "error " + e.Message; }
             Console.Out.WriteLine(reply);
             Console.Out.Flush();
         }
+        ReleaseHeld();
     }
 }
 "@
 
 Add-Type -TypeDefinition $src -Language CSharp
-[WinDrive]::Run($Proc)
+[WinDrive]::Run($Proc, $TargetPid)

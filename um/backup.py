@@ -15,15 +15,18 @@ from __future__ import annotations
 
 import hashlib
 import json
-import time
+import re
+from datetime import datetime
 import zipfile
 from pathlib import Path
 
 from um.common import data_dir, die, to_posix
 
 
-def _root(name: str) -> Path:
-    d = data_dir() / "backups" / name
+def _root(name: str, store: Path | None = None) -> Path:
+    if not name or name in (".", "..") or re.search(r'[\\/:\x00]', name):
+        raise ValueError("backup name must be one directory name")
+    d = (store if store is not None else data_dir()) / "backups" / name
     d.mkdir(parents=True, exist_ok=True)
     return d
 
@@ -40,7 +43,7 @@ def _scan(src: Path) -> dict:
     return files
 
 
-def create(src: str, name: str | None = None, note: str = "") -> Path:
+def create(src: str, name: str | None = None, note: str = "", *, store: Path | None = None, quiet: bool = False) -> Path:
     s = Path(to_posix(src)).expanduser()
     if not s.is_dir():
         die(f"not a folder: {s}")
@@ -49,13 +52,14 @@ def create(src: str, name: str | None = None, note: str = "") -> Path:
     total = sum(f["size"] for f in files.values())
     if total > 20 << 30:
         die(f"{total / 2**30:.1f} GB - too big to snapshot casually; back up the specific subfolder you'll change")
-    stamp = time.strftime("%Y%m%d-%H%M%S")
-    out = _root(name) / f"{stamp}.zip"
-    with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as z:
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
+    out = _root(name, store) / f"{stamp}.zip"
+    with zipfile.ZipFile(out, "x", zipfile.ZIP_DEFLATED, compresslevel=6) as z:
         for rel in files:
             z.write(s / rel, rel)
         z.writestr("_um_manifest.json", json.dumps(dict(source=str(src), created=stamp, note=note, files=files), indent=1))
-    print(f"{out}  ({len(files)} files, {total / 2**20:.1f} MB)")
+    if not quiet:
+        print(f"{out}  ({len(files)} files, {total / 2**20:.1f} MB)")
     return out
 
 

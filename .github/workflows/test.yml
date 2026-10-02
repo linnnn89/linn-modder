@@ -2,14 +2,38 @@ name: test
 on: [push, pull_request]
 jobs:
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ['3.10', '3.12']
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
-      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
-      - run: uv run --with pytest pytest -q tests
-      - run: ./bin/um --help && for g in scan fal sprite render3d video win backup publish kb; do ./bin/um $g --help > /dev/null; done
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install ffmpeg for offline video tests
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: uv sync --extra mcp --extra dev
+      - run: uv run pytest -q tests
+      - name: CLI entry points (native Python on both platforms)
+        run: |
+          uv run um --help
+          for g in scan fal sprite render3d video win backup publish kb doctor tool mcp; do uv run um "$g" --help; done
       - name: knowledge base
-        run: ./bin/um kb check --index
+        run: uv run um kb check --index
       - name: nothing that shouldn't ship
-        run: ./bin/um publish check .
+        run: uv run um publish check .
+      - name: Build distributions
+        run: uv run python -m build
+      - name: Install wheel into a separate environment
+        run: |
+          uv venv wheel-env
+          if [ "$RUNNER_OS" = "Windows" ]; then py=wheel-env/Scripts/python.exe; else py=wheel-env/bin/python; fi
+          uv pip install --python "$py" dist/*.whl
+          "$py" scripts/check_wheel.py

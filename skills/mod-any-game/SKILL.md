@@ -19,8 +19,14 @@ MW2) showed about scaling up.
 
 ## Your tools
 
+In Linn Modder, MCP and `um tool call` expose the same service. Start with
+`game_profiles` and `environment_check`; read bundled manuals with `manual_read`.
+For anime mods in CK3, Victoria II, Romance of the Three Kingdoms or Nobunaga's
+Ambition, read `anime-strategy-mod/SKILL.md` from the skills collection. Profiles
+state whether they offer a scaffold or planning guidance only.
+
 `um` is the toolkit CLI. Plugin installs and clones put it on PATH (it lives at `bin/um` in the repo).
-Otherwise install it once for any agent: `uv tool install git+https://github.com/rehan-remade/universal-modder`
+Otherwise install it once for any agent: `uv tool install "linn-modder[mcp] @ git+https://github.com/linnnn89/linn-modder"`
 (or `pipx install ...`). Every group has `--help` with examples.
 
 | Need | Command |
