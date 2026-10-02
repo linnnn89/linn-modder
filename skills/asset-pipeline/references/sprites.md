@@ -19,6 +19,6 @@ um sprite preview item.png look.png --scale 6             # checkerboard + zoom:
 ```
 - **Pixel art:** scale once, with nearest neighbour, to the final size. Never scale pixel art twice.
 - **Painted / HD art:** use `fit --smooth`.
-- **Real frames:** for animation frames beyond bob/squash, generate each frame with the fal edit endpoint
+- **Real frames:** for animation frames beyond bob/squash, generate each frame with an available image-edit tool (Codex GPT Image or selected provider)
   using the base sprite as reference ("same drone, rotors tilted, frame 2 of 4"), then cut out and fit each
   frame the same way. Or go 3D (below).
