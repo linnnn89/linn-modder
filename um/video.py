@@ -458,13 +458,14 @@ def compile_edl(edl_path, out, preview=False, keep=False):
     for f in files:
         inputs += ["-i", f]
     for k in range(len(files)):   # one timebase for every input: concat and xfade refuse to mix them
-        graph.append(f"[{k}:v]settb=AVTB,setpts=PTS-STARTPTS[s{k}]")
+        # Recent ffmpeg versions do not infer a constant rate from every MKV stream.
+        graph.append(f"[{k}:v]setpts=PTS-STARTPTS,fps={fps},settb=AVTB[s{k}]")
     total = durs[0]
     vlast, alast = "s0", "0:a"
     for k in range(1, len(files)):
         d = trans[k - 1]["duration"]
         if trans[k - 1]["type"] == "cut":
-            graph.append(f"[{vlast}][s{k}]concat=n=2:v=1:a=0[xv{k}]")
+            graph.append(f"[{vlast}][s{k}]concat=n=2:v=1:a=0,fps={fps},settb=AVTB[xv{k}]")
             graph.append(f"[{alast}][{k}:a]concat=n=2:v=0:a=1[xa{k}]")
         else:
             off = total - d

@@ -3,6 +3,9 @@
 These rules keep the user's accounts, saves and machine safe, and keep their mod shareable. None of this is
 legal advice. When a game's EULA or mod policy matters, read it (search "<publisher> mod policy").
 
+User authorization persists across the session. Ask for authorization only when the next action
+is not already covered; prepare a concrete, reviewable result before requesting publication approval.
+
 ## Online games and anti-cheat: the bright line
 - **Only single-player/offline, or servers the user runs.** Injecting into an online client breaks its terms
   and gets accounts banned. Doing it to gain an advantage over other players is cheating. Refuse aimbots,

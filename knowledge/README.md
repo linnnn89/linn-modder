@@ -1,46 +1,42 @@
-# The AI modding knowledge base
+# Modding field notes
 
-Field notes on how games were actually modded, decompiled and reverse-engineered. **Written by agents for
-the next agent**, reviewed through pull requests. Each note records what one project learned the hard way:
-the exact versions that worked, the route, what the engine really does, how it was verified, and most of all
-the **gotchas** (symptom → cause → fix). The next agent that touches the same game or engine starts with
-that instead of rediscovering it.
+Versioned findings from actual projects: chosen route, engine behavior, verification evidence
+and symptom → cause → fix gotchas. Read the relevant note rather than every game's history.
 
-- [`INDEX.md`](INDEX.md) lists every note (`index.json` is the same data for tools).
-- `games/<game>/<note>.md` holds one project each. Mashups live under the host game.
-- `techniques/<note>.md` holds cross-game methods: oracles, recording, safe input, passthrough, decomp
-  loops...
-- Engine playbooks (routes and tools per engine) live with the skills, in
-  [`../skills/mod-any-game/references/engines/`](../skills/mod-any-game/references/engines/).
+| Task | Entry |
+|---|---|
+| Find prior work | [INDEX.md](INDEX.md), `index.json`, or `um kb search "<game>"` |
+| Write or update a note | [share-field-notes](../skills/share-field-notes/SKILL.md) |
+| Contribution rules | [CONTRIBUTING.md](../CONTRIBUTING.md) in the checkout |
+| Engine-specific routes/tools | The matching playbook under `skills/mod-any-game/references/engines/` |
 
-## Before you start a mod: search
+## Search
+
 ```bash
-um kb search "<game>"                      # works in a clone, or anywhere (it syncs this folder from GitHub)
+um kb search "<game>"
 um kb search unreal pak --route loader-api
 um kb show games/gta-v/minecraft-passthrough.md
 ```
-No `um`? Read [`INDEX.md`](INDEX.md) on GitHub, or fetch
-`https://raw.githubusercontent.com/rehan-remade/universal-modder/main/knowledge/index.json`.
 
-## After you finish (or get stuck): write it up and open a PR
-A note is worth writing whenever you learned something the next agent would otherwise lose an hour to,
-even if the mod isn't finished. `status: in-progress` and `abandoned` are welcome; dead ends are knowledge.
+The CLI prefers checkout notes or the installed offline snapshot. Use `um kb sync` or
+`--remote` explicitly for the GitHub copy. MCP `knowledge_search` always searches the
+bundled offline collection; read a matching note with `manual_read(collection="knowledge", path=...)`.
+No CLI? Read [INDEX.md](INDEX.md), or the fork's
+[remote index](https://raw.githubusercontent.com/linnnn89/linn-modder/main/knowledge/index.json).
+
+## Write only when contributing findings
+
+Keep a journal while investigating. Exact builds, supported routes, evidence and known failures
+matter more than length. A useful unfinished or abandoned project is welcome if labeled honestly.
 
 ```bash
-um kb new --game "<game>" --title "<what you built>" --from-scan "<game>" --agent "<agent (model)>"
-# fill it in: Setup (exact versions), Route and why, How the game works, Build steps, Verification, Gotchas
+um kb new --game "<game>" --title "<finding>" --agent "<agent and model>"
 um kb check knowledge/games/<game>/<note>.md
-um kb pr knowledge/games/<game>/<note>.md          # dry run; add --yes once your human agrees
+um kb index
+um kb pr knowledge/games/<game>/<note>.md
 ```
-The full rules for contributors (human or AI) are in [`../CONTRIBUTING.md`](../CONTRIBUTING.md). In short:
-- no game files, no pasted decompiled code, no secrets;
-- describe what you learned in your own words;
-- name the agent and model;
-- say honestly what you did and didn't verify.
 
-## What makes a good note
-- **Versions.** "tModLoader 2026.07 on Terraria 1.4.4.9" beats "latest".
-- **Gotchas with causes.** "Colour readback fails after a depth readback, because the GL backend leaves the
-  read buffer at GL_NONE" is reusable; "rendering was broken" isn't.
-- **The oracle.** How you knew it worked, so the next agent can re-verify after a game update.
-- **Short code.** A snippet of *your own* code is fine. Link to the repo for the rest.
+The last command is a dry run; add `--yes` only within user authorization after the note is
+reviewable. Do not publish game files, extracted assets, decompiled dumps or secrets.
+Writing a note needs a writable checkout or explicit `--root`, not the installed package directory.
+Read the writing/contributing reference in the field-note skill only when needed.

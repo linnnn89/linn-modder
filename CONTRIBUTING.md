@@ -7,8 +7,8 @@ repo: every game one agent figures out becomes something the next agent can read
 ## If you are an AI agent
 You just modded (or tried to mod) a game, and you learned things. Share them:
 
-1. **Ask your human first.** A pull request is public and carries their GitHub identity. Tell them what you
-   want to publish and show them the note.
+1. **Use the user's publication authorization.** A pull request is public and carries their GitHub identity.
+   If authorization is missing, prepare the complete note first and show it when requesting approval.
 2. **Check it's new:** `um kb search "<game>"`. If a note already exists, improve it: add your versions and
    gotchas, and fix what's wrong. Don't write a second one.
 3. **Scaffold:** `um kb new --game "<game>" --title "<what you built>" --from-scan "<game>" --agent "<agent (model)>"`.
@@ -49,12 +49,15 @@ You just modded (or tried to mod) a game, and you learned things. Share them:
 - **Tools (`um/`):**
   - one module per CLI group, with a docstring that doubles as `--help`;
   - add a test in `tests/`;
-  - `uv run --with pytest pytest -q tests` must pass.
+  - Follow `docs/development.md` for tests, build and installed-wheel checks.
 - **Skills (`skills/`):** the Agent Skills format (`SKILL.md` with `name` + `description`). Keep them
-  agent-neutral: say "the agent", not a specific product. Put deep material in `references/`.
+  agent-neutral: say "the agent", not a specific product. Keep discovery metadata and task entries short;
+  put task-specific detail in `references/`. Follow [skill design](docs/skill-design.md) and run
+  `uv run python scripts/check_docs.py`.
 - **Engine playbooks** (`skills/mod-any-game/references/engines/`): routes, tools, pitfalls. Link to the
   canonical projects; versions move, so say "check the current release".
 - **Examples (`examples/`):** your own code and assets only. Use `fetch` scripts for third-party SDKs, and
   pass `um publish check --game <install>`.
 
-CI runs the tests, `um kb check --index` and the CLI help screens on every PR.
+CI covers documentation structure, tests, CLI help, knowledge/publish checks and independent wheel installation
+on Ubuntu/Windows and Python 3.10/3.12.

@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "profiles": [
+    {
+      "id": "ck3",
+      "name": "Crusader Kings III",
+      "family": "paradox",
+      "support": "project-scaffold",
+      "route": "Native mod folder with descriptor.mod; additive data and asset overrides.",
+      "localization": {"format": "yaml", "encoding": "utf-8-sig", "requires_language_header": true},
+      "anime_targets": ["interface icons", "event illustrations", "character and dynasty data", "events and localization", "3D portrait materials and models"],
+      "constraints": ["Main character portraits are a 3D pipeline; a PNG portrait is not a drop-in replacement.", "Confirm paths, texture compression, material slots, rigs and game version before exporting engine assets.", "The scaffold does not replace entire vanilla directories."],
+      "scaffold_directories": ["common", "events", "gfx", "localization/english", "localization/simp_chinese"]
+    },
+    {
+      "id": "victoria2",
+      "name": "Victoria II",
+      "family": "paradox-legacy",
+      "support": "project-scaffold",
+      "route": "Legacy .mod descriptor with a mod directory; data, flags, interface and events.",
+      "localization": {"format": "semicolon-csv", "encoding": "verify-against-installed-version", "preserve_columns": true},
+      "anime_targets": ["country flags", "interface and event images", "leaders", "countries and events", "localization"],
+      "constraints": ["Localization is legacy semicolon CSV, not CK3 YAML.", "Determine encoding from the installed language/version or localization patch; never assume UTF-8.", "Keep existing column layout, IDs and required flag variants; verify image sizes and formats against the target build."],
+      "scaffold_directories": ["common", "events", "gfx", "localisation"]
+    },
+    {
+      "id": "romance-of-the-three-kingdoms",
+      "name": "三国志 / Romance of the Three Kingdoms",
+      "family": "koei",
+      "support": "planning-only",
+      "route": "Identify the exact title, edition and patch; prefer its supported portrait import/editor, otherwise a version-specific resource adapter.",
+      "localization": {"format": "title-specific", "encoding": "verify-against-installed-version"},
+      "anime_targets": ["officer portraits", "portrait variants and alpha masks", "event images", "officer names and biographies"],
+      "constraints": ["This profile covers a series, not a verified archive format.", "Base and expansion/PK editions can differ in IDs, sizes, compression and import support.", "No generic archive repacker or automatic installation is claimed."],
+      "scaffold_directories": []
+    },
+    {
+      "id": "nobunagas-ambition",
+      "name": "信长之野望 / Nobunaga's Ambition",
+      "family": "koei",
+      "support": "planning-only",
+      "route": "Identify the exact title, edition and patch; select a supported portrait importer or build a resource adapter from verified samples.",
+      "localization": {"format": "title-specific", "encoding": "verify-against-installed-version"},
+      "anime_targets": ["officer portraits", "portrait crops and expressions", "event illustrations", "officer data and biographies"],
+      "constraints": ["Souzou, Taishi and Shinsei must not share an assumed resource format.", "Record title, expansion/PK edition, patch and language before authoring import rules.", "No generic archive repacker or automatic installation is claimed."],
+      "scaffold_directories": []
+    }
+  ]
+}
