@@ -5,12 +5,12 @@ Follow the user's requested scope. Toolkit/code work uses synthetic fixtures;
 a real game installation, gameplay test or showcase is required only when requested.
 
 ## Load on demand
-- Known modding task: open only its `skills/<name>/SKILL.md` and the reference needed for the current step.
-- Unknown route: read `skills/README.md` to choose one skill. Do not preload the catalog's bodies.
+- Modding task: read the single entry `skills/linn-modder/SKILL.md`, then the matching topic's `GUIDE.md` and current reference.
+- Topic folders are on-demand documents. Keep one discoverable `SKILL.md`; do not preload all guides.
 - Toolkit code/integration: read `docs/development.md`; read `docs/architecture.md` when changing service boundaries.
 - Installation or harness configuration: read `docs/setup.md`.
 - Reuse prior game findings: search the knowledge base; read only relevant matches.
-- UI/data/art: route via `skills/README.md`. Verify unfamiliar formats, tool choices and version changes online with `skills/mod-research/SKILL.md`.
+- Verify unfamiliar formats, tool choices and version changes online through the `mod-research` topic.
 
 ## Always keep
 - Use owned offline games; no protected online-client modification or protection bypasses.

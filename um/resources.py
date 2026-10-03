@@ -23,6 +23,17 @@ def read(kind: str, name: str) -> str:
     path = (base / name).resolve()
     if not path.is_relative_to(base) or path.suffix not in (".md", ".json"):
         raise ToolError("invalid_resource", "Choose a Markdown or JSON file inside the collection.")
+    if kind == "skills" and not path.is_file():
+        # Existing MCP/CLI callers can still read the former topic paths.
+        relative = path.relative_to(base)
+        if relative.parts and relative.parts[0] != "linn-modder":
+            candidate = base / "linn-modder" / relative
+            if candidate.name == "SKILL.md":
+                candidate = candidate.with_name("GUIDE.md")
+            candidate = candidate.resolve()
+            if not candidate.is_relative_to(base):
+                raise ToolError("invalid_resource", "Choose a file inside the collection.")
+            path = candidate
     if not path.is_file():
         raise ToolError("not_found", f"Resource not found: {name}")
     if path.stat().st_size > 256 * 1024:

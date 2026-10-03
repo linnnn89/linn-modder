@@ -47,8 +47,8 @@ def create_server(service: Service):
 
     server = ModderMCP(
         "linn-modder", lifespan=lifespan,
-        instructions="Use the tools exposed by this server. Read um://guide only when choosing a workflow; "
-                     "otherwise read the matching SKILL.md and current reference via manual_read when enabled. Game roots are read-only. "
+        instructions="Read the unified entry at um://guide or um://workflow, then the relevant topic GUIDE.md "
+                     "and current reference via manual_read when enabled. Game roots are read-only. "
                      "Report prepared art, format validation and in-game verification separately.")
 
     def adapt(name, fn):
@@ -76,13 +76,13 @@ def create_server(service: Service):
     @server.resource("um://workflow", mime_type="text/markdown")
     def workflow_resource() -> str:
         from um.resources import read
-        return read("skills", "mod-any-game/SKILL.md")
+        return read("skills", "linn-modder/SKILL.md")
 
     @server.resource("um://guide", mime_type="text/markdown")
     def guide_resource() -> str:
-        """Route an unclear task to one skill; detailed references are loaded separately."""
+        """Unified skill entry; topic guides and references are loaded on demand."""
         from um.resources import read
-        return read("skills", "README.md")
+        return read("skills", "linn-modder/SKILL.md")
 
     return server
 

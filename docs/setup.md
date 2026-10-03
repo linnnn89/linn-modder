@@ -2,7 +2,7 @@
 
 按需要选择 MCP、JSON CLI 或 Python；三种接口使用同一个 `Service`。
 以下命令以 Windows PowerShell 为例；目录由使用者选择，不预设盘符或安装位置。
-详细操作见[工具接口](../skills/references/tools.md)。
+详细操作见[工具接口](../skills/linn-modder/references/tools.md)。
 
 ## 安装
 
@@ -61,15 +61,17 @@ args = ["mcp", "serve", "--workspace", "<ABSOLUTE_WORKSPACE>", "--game-root", "<
 才加入 `--allow-input`；默认没有输入工具。远端/cloud harness 需要独立的认证桥接，
 stdio 配置本身不提供远程 PC 访问。
 
-Codex 已发现技能时按任务描述选择一个；MCP 需要选择任务时读 `um://guide`。
-知道任务时直接用 `manual_read` 读取对应技能。例如：
+Codex 使用统一技能 `$linn-modder`；MCP 先读 `um://guide` 或 `um://workflow`，
+两者都是同一个入口。按入口的任务表选择主题，使用 `manual_read` 读取：
 
 ```json
-{"collection":"skills","path":"anime-strategy-mod/SKILL.md"}
+{"collection":"skills","path":"linn-modder/anime-strategy-mod/GUIDE.md"}
 ```
 
-将这组参数传给 `manual_read`。技能中的 `references/targets.md` 是相对链接，下一次
-读取使用 `anime-strategy-mod/references/targets.md`。只读取当前步骤需要的文件。
+主题中的 `references/targets.md` 是相对链接，下一次读取使用
+`linn-modder/anime-strategy-mod/references/targets.md`。只读取当前步骤需要的文件。
+旧的 `<topic>/SKILL.md` 和 `<topic>/references/...` 路径仍由 `manual_read` 映射到
+新目录；导出的实体文件统一使用新结构。
 
 长手册可以传 `start_line:1,max_lines:40`，按返回的 `next_line` 续读；`next_line:null`
 表示已读完。默认参数仍返回全文。分页可减少首次上下文，全文必读时直接读取全文更省调用。
@@ -112,7 +114,7 @@ um tool call project_create --workspace $ModWorkspace --args-file create-project
 ```
 
 每次调用只在 stdout 输出一个 JSON 结果。失败返回非零退出码和结构化 `error`。
-产物包含路径、类型、大小和 SHA-256；结果字段详见[工具接口](../skills/references/tools.md)。
+产物包含路径、类型、大小和 SHA-256；结果字段详见[工具接口](../skills/linn-modder/references/tools.md)。
 
 ## Python
 
@@ -133,7 +135,7 @@ finally:
 ## 本地技能与兼容入口
 
 Codex 优先复用仓库 `AGENTS.md` 和现有插件中的 `skills/`。本地自动发现需要真实的
-`.agents/skills/<name>/SKILL.md` 目录或有效符号链接；Windows checkout 中内容为
+`.agents/skills/linn-modder/SKILL.md` 目录或有效符号链接；Windows checkout 中内容为
 `../skills` 的普通指针文件不等于符号链接，也不会自行变成可发现的技能目录。
 先检查文件类型，再选择插件、MCP 按需读取或导出，不能仅凭指针存在声称安装成功。
 
@@ -143,12 +145,14 @@ Windows checkout 未启用符号链接时，使用 MCP 的 `manual_read`，或�
 
 例如通过服务调用 `manuals_export`，参数为 `{"destination":"manuals"}`（工作区内
 尚不存在的目录），得到 `manuals/skills/` 和 `manuals/knowledge/`。需本地自动发现时，
-按客户端安装规则使用这份真实 `skills/` 目录，保留 `references/`、共享引用和
-`agents/openai.yaml`。已有目录不要整目录覆盖；更换位置后检查新会话的技能列表，
+按客户端安装规则使用这份真实 `skills/linn-modder/` 目录，保留全部主题、共享引用和
+统一入口的 `agents/openai.yaml`。已有目录不要整目录覆盖；更换位置后检查新会话的技能列表，
 或显式指向 `SKILL.md` 验证可读取。插件发现和实际模型选择仍由客户端负责。
 
-新任务可直接指定 `$mod-research`、`$ui-mod` 或 `$file-mod`（技能已被客户端发现时），
-也可让 agent 读取仓库内对应文件。MCP-only 用 `manual_read` 读取同一个路径；
+新任务统一指定 `$linn-modder`（技能已被客户端发现时），由入口指导 AI 进入
+`linn-modder/mod-research/`、`linn-modder/ui-mod/`、`linn-modder/file-mod/` 等主题。主题的 `GUIDE.md` 是普通资料。
+升级旧的手动技能安装时，将原来各主题独立目录替换为这一份统一目录，
+再检查客户端技能列表。MCP-only 用 `manual_read` 读取同一个路径；
 不支持 `$skill` 的客户端仍按自然语言任务路由。联网使用 harness 自带的搜索/网页
 能力，图像任务使用已有 provider；阅读资料、文件检查和 UI 经验学习不依赖 fal key。
 
@@ -171,7 +175,7 @@ Windows checkout 未启用符号链接时，使用 MCP 的 `manual_read`，或�
 上游插件保留 `universal-modder` 标识及可选 fal 配置，以兼容已有安装；其简短描述用于
 发现；仓库/安装地址指向本 fork，元数据版本与工具包一致。Claude 的 SessionStart hook 只设置 PATH，不向上下文注入手册。原生 Windows
 推荐上面的安装入口，Bash hook 依赖对应 shell。需要 fal 时再读取
-[fal-assets](../skills/fal-assets/SKILL.md)。
+[fal-assets](../skills/linn-modder/fal-assets/GUIDE.md)。
 
 ## 备份恢复
 
@@ -190,5 +194,5 @@ um backup list anime-saves --store (Join-Path $ModWorkspace '.um')
 um backup diff anime-saves (Join-Path $ModWorkspace 'saves') --store (Join-Path $ModWorkspace '.um')
 ```
 
-更多恢复边界见[工具接口](../skills/references/tools.md)。原有 `um win`、`backup`、
+更多恢复边界见[工具接口](../skills/linn-modder/references/tools.md)。原有 `um win`、`backup`、
 `fal` 等直接 CLI 命令保持原接口，不继承 Service 的工作区限制。

@@ -5,7 +5,7 @@
     um scan "C:\\Games\\Foo" --json  # machine-readable, for agents
 
 The report ends with ranked modding routes and the playbook to read next
-(skills/mod-any-game/references/engines/*.md). Everything here is read-only.
+(skills/linn-modder/mod-any-game/references/engines/*.md). Everything here is read-only.
 """
 from __future__ import annotations
 
@@ -653,7 +653,7 @@ def scan(query: str) -> dict:
         anti_cheat=anti, mod_loaders_installed=loaders, mod_folders=moddirs,
         workshop=game.get("workshop"), saves=save_hints(name, det),
         executables=facts.get("executables", {}), routes=routes, warnings=warnings,
-        playbook=f"skills/mod-any-game/references/engines/{routes[0]['playbook']}",
+        playbook=f"skills/linn-modder/mod-any-game/references/engines/{routes[0]['playbook']}",
         files_indexed=len(ix.files), index_truncated=ix.truncated,
     )
     return report

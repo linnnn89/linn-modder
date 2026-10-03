@@ -139,8 +139,24 @@ def test_bundled_knowledge_and_resource_paths(tmp_path):
     assert "Mod any game" in call(service, "manual_read", collection="skills", path="mod-any-game/SKILL.md").data["text"]
     assert not service.invoke("manual_read", {"collection": "skills", "path": "../../pyproject.toml"}).ok
     call(service, "manuals_export", destination="manuals")
-    assert (tmp_path / "manuals/skills/mod-any-game/SKILL.md").is_file()
+    skill_tree = tmp_path / "manuals/skills"
+    assert [p.relative_to(skill_tree).as_posix() for p in skill_tree.rglob("SKILL.md")] == ["linn-modder/SKILL.md"]
+    assert (skill_tree / "linn-modder/mod-any-game/GUIDE.md").is_file()
     assert not service.invoke("manuals_export", {"destination": "manuals"}).ok
+
+
+def test_legacy_manual_paths_resolve_to_single_entry_topic_tree(tmp_path):
+    service = Service(tmp_path)
+    for legacy, current in (("ui-mod/SKILL.md", "linn-modder/ui-mod/GUIDE.md"),
+                            ("mod-any-game/references/engines/unity.md", "linn-modder/mod-any-game/references/engines/unity.md"),
+                            ("references/tools.md", "linn-modder/references/tools.md")):
+        old = call(service, "manual_read", collection="skills", path=legacy).data
+        new = call(service, "manual_read", collection="skills", path=current).data
+        assert old["path"] == legacy and old["text"] == new["text"]
+    assert not service.invoke("manual_read", {"collection": "skills", "path": "../../pyproject.toml"}).ok
+    assert not service.invoke("manual_read", {"collection": "skills", "path": "linn-modder/ui-mod/SKILL.md"}).ok
+    note = call(service, "manual_read", collection="knowledge", path="techniques/content-mod-design.md")
+    assert note.data["text"].startswith("---")
 
 
 def test_manual_pages_reassemble_exact_text_and_preserve_default_contract(tmp_path):

@@ -12,7 +12,7 @@ fal 保留为可选提供方，发布文案记录实际使用的工具和来源�
 新项目包含：
 
 - `references/manifest.json`：初始为空，用于记录官方页面、原图 URL、版本、hash 和核验结果。
-- `ASSET_WORKFLOW.md`：从唯一的[素材流程文档](../skills/asset-pipeline/references/sourcing-and-psd.md)复制，避免项目模板与技能要求不一致。
+- `ASSET_WORKFLOW.md`：从唯一的[素材流程文档](../skills/linn-modder/asset-pipeline/references/sourcing-and-psd.md)复制，避免项目模板与技能要求不一致。
 - `assets/layers/`、`assets/editable/`：透明部件与可编辑母版，和源图、游戏输出分开保存。
 
 创建项目只创建结构，不会自动检索、生成图片或改写旧项目。GPT Image 提供光栅图像，
