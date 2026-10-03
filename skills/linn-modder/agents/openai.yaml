@@ -1,4 +1,4 @@
 interface:
   display_name: "Linn Modder"
-  short_description: "游戏 MOD 统一入口，按需进入二次元素材、UI、文件修改和联网资料抽屉"
-  default_prompt: "用 $linn-modder 完成当前游戏 MOD 任务，先选择对应主题子文件夹，再读取当前步骤的资料。"
+  short_description: "制作与修复游戏 MOD：找模组目录、换二次元素材、改 UI/汉化/数值、查工具与打包"
+  default_prompt: "用 $linn-modder 处理当前游戏修改需求，根据游戏版本与目标选择指南，联网查证所需工具，交付修改文件和验证结果。"

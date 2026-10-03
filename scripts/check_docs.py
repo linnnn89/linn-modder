@@ -71,8 +71,8 @@ def check_skill_tree(root: Path):
         if not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', entry.parent.name) or len(entry.parent.name) > 64:
             problems.append(f'{entry}: invalid skill name')
         description = data.get('description') if isinstance(data, dict) else None
-        if not isinstance(description, str) or not 1 <= len(description) <= 240:
-            problems.append(f'{entry}: discovery description must be 1..240 characters')
+        if not isinstance(description, str) or not 1 <= len(description) <= 512:
+            problems.append(f'{entry}: discovery description must be 1..512 characters')
         metadata = data.get('metadata', {}) if isinstance(data, dict) else {}
         if not isinstance(metadata, dict) or any(not isinstance(k, str) or not isinstance(v, str) for k, v in metadata.items()):
             problems.append(f'{entry}: metadata must map string keys to string values')
