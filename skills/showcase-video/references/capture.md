@@ -14,9 +14,9 @@ Read when recording a new authorized gameplay take. Follow the user's requested 
 
 ## Record the window + the game's own audio
 ```bash
-um win record --exe Game.exe --out C:\caps\take1 --seconds 40      # -> take1.mkv, take1.audio.raw, take1.json
-um video first-frame C:/caps/take1.mkv                              # where gameplay starts (skips loading screens)
-um video mux C:/caps/take1.mkv C:/caps/take1.audio.raw C:/caps/take1.json take1.mp4 [--offset 0.25]
+um win record --exe Game.exe --out captures/take1 --seconds 40      # -> take1.mkv, take1.audio.raw, take1.json
+um video first-frame captures/take1.mkv                           # where gameplay starts (skips loading screens)
+um video mux captures/take1.mkv captures/take1.audio.raw captures/take1.json take1.mp4 [--offset 0.25]
 ```
 - **Video:** ffmpeg gfxcapture of that window only (GPU frames, no desktop). It encodes with NVENC, AMF or
   QSV when available. NVENC H.264 maxes out at **4096 px wide**, so the recorder scales above that; for

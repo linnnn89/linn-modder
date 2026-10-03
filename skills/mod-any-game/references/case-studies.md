@@ -16,7 +16,7 @@ community loader. It is a free Steam app, id 1281930. Content is written in C# a
    vanilla AI there (e.g. `NPC.AI_004` for the Eye of Cthulhu, `aiStyle` numbers). tModLoader's own
    decompiled base (1.4.4.9) was diffed against vanilla 1.4.5.8 to confirm the logic matched. The only
    differences were refactors.
-3. Lab: tModLoader launched with `-tmlsavedirectory C:\dev\tModLoader\lab` so the user's real characters and
+3. Lab: tModLoader launched with `-tmlsavedirectory "<ISOLATED_SAVE_ROOT>"` (a chosen test directory) so the user's real characters and
    worlds are never touched. A lab character is created in code if missing. `-skipselect Char:World` jumps
    straight into a world.
 4. Content: weapons as `ModItem` + `ModProjectile`, enemies as `ModNPC` with custom `AI()`, a boss with two

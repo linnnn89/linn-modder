@@ -1,6 +1,6 @@
 ---
 name: anime-strategy-mod
-description: Plan anime casts, portraits, flags, event art and localization for CK3, Victoria II, Romance of the Three Kingdoms or Nobunaga’s Ambition.
+description: Plan anime casts, portraits, flags, event art and localization for CK3, Victoria II, Romance of the Three Kingdoms or Nobunaga’s Ambition. 二次元策略模组；アニメ戦略MOD。
 ---
 
 # Anime strategy-game mods
@@ -9,7 +9,7 @@ description: Plan anime casts, portraits, flags, event art and localization for 
 1. Call `game_profiles`; record the exact title, build, language and expansion/PK edition.
 2. Use `project_create` for staging. CK3/Victoria II have scaffolds; Koei series profiles are planning only.
 3. Retrieve official character references first; define stable IDs and style/variant rules in `ART_DIRECTION.md`.
-4. Start with one character, illustration or flag family. Measure formats from the exact target version.
+4. Start with one character, illustration or flag family. Measure formats from the target version; [verify tool/import compatibility online](../mod-research/SKILL.md) before selecting a writer.
 5. Keep source art, prepared art and engine outputs separate; record mappings/provenance in the manifest.
 6. Report offline checks separately from runtime verification; retain `not-tested-in-game` if no game ran.
 
@@ -22,6 +22,7 @@ Game roots stay read-only; use a generation provider only when requested and con
 | Official references, GPT Image character bases or layered PSD | [Sourcing and PSD](../asset-pipeline/references/sourcing-and-psd.md) |
 | Choose CK3, Victoria II or a Koei edition/route | [Target games](references/targets.md) |
 | Character identity, crops, flags, provenance or a first slice | [Cast and assets](references/cast-and-assets.md) |
+| Expressions, layered characters, Live2D/3D or a finished-mod study | [Anime asset contracts](../asset-pipeline/references/anime-assets.md) |
 | Encoding, asset-format or runtime checks | [Verification](references/verification.md) |
 | Read, modify and repack a version-specific game container | [Archive round trips](../reverse-engineering/references/archive-roundtrip.md) |
 | Tool parameters or MCP-only access | [Tool interfaces](../references/tools.md) |

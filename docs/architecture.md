@@ -7,6 +7,36 @@ providers (such as the legacy `um fal` commands).
 
 ## Layers
 
+### Agent reading layers
+
+| Responsibility | Source of truth | Entry and next read |
+|---|---|---|
+| Project rules | `AGENTS.md` | Scope and routes; loaded by the harness |
+| Skill discovery | `SKILL.md` frontmatter | Harness selects by name/description; `skills/README.md` is the fallback |
+| Task workflow | `skills/<name>/SKILL.md` | Read one matched skill, then the reference for the current step |
+| Tool/format instructions | `skills/<name>/references/`; shared `skills/references/` | `manual_read` using collection-relative paths |
+| Reusable findings | Indexed `knowledge/` | `knowledge_search`, then one matching note via `manual_read` |
+| Current external evidence | URLs in `mod-research` references | Harness web tools read the relevant version's source |
+| Toolkit implementation | `docs/development.md`, this document, `um/`, `tests/` | Checkout files for code changes |
+
+The frontmatter is the discovery source, with concise English/Chinese/Japanese task
+terms in descriptions. The harness selects a skill; a client without native discovery
+uses the router and the existing `manual_read` contract. Known tasks go directly to
+their entry. Shared procedures stay in references, and observed findings stay in the
+knowledge collection. Web research is supplied by the harness.
+
+```mermaid
+flowchart LR
+    A[Task] --> B[Harness discovery or skill router]
+    B --> C[One SKILL.md]
+    C --> D[Current reference]
+    D --> E[Shared Service operations]
+    C --> F[Relevant knowledge note]
+    D --> G[Current web source]
+```
+
+### Runtime layers
+
 ```text
 MCP client            Shell-capable harness          Python agent
     |                    um tool call                  |

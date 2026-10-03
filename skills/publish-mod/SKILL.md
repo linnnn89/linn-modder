@@ -1,6 +1,6 @@
 ---
 name: publish-mod
-description: Prepare a requested mod package or release. Use for release lint, platform layout, install/uninstall instructions, compatibility, credits and authorized publishing.
+description: Prepare a requested mod package or release. Use for release lint, platform layout, install/uninstall instructions, compatibility, credits and authorized publishing. 打包发布；MOD公開。
 ---
 
 # Publish a mod

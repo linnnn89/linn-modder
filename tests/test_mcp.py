@@ -64,6 +64,14 @@ def test_stdio_session_survives_tool_errors_and_reads_resources(tmp_path):
                     "path": "anime-strategy-mod/references/targets.md"})
                 assert not reference.isError
                 assert "planning only" in reference.structuredContent["data"]["text"]
+                # The new drawers remain readable through the same portable MCP contract.
+                for path in ("mod-research/references/engine-and-file-sources.md",
+                             "ui-mod/references/layout-and-state.md",
+                             "file-mod/references/text-and-data.md"):
+                    drawer = await client.call_tool("manual_read", {"collection": "skills", "path": path})
+                    assert not drawer.isError
+                    assert drawer.structuredContent["data"]["text"] == (
+                        Path(root) / "skills" / path).read_text(encoding="utf-8")
                 await client.send_ping()
     asyncio.run(asyncio.wait_for(exercise(), timeout=30))
 

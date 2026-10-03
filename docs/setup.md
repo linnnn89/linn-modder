@@ -1,7 +1,8 @@
 # 安装与 agent 接入
 
 按需要选择 MCP、JSON CLI 或 Python；三种接口使用同一个 `Service`。
-本页配置针对本机 Windows，详细操作见[工具接口](../skills/references/tools.md)。
+以下命令以 Windows PowerShell 为例；目录由使用者选择，不预设盘符或安装位置。
+详细操作见[工具接口](../skills/references/tools.md)。
 
 ## 安装
 
@@ -26,13 +27,23 @@ um doctor
 
 先创建工作目录。在客户端添加以下 server；顶层配置键可能因 harness 而不同。
 使用绝对路径，并确保客户端能在 PATH 找到安装的 `um`，或填写 `um.exe` 的完整路径。
+下方 `<ABSOLUTE_WORKSPACE>` 和 `<ABSOLUTE_GAME_ROOT>` 是需要替换的占位符，
+不是工具会自动展开的变量；JSON/TOML 中 Windows 反斜杠需要按各自语法转义。
+游戏目录应由使用者指定或通过安装元数据确认，仅使用手册时可省略 `--game-root`。
+
+PowerShell 命令示例使用以下变量，可将其改为自己的工作目录：
+
+```powershell
+$ModWorkspace = Join-Path (Get-Location) 'mod-workspace'
+New-Item -ItemType Directory -Force $ModWorkspace
+```
 
 ```json
 {
   "mcpServers": {
     "linn-modder": {
       "command": "um",
-      "args": ["mcp", "serve", "--workspace", "C:\\Mods", "--game-root", "D:\\Games"]
+      "args": ["mcp", "serve", "--workspace", "<ABSOLUTE_WORKSPACE>", "--game-root", "<ABSOLUTE_GAME_ROOT>"]
     }
   }
 }
@@ -43,14 +54,15 @@ Codex 的同一配置可写为：
 ```toml
 [mcp_servers.linn-modder]
 command = "um"
-args = ["mcp", "serve", "--workspace", "C:\\Mods", "--game-root", "D:\\Games"]
+args = ["mcp", "serve", "--workspace", "<ABSOLUTE_WORKSPACE>", "--game-root", "<ABSOLUTE_GAME_ROOT>"]
 ```
 
 `--game-root` 可重复指定，服务层保持这些目录只读。只有桌面输入已获授权时，
 才加入 `--allow-input`；默认没有输入工具。远端/cloud harness 需要独立的认证桥接，
 stdio 配置本身不提供远程 PC 访问。
 
-需要选择任务时读 `um://guide`；知道任务时直接读取对应技能。例如：
+Codex 已发现技能时按任务描述选择一个；MCP 需要选择任务时读 `um://guide`。
+知道任务时直接用 `manual_read` 读取对应技能。例如：
 
 ```json
 {"collection":"skills","path":"anime-strategy-mod/SKILL.md"}
@@ -71,7 +83,7 @@ stdio 配置本身不提供远程 PC 访问。
 专用 harness 可以重复传 `--enable-tool NAME`，只加载当前任务所需的 schema，例如：
 
 ```powershell
-um mcp serve --workspace C:\Mods --enable-tool game_profiles --enable-tool manual_read --enable-tool project_create --enable-tool image_prepare --enable-tool backup_create
+um mcp serve --workspace $ModWorkspace --enable-tool game_profiles --enable-tool manual_read --enable-tool project_create --enable-tool image_prepare --enable-tool backup_create
 ```
 
 这是项目创建和素材准备配置；需要扫描、恢复或窗口操作时，将对应工具加入配置并重启
@@ -88,9 +100,9 @@ server。`--enable-tool` 不会自动启用桌面输入；选入 `window_input` 
 支持带 BOM 的 UTF-8：
 
 ```powershell
-um tool list --workspace C:\Mods
-um tool call game_profiles --workspace C:\Mods
-um tool call project_create --workspace C:\Mods --args-file create-project.json
+um tool list --workspace $ModWorkspace
+um tool call game_profiles --workspace $ModWorkspace
+um tool call project_create --workspace $ModWorkspace --args-file create-project.json
 ```
 
 `create-project.json`：
@@ -105,9 +117,12 @@ um tool call project_create --workspace C:\Mods --args-file create-project.json
 ## Python
 
 ```python
+from pathlib import Path
 from um.service import Service
 
-service = Service(r"C:\Mods", game_roots=(r"D:\Games",))
+workspace = Path("mod-workspace").resolve()
+workspace.mkdir(parents=True, exist_ok=True)
+service = Service(workspace)
 try:
     result = service.invoke("game_profiles", {})
     print(result.to_dict())
@@ -117,13 +132,41 @@ finally:
 
 ## 本地技能与兼容入口
 
-checkout 中 `.agents/skills`、`.claude/skills`、`.gemini/skills` 和 `.github/skills`
-链接到 `skills/`。客户端实际加载行为由 harness 决定；项目只能缩短入口并提供按需
-路径，不能强制所有客户端延迟加载。
+Codex 优先复用仓库 `AGENTS.md` 和现有插件中的 `skills/`。本地自动发现需要真实的
+`.agents/skills/<name>/SKILL.md` 目录或有效符号链接；Windows checkout 中内容为
+`../skills` 的普通指针文件不等于符号链接，也不会自行变成可发现的技能目录。
+先检查文件类型，再选择插件、MCP 按需读取或导出，不能仅凭指针存在声称安装成功。
 
 Windows checkout 未启用符号链接时，使用 MCP 的 `manual_read`，或调用
 `manuals_export` 导出真实目录，再将其 `skills/` 按客户端规范放入技能搜索路径。
 导出只是文件准备，不需要将所有文件塞进每轮提示词。
+
+例如通过服务调用 `manuals_export`，参数为 `{"destination":"manuals"}`（工作区内
+尚不存在的目录），得到 `manuals/skills/` 和 `manuals/knowledge/`。需本地自动发现时，
+按客户端安装规则使用这份真实 `skills/` 目录，保留 `references/`、共享引用和
+`agents/openai.yaml`。已有目录不要整目录覆盖；更换位置后检查新会话的技能列表，
+或显式指向 `SKILL.md` 验证可读取。插件发现和实际模型选择仍由客户端负责。
+
+新任务可直接指定 `$mod-research`、`$ui-mod` 或 `$file-mod`（技能已被客户端发现时），
+也可让 agent 读取仓库内对应文件。MCP-only 用 `manual_read` 读取同一个路径；
+不支持 `$skill` 的客户端仍按自然语言任务路由。联网使用 harness 自带的搜索/网页
+能力，图像任务使用已有 provider；阅读资料、文件检查和 UI 经验学习不依赖 fal key。
+
+| 入口 | 兼容约定 |
+|---|---|
+| `AGENTS.md` | Codex/Agents 共用项目边界与导航 |
+| `plugin.json` + `mcp.json` | 保留 Agent Plugins 根清单与 `streamable-http` 格式 |
+| `.codex-plugin/plugin.json` | 保留已有 Codex 兼容清单，skills/MCP 路径相对插件根；不另建插件 |
+| `.codex/config.toml` | 可选 fal HTTP MCP，以 `FAL_KEY` 环境变量认证；不是本地 um MCP |
+| `.claude-plugin/` + `.mcp.json` | 保留 Claude 插件与 HTTP MCP 格式 |
+| `.cursor-plugin/` | 保留 Cursor 市场/插件元数据 |
+| `gemini-extension.json` | `contextFileName` 指向 `AGENTS.md`，保留 Gemini 接入 |
+| 可选 `CLAUDE.md` / `GEMINI.md` | 如启用，分别用 `@AGENTS.md` 单行导入 / 普通文字要求读取 `AGENTS.md`；文件缺失时不假定它们被加载 |
+
+官方依据（2026-10-03 阅读）：[Codex 技能发现与渐进加载](https://learn.chatgpt.com/docs/build-skills)、
+[AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md)、
+[插件打包和兼容清单](https://developers.openai.com/plugins/build/plugins)。
+保留已有 `universal-modder` 标识，避免把内容更新变成重新安装/迁移。
 
 上游插件保留 `universal-modder` 标识及可选 fal 配置，以兼容已有安装；其简短描述用于
 发现；仓库/安装地址指向本 fork，元数据版本与工具包一致。Claude 的 SessionStart hook 只设置 PATH，不向上下文注入手册。原生 Windows
@@ -143,8 +186,8 @@ Windows checkout 未启用符号链接时，使用 MCP 的 `manual_read`，或�
 旧 CLI 可查询同一存储：
 
 ```powershell
-um backup list anime-saves --store C:\Mods\.um
-um backup diff anime-saves C:\Mods\saves --store C:\Mods\.um
+um backup list anime-saves --store (Join-Path $ModWorkspace '.um')
+um backup diff anime-saves (Join-Path $ModWorkspace 'saves') --store (Join-Path $ModWorkspace '.um')
 ```
 
 更多恢复边界见[工具接口](../skills/references/tools.md)。原有 `um win`、`backup`、

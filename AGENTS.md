@@ -6,10 +6,11 @@ a real game installation, gameplay test or showcase is required only when reques
 
 ## Load on demand
 - Known modding task: open only its `skills/<name>/SKILL.md` and the reference needed for the current step.
-- Unknown route: read `skills/README.md` to choose a skill. Do not preload the skill catalog's bodies.
+- Unknown route: read `skills/README.md` to choose one skill. Do not preload the catalog's bodies.
 - Toolkit code/integration: read `docs/development.md`; read `docs/architecture.md` when changing service boundaries.
 - Installation or harness configuration: read `docs/setup.md`.
 - Reuse prior game findings: search the knowledge base; read only relevant matches.
+- UI/data/art: route via `skills/README.md`. Verify unfamiliar formats, tool choices and version changes online with `skills/mod-research/SKILL.md`.
 
 ## Always keep
 - Use owned offline games; no protected online-client modification or protection bypasses.
@@ -18,3 +19,11 @@ a real game installation, gameplay test or showcase is required only when reques
 - Desktop input, installation/registry changes and publication need user authorization; reuse authorization already given.
 - Keep evidence/unknowns in `MODLOG.md` for mod work; distinguish prepared art, format validation and game verification.
 - Keep MCP/JSON stdout clean and operational errors structured. State unsupported formats honestly.
+
+## Harness compatibility
+
+`AGENTS.md` is canonical. Codex/plugin and other client entry formats are documented
+in `docs/setup.md`; keep shared workflows in `skills/`, not duplicated per harness.
+On Windows a `../skills` text pointer is not an auto-discovered skill directory.
+Use the existing plugin, MCP manual reads or exported real directories. Preserve
+compatibility manifests; do not create empty platform skill directories.

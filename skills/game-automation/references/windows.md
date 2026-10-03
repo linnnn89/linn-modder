@@ -6,7 +6,7 @@ Read when launching, capturing or controlling an authorized Windows session. Fol
 ```bash
 um win setup                                   # once: PowerShell tools + an ffmpeg with gfxcapture, picks NVENC/AMF/QSV/x264
 um win ps                                      # windowed processes: pid, name, title
-um win launch --steam 105600                   # or: um win launch "C:\Games\Foo\Foo.exe" -- -windowed
+um win launch --steam 105600                   # example App ID; or use a verified executable path
 um win shot --exe Terraria.exe shot.png --scale 0.33   # full frame + a 1/3 copy that's cheap to look at
 um win drive --proc Terraria "focus" "click 640 360" "key 0x1B" "type hello" "hold 0x44 1500"
 um win drive --proc Terraria idle              # seconds since the user last touched mouse/keyboard
