@@ -25,6 +25,8 @@ agent harness 复用同一套操作。Agent 负责规划和代码，工具负责
 
 ## Windows 快速开始
 
+如需让 Agent 自动安装，请先指定电脑上的项目安装路径，让 Agent 将本项目安装到该位置、把完整的 `skills/linn-modder/` 目录安装到客户端技能目录，并在安装后的 `SKILL.md` 中写明项目的实际安装路径，指引 Agent 到该位置查找本项目文件和按需资料，同时按[安装与接入](docs/setup.md)配置所需的 MCP 启动命令、工作区和游戏目录。
+
 安装 Python 3.10+、Git 和 [uv](https://docs.astral.sh/uv/)，在 PowerShell 执行：
 
 ```powershell
