@@ -40,6 +40,11 @@ With no selection all default tools remain available; input still needs `--allow
 Use the tool's discovered schema for exact parameters. Do not guess operations such as
 `mod_build` or `archive_import`; they are not implemented.
 
+For a known task, read its `SKILL.md` directly using `manual_read`. Otherwise choose one
+entry from `um://guide` (the skill router), then read the reference needed for the current
+step. Use `knowledge_search` for reusable findings and read its matching note from the
+`knowledge` collection. Current web sources are handled by the harness through `mod-research`.
+
 ## Boundaries
 
 - The workspace must already exist. Repeated `--game-root` flags add read-only directories.

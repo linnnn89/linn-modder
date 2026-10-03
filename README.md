@@ -11,6 +11,12 @@ agent harness 复用同一套操作。Agent 负责规划和代码，工具负责
 | 安装工具、接入 MCP 或命令行 | [安装与接入](docs/setup.md) |
 | 让 agent 选择当前任务的技能 | [技能导航](skills/README.md)；已知任务直接读对应 `SKILL.md` |
 | 做二次元策略游戏 Mod | [anime-strategy-mod](skills/anime-strategy-mod/SKILL.md) · [工作流与支持范围](docs/anime-mods.md) |
+| 二次元立绘、表情、Live2D/3D 的制作注意事项 | [二次元素材抽屉](skills/asset-pipeline/references/anime-assets.md) |
+| UI MOD、HUD、菜单皮肤、字体或汉化 | [UI MOD](skills/ui-mod/SKILL.md) |
+| 修改配置、数据、脚本、资源与打包文件 | [文件修改](skills/file-mod/SKILL.md) |
+| 联网查证版本、工具和英中日免费学习资料 | [MOD 联网查证](skills/mod-research/SKILL.md) |
+| 学习完整内容 MOD 的组织方式 | [资源分层、稳定标识与交付边界](knowledge/techniques/content-mod-design.md) |
+| 找不到 Steam 已下载 MOD | [工坊位置发现方法](skills/game-recon/references/steam-workshop.md) |
 | 找官方素材参考、用 GPT Image 制作底图或准备 PSD | [素材流程](skills/asset-pipeline/references/sourcing-and-psd.md) |
 | 开发或修改工具本身 | [开发指南](docs/development.md) · [架构](docs/architecture.md) |
 | 查看效率实测、专用工具配置与回退方法 | [效率报告](docs/performance.md) |
@@ -24,12 +30,13 @@ agent harness 复用同一套操作。Agent 负责规划和代码，工具负责
 ```powershell
 uv tool install "linn-modder[mcp] @ git+https://github.com/linnnn89/linn-modder"
 um doctor
-New-Item -ItemType Directory -Force C:\Mods
-um tool list --workspace C:\Mods
+$ModWorkspace = Join-Path (Get-Location) 'mod-workspace'
+New-Item -ItemType Directory -Force $ModWorkspace
+um tool list --workspace $ModWorkspace
 ```
 
 先用 `game_profiles` 查看支持范围，再按需调用工具。MCP 客户端使用
-`um mcp serve --workspace C:\Mods`，完整配置见[安装与接入](docs/setup.md)。
+`um mcp serve --workspace $ModWorkspace`，完整配置见[安装与接入](docs/setup.md)。
 扫描、知识库、项目脚手架和图片处理不需要生成服务的 API key。
 
 ## 当前可以做什么
@@ -52,13 +59,21 @@ um tool list --workspace C:\Mods
 
 ## 文档如何加载
 
-`AGENTS.md` 只保留项目边界与导航；`CLAUDE.md` 引用同一入口。技能发现只需要
+`AGENTS.md` 只保留项目边界与导航；其他 harness 使用同一规则，接入方式见安装页。技能发现只需要
 简短的 `name`/`description`，匹配任务后才读 `SKILL.md`，执行某一步时才读
 对应 `references/`。无需每次加载全部手册、命令样例或引擎知识。
 
-MCP 提供 `um://guide` 导航和 `manual_read` 单文件读取。打包后的技能保持相同目录
+Codex 按技能描述选择一个入口；MCP 使用 `um://guide` 导航和 `manual_read` 单文件读取。
+JSON CLI 与 Python 复用相同读取操作。打包后的技能保持相同目录
 结构；需要本地技能目录时可用 `manuals_export` 导出真实文件，避免依赖 Windows
 符号链接。目录设计与维护规则见[技能文档设计](docs/skill-design.md)。
+
+Codex 优先通过已有插件或仓库规则进入共享技能；新增技能附带 `agents/openai.yaml`
+展示名称和示例提示。英中日学习资料按引擎/文件、美术/UI 分抽屉；第一次选工具、
+遇到未知格式或版本变化要联网查正文，普通本地修改可复用已验证结论。
+这些是技能和经验扩充，不代表工具包新增了 UI 注入器、通用回封器或游戏支持 profile。
+共享经验按设计问题组织，不依赖维护者的安装目录或某个成品包；运行时路径由使用者
+的配置与环境确定。案例只用于来源追溯，不能成为通用技能的默认目标。
 
 ## 来源与许可
 

@@ -59,7 +59,9 @@ from pathlib import Path
 from um.service import Service
 
 jobs = json.loads(Path("jobs.json").read_text(encoding="utf-8-sig"))
-service = Service(r"C:\Mods")
+workspace = Path("mod-workspace").resolve()
+workspace.mkdir(parents=True, exist_ok=True)
+service = Service(workspace)
 try:
     for job in jobs:
         result = service.invoke("image_prepare", job)

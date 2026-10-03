@@ -7,8 +7,9 @@ and symptom → cause → fix gotchas. Read the relevant note rather than every 
 |---|---|
 | Find prior work | [INDEX.md](INDEX.md), `index.json`, or `um kb search "<game>"` |
 | Write or update a note | [share-field-notes](../skills/share-field-notes/SKILL.md) |
-| Contribution rules | [CONTRIBUTING.md](../CONTRIBUTING.md) in the checkout |
+| Contribution rules | [Shared contribution reference](../skills/share-field-notes/references/contributing.md) |
 | Engine-specific routes/tools | The matching playbook under `skills/mod-any-game/references/engines/` |
+| Cross-game content design | [Resource layers, stable IDs and delivery boundaries](techniques/content-mod-design.md) |
 
 ## Search
 

@@ -1,6 +1,6 @@
 ---
 name: fal-assets
-description: Generate requested game art, audio or 3D assets with fal. Use for model discovery, provider setup, reference-based variants or generation batches.
+description: Generate requested game art, audio or 3D assets with fal. Use for model discovery, provider setup, reference-based variants or generation batches. 素材生成；AI素材生成。
 ---
 
 # Game assets with fal

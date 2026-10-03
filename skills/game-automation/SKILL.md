@@ -1,6 +1,6 @@
 ---
 name: game-automation
-description: Capture or control an authorized game session, diagnose runtime failures or build repeatable test scenes. Windows first; use only when runtime interaction is in scope.
+description: Capture or control an authorized game session, diagnose runtime failures or build repeatable test scenes. Windows first; use only when runtime interaction is in scope. 游戏控制与截图；ゲーム操作、画面キャプチャ。
 ---
 
 # Game automation

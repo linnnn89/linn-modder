@@ -1,6 +1,6 @@
 ---
 name: mashup-mods
-description: Combine two games’ mechanics or runtimes in an offline mod. Use for host-native content ports, two-process passthrough or embedded simulations.
+description: Combine two games’ mechanics or runtimes in an offline mod. Use for host-native content ports, two-process passthrough or embedded simulations. 玩法融合；ゲーム融合。
 ---
 
 # Mashups: putting one game inside another

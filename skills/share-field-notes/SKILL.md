@@ -1,6 +1,6 @@
 ---
 name: share-field-notes
-description: Find prior modding work or document new findings in the shared knowledge base. Use for versions, routes, verification evidence, gotchas and authorized note contributions.
+description: Find prior modding work or document new findings in the shared knowledge base. Use for versions, routes, verification evidence, gotchas and authorized note contributions. 经验检索与分享；ナレッジ共有。
 ---
 
 # Field notes

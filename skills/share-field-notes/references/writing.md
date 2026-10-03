@@ -29,3 +29,17 @@ Fill in every section of the scaffold (`knowledge/TEMPLATE.md` explains each). W
 
 If a note for the same game and idea exists, extend it (add a Gotcha, a newer version, a correction)
 instead of writing a second one.
+
+## GitHub-shared knowledge versus local evidence
+
+For a reusable design lesson, write a `kind: technique` note organized around decisions,
+responsibilities, invariants and trade-offs. Explain which observations support the lesson
+and which recommendations are your synthesis; do not infer an author's intent from a folder tree.
+Keep a game-specific note only when reproducing that exact game's behavior is the purpose.
+
+Shared guidance must work without the author's machine. Use relative resource paths and
+target-derived identifiers; explain how a user resolves installation/workspace roots instead
+of copying a local absolute path. Do not route generic skills through a particular game or mod.
+Keep machine paths, inventories and one-off diagnostic dumps in the local, untracked `MODLOG.md`.
+For abstract design guidance, keep the public text focused on the technique, with neutral examples
+and topic-based routing. Use concise technical instructions and state the conditions for applying them.
