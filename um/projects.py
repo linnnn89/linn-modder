@@ -44,7 +44,7 @@ def create(destination: Path, profile_id: str, name: str, game_version: str = "u
         (destination / "references/manifest.json").write_text('{"schema_version": 1, "references": []}\n', encoding="utf-8")
         from um.resources import read
         (destination / "ASSET_WORKFLOW.md").write_text(
-            read("skills", "asset-pipeline/references/sourcing-and-psd.md"), encoding="utf-8")
+            read("skills", "linn-modder/asset-pipeline/references/sourcing-and-psd.md"), encoding="utf-8")
         (destination / "ART_DIRECTION.md").write_text(
             "# Art direction\n\nRecord the cast, palette, line style, lighting, costume rules, expressions and framing.\n"
             "Keep a stable character ID across crops and variants. Record authorship/license and generation provenance.\n"

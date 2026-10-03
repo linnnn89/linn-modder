@@ -11,10 +11,11 @@ from check_docs import check_skill_tree
 def main():
     for kind in resources.KINDS:
         assert "data" in resources.root(kind).parts, "resources resolved to a checkout, not the wheel"
-    assert "Mod any game" in resources.read("skills", "mod-any-game/SKILL.md")
+    assert "Mod any game" in resources.read("skills", "linn-modder/mod-any-game/GUIDE.md")
     assert not check_skill_tree(resources.root("skills")), "Installed skill links or entry metadata are invalid"
-    assert "anime-strategy-mod/SKILL.md" in resources.read("skills", "README.md")
-    assert "ck3" in resources.read("skills", "anime-strategy-mod/references/targets.md")
+    assert "anime-strategy-mod/GUIDE.md" in resources.read("skills", "linn-modder/SKILL.md")
+    assert len(list(resources.root("skills").rglob("SKILL.md"))) == 1
+    assert "ck3" in resources.read("skills", "linn-modder/anime-strategy-mod/references/targets.md")
     assert (Path(__import__("um").__file__).parent / "ps1/WinDrive.ps1").is_file()
     with tempfile.TemporaryDirectory() as directory:
         service = Service(directory)
@@ -27,16 +28,20 @@ def main():
         # Export must keep sibling drawers and optional Codex metadata usable without symlinks.
         exported = service.invoke("manuals_export", {"destination": "manuals"})
         assert exported.ok, exported.to_dict()
-        for relative in ("mod-research/references/art-and-ui-sources.md",
-                         "ui-mod/references/fonts-and-localization.md",
-                         "file-mod/references/text-and-data.md",
-                         "asset-pipeline/references/anime-assets.md"):
+        for relative in ("linn-modder/mod-research/references/art-and-ui-sources.md",
+                         "linn-modder/ui-mod/references/fonts-and-localization.md",
+                         "linn-modder/file-mod/references/text-and-data.md",
+                         "linn-modder/asset-pipeline/references/anime-assets.md"):
             read = service.invoke("manual_read", {"collection": "skills", "path": relative})
             assert read.ok, read.to_dict()
             assert read.data["text"] == (Path(directory) / "manuals/skills" / relative).read_text(encoding="utf-8")
-        for name in ("mod-research", "ui-mod", "file-mod"):
-            assert (Path(directory) / "manuals/skills" / name / "agents/openai.yaml").read_bytes() == (
-                resources.root("skills") / name / "agents/openai.yaml").read_bytes()
+        skill_tree = Path(directory) / "manuals/skills"
+        assert [p.relative_to(skill_tree).as_posix() for p in skill_tree.rglob("SKILL.md")] == ["linn-modder/SKILL.md"]
+        assert (skill_tree / "linn-modder/agents/openai.yaml").read_bytes() == (
+            resources.root("skills") / "linn-modder/agents/openai.yaml").read_bytes()
+        for legacy, current in (("mod-any-game/SKILL.md", "linn-modder/mod-any-game/GUIDE.md"),
+                                ("asset-pipeline/references/sourcing-and-psd.md", "linn-modder/asset-pipeline/references/sourcing-and-psd.md")):
+            assert resources.read("skills", legacy) == resources.read("skills", current)
         scoped = Service(directory, enabled_tools=("manual_read",))
         assert set(scoped.tools()) == {"manual_read"}
         assert scoped.invoke("project_create", {}).error.code == "unknown_tool"
@@ -46,7 +51,7 @@ def main():
         data = json.loads((Path(directory) / "project/project.json").read_text(encoding="utf-8"))
         assert data["profile"] == "ck3"
         assert (Path(directory) / "project" / data["asset_workflow"]).read_text(encoding="utf-8") == resources.read(
-            "skills", "asset-pipeline/references/sourcing-and-psd.md")
+            "skills", "linn-modder/asset-pipeline/references/sourcing-and-psd.md")
         assert json.loads((Path(directory) / "project" / data["reference_manifest"]).read_text(encoding="utf-8"))["references"] == []
         saves = Path(directory) / "saves"
         saves.mkdir()

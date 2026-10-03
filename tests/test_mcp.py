@@ -57,17 +57,22 @@ def test_stdio_session_survives_tool_errors_and_reads_resources(tmp_path):
                 profiles = await client.call_tool("game_profiles", {})
                 assert len(profiles.structuredContent["data"]["profiles"]) == 4
                 resource = await client.read_resource("um://workflow")
-                assert "Mod any game" in resource.contents[0].text
+                assert "Linn Modder" in resource.contents[0].text
                 guide = await client.read_resource("um://guide")
-                assert "anime-strategy-mod/SKILL.md" in guide.contents[0].text
+                assert resource.contents[0].text == guide.contents[0].text
+                assert "anime-strategy-mod/GUIDE.md" in guide.contents[0].text
+                topic = await client.call_tool("manual_read", {"collection": "skills",
+                    "path": "linn-modder/ui-mod/GUIDE.md"})
+                assert not topic.isError
+                assert "references/layout-and-state.md" in topic.structuredContent["data"]["text"]
                 reference = await client.call_tool("manual_read", {"collection": "skills",
-                    "path": "anime-strategy-mod/references/targets.md"})
+                    "path": "linn-modder/anime-strategy-mod/references/targets.md"})
                 assert not reference.isError
                 assert "planning only" in reference.structuredContent["data"]["text"]
                 # The new drawers remain readable through the same portable MCP contract.
-                for path in ("mod-research/references/engine-and-file-sources.md",
-                             "ui-mod/references/layout-and-state.md",
-                             "file-mod/references/text-and-data.md"):
+                for path in ("linn-modder/mod-research/references/engine-and-file-sources.md",
+                             "linn-modder/ui-mod/references/layout-and-state.md",
+                             "linn-modder/file-mod/references/text-and-data.md"):
                     drawer = await client.call_tool("manual_read", {"collection": "skills", "path": path})
                     assert not drawer.isError
                     assert drawer.structuredContent["data"]["text"] == (

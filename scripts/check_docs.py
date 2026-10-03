@@ -41,9 +41,21 @@ def check_skill_tree(root: Path):
     if not index.is_file():
         problems.append('Skills are missing the routing index README.md')
     routed = {target for target, _ in links(index)} if index.is_file() else set()
-    for entry in sorted(root.glob('*/SKILL.md')):
+    entries = sorted(root.rglob('SKILL.md'))
+    if len(entries) != 1:
+        problems.append('Skills must contain exactly one SKILL.md entry')
+    for entry in entries:
+        if entry.parent.parent != root:
+            problems.append(f'{entry}: nested SKILL.md creates another discoverable skill')
         if entry.resolve() not in routed:
             problems.append(f'{entry}: skill missing from routing index')
+        topics = {target for target, _ in links(entry)}
+        for guide in entry.parent.glob('*/GUIDE.md'):
+            if guide.resolve() not in topics:
+                problems.append(f'{guide}: topic missing from unified entry')
+        for ui_path in entry.parent.rglob('agents/openai.yaml'):
+            if ui_path.parent.parent != entry.parent:
+                problems.append(f'{ui_path}: topic metadata must live at the unified entry')
         text = entry.read_text(encoding='utf-8')
         pieces = text.split('---', 2)
         if len(pieces) != 3 or pieces[0].strip():
