@@ -15,6 +15,10 @@ def test_skill_checker_catches_orphans_invalid_metadata_and_unspaced_entry_growt
     assert any("missing from routing index" in problem for problem in check_skill_tree(tmp_path))
     index.write_text("[Sample](sample/SKILL.md)\n", encoding="utf-8")
     assert check_skill_tree(tmp_path) == []
+    entry.write_text(text.replace("Sample task", "界" * 512), encoding="utf-8")
+    assert check_skill_tree(tmp_path) == []
+    entry.write_text(text.replace("Sample task", "界" * 513), encoding="utf-8")
+    assert any("1..512 characters" in problem for problem in check_skill_tree(tmp_path))
     entry.write_text(text + "界" * 3001, encoding="utf-8")
     assert any("3000 characters" in problem for problem in check_skill_tree(tmp_path))
     entry.write_text(text.replace("description:", "metadata: [invalid]\ndescription:"), encoding="utf-8")
