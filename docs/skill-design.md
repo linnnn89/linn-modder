@@ -21,7 +21,10 @@ Cross-topic links are normal document navigation; the harness discovers one skil
 
 ## Writing and routing
 
-1. Keep the unified description concise, with useful English/Chinese/Japanese task terms.
+1. Describe when to invoke the skill using concrete user requests, including requests that omit
+   the word MOD (finding Workshop files, swapping portraits, changing menus/fonts or save values,
+   and repairing mods after updates). Keep useful English/Chinese/Japanese task terms tied to games.
+   Put these selection cues in frontmatter; body-only cues are unavailable before invocation.
 2. Add or update a topic's row in the entry when its purpose changes.
 3. Give each guide a short workflow, required inputs, expected output and conditional links.
 4. Use `GUIDE.md` for topics. Put substantial commands, formats and examples in references.
@@ -59,7 +62,9 @@ in [setup](setup.md), and implementation rules in [development](development.md).
 in its routing table, local links, packaged boundaries and entry metadata.
 It rejects nested skill entries and topic UI discovery metadata.
 The unified entry stays within 400 words and 3,000 characters, its description within
-240 characters, and `AGENTS.md` within 2,000 characters. These are project budgets.
+512 characters, and `AGENTS.md` within 2,000 characters. These are project budgets;
+the description budget leaves room for concrete multilingual selection cues while staying
+below the Agent Skills specification's 1,024-character maximum.
 The same checks run against installed-wheel manuals. MCP integration exercises entry,
 topic and reference reads; export checks verify one physical entry and usable guides.
 
