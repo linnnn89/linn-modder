@@ -1,6 +1,6 @@
 ---
 name: mod-any-game
-description: Plan and coordinate a complete offline game mod when the route is unclear or several stages must be combined. Use a specialist skill for a single known task.
+description: Plan and coordinate a complete offline game mod when the route is unclear or several stages must be combined. Use a specialist skill for a single known task. 完整模组路线；MOD制作。
 ---
 
 # Mod any game
@@ -11,7 +11,7 @@ is a fallback router.
 
 ## Minimum workflow
 1. Record the exact game/build, idea and requested validation level in `MODLOG.md`.
-2. Search existing notes; identify the engine and choose a supported data, asset or loader route.
+2. Search existing notes; verify current route/tool compatibility online before choosing a data, asset or loader route. Use [mod-research](../mod-research/SKILL.md) for unknowns.
 3. Stage work separately from game files; snapshot saves/config before changing them.
 4. Implement one complete feature with placeholder assets before expanding.
 5. Validate within the authorized scope. Separate prepared art, format checks and game runs.
@@ -30,6 +30,8 @@ Never bypass protections, modify protected online clients or distribute game ass
 | Asset integration or evidence | [Verification](references/verification.md) |
 | Video, package or field note requested | [Delivery](references/delivery.md), then the matching specialist |
 | Anime strategy-game conversion | [anime-strategy-mod](../anime-strategy-mod/SKILL.md) |
+| HUD, menu, fonts or interface localization | [ui-mod](../ui-mod/SKILL.md) |
+| Known data, script or asset file edits | [file-mod](../file-mod/SKILL.md) |
 | Engine-specific behavior | Only the playbook named by the scan in `references/engines/` |
 | Permissions or distribution question | [Safety](references/safety.md) |
 | A comparable historical project | [Case studies](references/case-studies.md) |

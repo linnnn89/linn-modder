@@ -1,0 +1,4 @@
+interface:
+  display_name: "游戏 UI MOD"
+  short_description: "按需修改游戏菜单、HUD、皮肤和字体，并验证布局、文字与交互状态"
+  default_prompt: "用 $ui-mod 检查这个游戏界面的修改路线，先完成一个控件并验证实际行为。"

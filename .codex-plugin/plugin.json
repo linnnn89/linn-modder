@@ -37,9 +37,9 @@
     ],
     "websiteURL": "https://github.com/linnnn89/linn-modder",
     "defaultPrompt": [
-      "Mod this game: add a new weapon with fal-generated sprites",
-      "What engine is this game and how do people mod it?",
-      "Search the modding knowledge base for this game"
+      "为这个游戏制作二次元 MOD，先查版本和素材合同，再按需读取技能",
+      "修改游戏 UI、字体或数据文件，保留原件并验证一个完整改动",
+      "联网检索英中日免费 MOD 资料，核对工具版本并引用原文"
     ],
     "brandColor": "#B6FF3B",
     "composerIcon": "./docs/media/logo-128.png",

@@ -24,6 +24,19 @@ def main():
         first = service.invoke("manual_read", args | {"max_lines": 40})
         assert first.ok and first.data["next_line"] == 41
         assert service.invoke("manual_read", args).data["text"].startswith(first.data["text"])
+        # Export must keep sibling drawers and optional Codex metadata usable without symlinks.
+        exported = service.invoke("manuals_export", {"destination": "manuals"})
+        assert exported.ok, exported.to_dict()
+        for relative in ("mod-research/references/art-and-ui-sources.md",
+                         "ui-mod/references/fonts-and-localization.md",
+                         "file-mod/references/text-and-data.md",
+                         "asset-pipeline/references/anime-assets.md"):
+            read = service.invoke("manual_read", {"collection": "skills", "path": relative})
+            assert read.ok, read.to_dict()
+            assert read.data["text"] == (Path(directory) / "manuals/skills" / relative).read_text(encoding="utf-8")
+        for name in ("mod-research", "ui-mod", "file-mod"):
+            assert (Path(directory) / "manuals/skills" / name / "agents/openai.yaml").read_bytes() == (
+                resources.root("skills") / name / "agents/openai.yaml").read_bytes()
         scoped = Service(directory, enabled_tools=("manual_read",))
         assert set(scoped.tools()) == {"manual_read"}
         assert scoped.invoke("project_create", {}).error.code == "unknown_tool"

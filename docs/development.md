@@ -60,5 +60,5 @@ Run the paired benchmark on one machine; do not gate CI on absolute timing from 
 Run checks relevant to the change; record what was and was not verified. Reuse the user's
 existing authorization for pushes/publication, or request it after preparing the reviewable result.
 Do not commit game files, extracted assets, decompiled dumps or secrets.
-Field-note conventions live in [CONTRIBUTING](../CONTRIBUTING.md) and the
-[share-field-notes skill](../skills/share-field-notes/SKILL.md).
+Field-note conventions live in the [contribution reference](../skills/share-field-notes/references/contributing.md)
+and [share-field-notes skill](../skills/share-field-notes/SKILL.md).

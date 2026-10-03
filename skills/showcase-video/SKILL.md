@@ -1,6 +1,6 @@
 ---
 name: showcase-video
-description: Make a requested mod demo, trailer or montage from existing clips or an authorized gameplay recording. Use for contact sheets, EDL edits, audio sync and credits.
+description: Make a requested mod demo, trailer or montage from existing clips or an authorized gameplay recording. Use for contact sheets, EDL edits, audio sync and credits. 演示视频；展示動画。
 ---
 
 # Showcase video
