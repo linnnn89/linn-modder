@@ -68,7 +68,7 @@ MCP 1.29.0、tiktoken 0.14.0。运行每项前预热 2 次，然后新建进程�
 
 ## 使用和复现
 
-配置示例见[安装与接入](setup.md#专用任务的工具清单)，分页约定见[工具接口](../skills/references/tools.md#reading-a-long-manual)。
+配置示例见[安装与接入](setup.md#专用任务的工具清单)，分页约定见[工具接口](../skills/linn-modder/references/tools.md#reading-a-long-manual)。
 
 在完整 Git checkout 中，用同一个 Python 环境比较两棵代码树：
 

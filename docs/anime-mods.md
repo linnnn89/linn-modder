@@ -62,7 +62,7 @@ um tool call project_create --args-file create-project.json
 7. 在素材清单中记录 source/output hash 和角色映射；后续由该游戏的适配器做 DDS/TGA 等转换、资源映射及安装计划。
 8. 将“参考图已取得”“图片已生成”“PSD 图层已验证”“游戏格式已验证”“已在游戏中验证”分别记录。
 
-完整按需流程见[官方参考、GPT Image 与 PSD](../skills/asset-pipeline/references/sourcing-and-psd.md)。
+完整按需流程见[官方参考、GPT Image 与 PSD](../skills/linn-modder/asset-pipeline/references/sourcing-and-psd.md)。
 新项目会复制该流程为 `ASSET_WORKFLOW.md`，初始参考清单为空，创建项目不会自动联网、生成图片或制造 PSD。
 GPT Image 接入来自 harness 的图像工具；仓库当前没有原生 GPT Image API 客户端、图片下载器或 PSD 组装器。
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Linn Modder"
+  short_description: "游戏 MOD 统一入口，按需进入二次元素材、UI、文件修改和联网资料抽屉"
+  default_prompt: "用 $linn-modder 完成当前游戏 MOD 任务，先选择对应主题子文件夹，再读取当前步骤的资料。"

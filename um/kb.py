@@ -261,7 +261,7 @@ def build_index(root: Path) -> tuple[str, list[dict]]:
         lines.append(f"- [{esc(r.get('title'))}]({r['path']}) · {esc(', '.join(r.get('tags') or []))}")
     lines += ["", "## Engine playbooks", "",
               "Per-engine routes and tools live with the skills: "
-              "[skills/mod-any-game/references/engines/](../skills/mod-any-game/references/engines/).", ""]
+              "[skills/linn-modder/mod-any-game/references/engines/](../skills/linn-modder/mod-any-game/references/engines/).", ""]
     return "\n".join(lines), rows
 
 

@@ -12,23 +12,24 @@ providers (such as the legacy `um fal` commands).
 | Responsibility | Source of truth | Entry and next read |
 |---|---|---|
 | Project rules | `AGENTS.md` | Scope and routes; loaded by the harness |
-| Skill discovery | `SKILL.md` frontmatter | Harness selects by name/description; `skills/README.md` is the fallback |
-| Task workflow | `skills/<name>/SKILL.md` | Read one matched skill, then the reference for the current step |
-| Tool/format instructions | `skills/<name>/references/`; shared `skills/references/` | `manual_read` using collection-relative paths |
+| Skill discovery and routing | `skills/linn-modder/SKILL.md` | One skill chooses a topic folder |
+| Task workflow | `skills/linn-modder/<topic>/GUIDE.md` | Read the selected topic's workflow |
+| Tool/format instructions | Topic `references/`; shared `skills/linn-modder/references/` | `manual_read` using collection-relative paths |
 | Reusable findings | Indexed `knowledge/` | `knowledge_search`, then one matching note via `manual_read` |
 | Current external evidence | URLs in `mod-research` references | Harness web tools read the relevant version's source |
 | Toolkit implementation | `docs/development.md`, this document, `um/`, `tests/` | Checkout files for code changes |
 
-The frontmatter is the discovery source, with concise English/Chinese/Japanese task
-terms in descriptions. The harness selects a skill; a client without native discovery
-uses the router and the existing `manual_read` contract. Known tasks go directly to
-their entry. Shared procedures stay in references, and observed findings stay in the
-knowledge collection. Web research is supplied by the harness.
+The harness discovers one `linn-modder` skill. Its compact task table guides the agent
+into a topic subfolder, then the current reference. Topic guides use ordinary Markdown
+without skill frontmatter or separate discovery metadata. `um://guide` and `um://workflow`
+serve the same entry. Old topic paths remain readable through `manual_read` aliases;
+exports contain the new physical structure. Knowledge and current web evidence are read
+only when the task calls for them.
 
 ```mermaid
 flowchart LR
-    A[Task] --> B[Harness discovery or skill router]
-    B --> C[One SKILL.md]
+    A[Task] --> B[Unified SKILL.md]
+    B --> C[Topic GUIDE.md]
     C --> D[Current reference]
     D --> E[Shared Service operations]
     C --> F[Relevant knowledge note]
@@ -142,7 +143,7 @@ opt-in input. Rendering, recording, paid generation and publishing remain in the
 existing CLI. Before exposing them as background MCP tasks, add persistent job
 IDs, bounded concurrency, subprocess cancellation and recoverable job manifests.
 Loading/repacking Koei archives and automatic deployment are separate adapters.
-Their acceptance workflow is [inspect, extract, prove a no-change repack, edit and validate](../skills/reverse-engineering/references/archive-roundtrip.md).
+Their acceptance workflow is [inspect, extract, prove a no-change repack, edit and validate](../skills/linn-modder/reverse-engineering/references/archive-roundtrip.md).
 Adapters must report read and write capability separately for each game build and
 preserve untouched entries, original files and a recovery manifest. A recognized
 header or successful extraction alone does not establish safe repacking support.

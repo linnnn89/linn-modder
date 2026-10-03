@@ -1,4 +1,0 @@
-interface:
-  display_name: "MOD 联网查证"
-  short_description: "按需检索英中日免费文档，核对游戏版本、工具与格式的支持边界"
-  default_prompt: "用 $mod-research 查证当前游戏版本的 MOD 路线，只读取相关资料并记录来源。"
