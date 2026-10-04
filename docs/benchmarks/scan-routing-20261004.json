@@ -1,0 +1,99 @@
+{
+  "date_utc": "2026-10-04T22:56:59.704990+00:00",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "tiktoken": "0.14.0",
+  "sources": {
+    "before": {
+      "commit": "ab8d4789ff374179fca23f73ce3e73997e55d299",
+      "measured_sources_dirty": false,
+      "measured_sources_sha256": "49ae9289441fd13bc5cca6040ff85e0d5a589edfcfd07f620aabcb32f77be406"
+    },
+    "after": {
+      "commit": "ab8d4789ff374179fca23f73ce3e73997e55d299",
+      "measured_sources_dirty": true,
+      "measured_sources_sha256": "186ea74c431664dfa196d08db7f27c612fb3a3d8ab166825d4e0c466af5d5f03"
+    }
+  },
+  "fixture": {
+    "files": 5003,
+    "directories": 21,
+    "store_discovery": "stubbed"
+  },
+  "scan": {
+    "samples_ms": {
+      "before": [
+        406.3946379999379,
+        398.24382799997693,
+        439.85338499999216,
+        403.6745249999285,
+        403.55272099998274,
+        406.3075829999434,
+        405.02005799999097,
+        434.56126700004916,
+        431.9517949999181,
+        395.0930469999321,
+        394.78423999992174,
+        401.9691219999686,
+        392.6923919999581,
+        393.92761900001005,
+        390.6908769999973
+      ],
+      "after": [
+        258.24715900000683,
+        254.62982300007297,
+        255.10820599993167,
+        256.70246399999996,
+        252.5246719999359,
+        259.3909070000109,
+        257.0784420000791,
+        260.7056240000247,
+        260.8865570000489,
+        248.99247400003333,
+        248.74751200002265,
+        246.7959370000017,
+        254.47036500008835,
+        248.011083999927,
+        249.59763099991505
+      ]
+    },
+    "median_ms": {
+      "before": 403.55272099998274,
+      "after": 254.62982300007297
+    },
+    "reduction_pct": 36.9,
+    "equivalent_existing_report_fields": true
+  },
+  "tokens": {
+    "cl100k_base": {
+      "entry": {
+        "before": 1733,
+        "after": 778
+      },
+      "asset_route": {
+        "before": 2142,
+        "after": 1187
+      },
+      "entry_reduction_pct": 55.11,
+      "asset_route_reduction_pct": 44.58
+    },
+    "o200k_base": {
+      "entry": {
+        "before": 1361,
+        "after": 696
+      },
+      "asset_route": {
+        "before": 1770,
+        "after": 1105
+      },
+      "entry_reduction_pct": 48.86,
+      "asset_route_reduction_pct": 37.57
+    }
+  },
+  "targets": {
+    "scan_at_least_25_pct_faster": true,
+    "cl100k_asset_route_at_least_40_pct_smaller": true,
+    "both_entries_at_least_45_pct_smaller": true,
+    "cl100k_entry_at_most_900_tokens": true
+  }
+}

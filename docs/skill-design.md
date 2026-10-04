@@ -28,7 +28,8 @@ Cross-topic links are normal document navigation; the harness discovers one skil
 2. Add or update a topic's row in the entry when its purpose changes.
 3. Give each guide a short workflow, required inputs, expected output and conditional links.
 4. Use `GUIDE.md` for topics. Put substantial commands, formats and examples in references.
-5. Keep shared interface facts in `skills/linn-modder/references/tools.md`.
+5. Keep shared interface facts in `skills/linn-modder/references/tools.md`. The entry
+   needs only relative-path and MCP collection conventions; reuse a loaded route.
 6. Use actual operation/parameter names and preserve the user's requested scope.
 7. Keep paths relative and portable. Resolve installation roots from configuration or target metadata.
 
@@ -79,3 +80,13 @@ portable deployment rules. Machine inventories and diagnostic paths belong to lo
 Design basis: [Agent Skills specification](https://agentskills.io/specification) and
 [Codex skill loading](https://learn.chatgpt.com/docs/build-skills), read on 2026-10-03.
 The single-entry organization follows this project's chosen interface.
+
+## Measure active routing cost
+
+Character/word budgets protect structure but do not estimate multilingual Token cost.
+Use `scripts/benchmark_scan_routing.py --require-targets` against a preserved checkout
+when changing the entry. Keep discovery triggers, all topic links and safety boundaries;
+move explanations to references instead of abbreviating required decisions. Target an
+entry within 900 cl100k tokens; compare the entry plus selected guide as well as entry
+alone. Review Chinese, English and Japanese task examples for routing coverage.
+See [paired measurements and routing review](scan-routing-performance.md).
