@@ -19,6 +19,7 @@ import time
 from pathlib import Path
 
 from um.common import die, is_mac, is_windows, is_wsl, to_posix
+from um.contracts import ToolError
 
 MAX_ENTRIES = 80_000
 MAX_DEPTH = 6
@@ -172,21 +173,44 @@ class Index:
         self.root = root
         self.files: list[str] = []
         self.dirs: set[str] = set()
-        self.truncated = False
-        base = len(str(root)) + 1
-        for dirpath, dirnames, filenames in os.walk(root):
-            rel = dirpath[base:].replace("\\", "/")
-            depth = rel.count("/") + 1 if rel else 0
-            if depth >= MAX_DEPTH:
-                dirnames[:] = []
-            dirnames[:] = [d for d in dirnames if d.lower() not in ("__pycache__", ".git", "shadercache")]
-            for d in dirnames:
-                self.dirs.add((rel + "/" + d if rel else d).lower())
-            for f in filenames:
-                self.files.append((rel + "/" + f if rel else f).lower())
-            if len(self.files) > MAX_ENTRIES:
-                self.truncated = True
-                break
+        self.truncation_reasons: set[str] = set()
+        self.entries_visited = 0
+        self._paths: dict[str, Path] = {}
+        self._walk(root, "", 0)
+        self.truncated = bool(self.truncation_reasons)
+
+    def _walk(self, directory: Path, relative: str, depth: int) -> bool:
+        # Stream entries instead of materializing a whole directory with os.walk.
+        # One lookahead distinguishes an exact limit from an incomplete index.
+        # Depth bounds open scandir handles; the entry budget includes directories.
+        with os.scandir(directory) as entries:
+            for entry in entries:
+                if self.entries_visited >= MAX_ENTRIES:
+                    self.truncation_reasons.add("max_entries")
+                    return False
+                self.entries_visited += 1
+                # DirEntry caches these queries. On Windows, reparse points also
+                # include junctions (Path.is_junction is unavailable on 3.10).
+                reparse = os.name == "nt" and bool(
+                    getattr(entry.stat(follow_symlinks=False), "st_file_attributes", 0) & 0x400)
+                if entry.is_symlink() or reparse:
+                    raise ToolError("linked_tree", "Recursive scans require a tree without links/junctions.")
+                rel = f"{relative}/{entry.name}" if relative else entry.name
+                key = rel.lower()
+                if entry.is_dir(follow_symlinks=False):
+                    if entry.name.lower() in ("__pycache__", ".git", "shadercache"):
+                        continue
+                    if depth >= MAX_DEPTH:
+                        self.truncation_reasons.add("max_depth")
+                        continue
+                    self.dirs.add(key)
+                    if not self._walk(Path(entry.path), rel, depth + 1):
+                        return False
+                elif entry.is_file(follow_symlinks=False):
+                    self.files.append(key)
+                    # Keep original case for subsequent reads without another walk.
+                    self._paths.setdefault(key, Path(entry.path))
+        return True
 
     def find(self, *patterns: str) -> list[str]:
         return [f for f in self.files if any(fnmatch.fnmatch(f, p) for p in patterns)]
@@ -198,14 +222,8 @@ class Index:
         return any(fnmatch.fnmatch(d, p) for p in patterns for d in self.dirs)
 
     def path(self, rel_lower: str) -> Path:
-        """Case-insensitive rel path -> real path."""
-        cur = self.root
-        for part in rel_lower.split("/"):
-            try:
-                cur = next(c for c in cur.iterdir() if c.name.lower() == part)
-            except (StopIteration, OSError):
-                return self.root / rel_lower
-        return cur
+        """Return only a file already checked and indexed, preserving its case."""
+        return self._paths[rel_lower]
 
 
 # --------------------------------------------------------------------------- binary sniffing
@@ -655,6 +673,7 @@ def scan(query: str) -> dict:
         executables=facts.get("executables", {}), routes=routes, warnings=warnings,
         playbook=f"skills/linn-modder/mod-any-game/references/engines/{routes[0]['playbook']}",
         files_indexed=len(ix.files), index_truncated=ix.truncated,
+        index_truncation_reasons=sorted(ix.truncation_reasons), entries_visited=ix.entries_visited,
     )
     return report
 
@@ -686,7 +705,8 @@ def format_report(r: dict) -> str:
     for w in r["warnings"]:
         lines.append(f"  WARNING:   {w}")
     if r.get("index_truncated"):
-        lines.append("  note:      file index truncated (huge install); pass a subfolder for detail")
+        reasons = ", ".join(r.get("index_truncation_reasons", [])) or "limit reached"
+        lines.append(f"  note:      file index truncated ({reasons}); pass a subfolder for detail")
     return "\n".join(lines)
 
 
