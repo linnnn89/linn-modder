@@ -17,6 +17,7 @@ agent harness 复用同一套操作。Agent 负责规划和代码，工具负责
 | 联网查证版本、工具和英中日免费学习资料 | [MOD 联网查证](skills/linn-modder/mod-research/GUIDE.md) |
 | 学习完整内容 MOD 的组织方式 | [资源分层、稳定标识与交付边界](knowledge/techniques/content-mod-design.md) |
 | 找不到 Steam 已下载 MOD | [工坊位置发现方法](skills/linn-modder/game-recon/references/steam-workshop.md) |
+| TKEditor 检索、受限编辑和新增头像选项 | [Agent 工具与使用](docs/tkeditor.md) |
 | 找官方素材参考、用 GPT Image 制作底图或准备 PSD | [素材流程](skills/linn-modder/asset-pipeline/references/sourcing-and-psd.md) |
 | 开发或修改工具本身 | [开发指南](docs/development.md) · [架构](docs/architecture.md) |
 | 查看效率实测、专用工具配置与回退方法 | [效率报告](docs/performance.md) |
@@ -47,11 +48,14 @@ um tool list --workspace $ModWorkspace
 - 离线读取技能/知识库、创建项目、裁切透明 PNG、备份及预览恢复。
 - Windows 窗口发现与捕获；输入控制需要明确启用和用户授权。
 - 原有素材生成、精灵处理、3D 转帧和视频工具保留为 CLI 命令。
+- TKEditor JSON 的 SQLite 分页检索、独立数据工程、带备份和预览确认的受限编辑；
+  三尺寸外部 CG 默认新增可选头像，独立命名并可通过数据库搜索，不修改旧武将头像。
 
 | 游戏 | 当前实现 | 适合的起点 |
 |---|---|---|
 | CK3 | 项目脚手架、descriptor、本地化占位文件 | 图标、事件图、文本与数据；主要肖像为 3D 流程 |
 | Victoria II | `.mod` 和目录脚手架 | 旗帜、事件图与按版本核对编码的本地化 |
+| 英雄立志传：三国志 / TKEditor | JSON 检索与受限编辑、外部 CG 选项包 | 默认新增头像；数据工程不包含原 MOD 资源，导入与游戏显示尚未验证 |
 | 三国志 | 规划配置与素材工作区 | 明确作品、版本、PK 和头像导入方式 |
 | 信长之野望 | 规划配置与素材工作区 | 按创造/大志/新生等具体作品确认格式 |
 

@@ -27,7 +27,7 @@ description: >-
 | “模组在哪”、Steam 创意工坊路径、安装排错、引擎与可行性 | [游戏识别](game-recon/GUIDE.md) |
 | 查当前版本、工具、格式与英中日免费资料 | [联网查证](mod-research/GUIDE.md) |
 | 改 HUD/菜单/布局、界面皮肤、字体、汉化与文字溢出 | [UI 修改](ui-mod/GUIDE.md) |
-| 改配置/数值/脚本/存档、替换纹理/音频、资源解包回封 | [文件修改](file-mod/GUIDE.md) |
+| TKEditor 检索/安全编辑/新增头像、配置/脚本/存档、资源解包回封 | [文件修改](file-mod/GUIDE.md) |
 | 二次元策略 MOD 的角色、头像、阵营、内容映射与本地化 | [策略游戏内容](anime-strategy-mod/GUIDE.md) |
 | 换立绘/表情、抠图、透明通道、PSD/Live2D、精灵与 3D 素材 | [素材制作](asset-pipeline/GUIDE.md) |
 | 未知二进制格式、内部逻辑与读写验证 | [逆向分析](reverse-engineering/GUIDE.md) |

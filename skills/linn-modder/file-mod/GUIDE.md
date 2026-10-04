@@ -10,6 +10,7 @@
 
 | 当前对象 | 抽屉 |
 |---|---|
+| TKEditor 数据库检索、安全编辑与新增外部头像选项 | [TKEditor Agent 接口](references/tkeditor.md) |
 | JSON、CSV、YAML、INI、XML、脚本和本地化 | [文本与数据](references/text-and-data.md) |
 | 纹理、音频、模型、二进制、归档和存档 | [二进制与资源](references/binary-and-assets.md) |
 | 未知格式/不确定能否写回 | [逆向调查](../reverse-engineering/GUIDE.md) |

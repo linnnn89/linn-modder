@@ -32,6 +32,9 @@ With no selection all default tools remain available; input still needs `--allow
 | Copy skill and knowledge directories once | `manuals_export` |
 | Create a staging project | `project_create` |
 | Alpha-preserving contain/cover crop to PNG | `image_prepare` |
+| TKEditor database indexing, paged tables/records/text | `tk_index`, `tk_tables`, `tk_query`, `tk_read_field` |
+| TKEditor staged data project and guarded edit preview/apply | `tk_project`, `tk_patch` |
+| Add independent external CG options (default), search packs and recover registration | `tk_portraits`, `tk_portrait_options`, `tk_portrait_register` |
 | Workspace snapshot/list/integrity verification | `backup_create`, `backup_list`, `backup_verify` |
 | Restore preview and optional apply | `backup_restore` |
 | Window discovery and capture | `windows_list`, `window_capture` |
@@ -39,6 +42,10 @@ With no selection all default tools remain available; input still needs `--allow
 
 Use the tool's discovered schema for exact parameters. Do not guess operations such as
 `mod_build` or `archive_import`; they are not implemented.
+
+For TKEditor, read [the targeted reference](../file-mod/references/tkeditor.md).
+It covers independent new portrait options, explicit replacements, safe JSON edits
+and SQLite retrieval. These operations do not install game content or compile bundles.
 
 Start at `um://guide` or `um://workflow`, which return the same unified `SKILL.md`.
 Choose the task's topic `GUIDE.md`, then read the reference needed for the current
