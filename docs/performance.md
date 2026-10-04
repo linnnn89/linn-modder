@@ -125,3 +125,7 @@ uv tool install --reinstall "linn-modder[mcp] @ git+https://github.com/linnnn89/
 批量头像处理：先用合成图片建立吞吐和内存基线，再决定是否增加批处理接口，避免
 每张图片一次进程启动或模型往返。并发写入、任务队列和动态工具发现会增加状态管理
 成本，应在实际工作量证明收益后再引入。
+
+## 扫描与统一入口的后续测量
+
+见 [2026-10-04 扫描与路由优化](scan-routing-performance.md)：相对 `ab8d478` 的单次安全遍历、严格扫描边界、入口 Token 成本与回退方法。

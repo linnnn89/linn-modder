@@ -3,6 +3,31 @@
 Read when selecting an operation, locating manuals or diagnosing an interface boundary.
 Installed wheels contain the same skill/reference paths as the checkout.
 
+## Locate the toolkit and manuals
+
+Linn Modder is the toolkit; `um` is its CLI. The local MCP server identifier is
+`linn-modder`; client display names depend on configuration. Ordinary file tools
+can read the skill without a running server. Resolve relative links from the
+current document, including when the skill directory was copied elsewhere.
+
+MCP `um://guide` and `um://workflow` expose the entry. JSON CLI, Python and MCP
+share `manual_read`, for example:
+
+```json
+{"collection":"skills","path":"linn-modder/ui-mod/GUIDE.md"}
+```
+
+The next reference can be `linn-modder/ui-mod/references/layout-and-state.md`.
+Reuse an already loaded route; do not reread the entry between steps. With toolkit
+operations use `knowledge_search`, then read a matching `knowledge` note. With
+file tools alone search the checkout or exported `knowledge/` directory. Web
+sources use the harness's own network tools.
+
+For toolkit development or installation, find the source checkout in the installation
+record or client configuration and read `docs/development.md` or `docs/setup.md` there.
+These checkout documents are not part of a copied skill directory. Engine manuals
+are linked from the [workflow](../mod-any-game/GUIDE.md).
+
 ## Choose one interface
 
 | Harness capability | Interface | Discovery |

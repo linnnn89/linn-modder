@@ -79,3 +79,7 @@ def test_recursive_read_rejects_windows_junction(tmp_path):
     # Exercise Python 3.10 as well: Path.is_junction exists only from 3.12.
     with pytest.raises(ToolError, match='links/junctions'):
         Workspace(work).check_tree(work)
+
+    from um.service import Service
+    report = Service(work).invoke('game_scan', {'path': '.'})
+    assert not report.ok and report.error.code == 'linked_tree'
