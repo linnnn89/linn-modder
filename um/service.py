@@ -37,7 +37,8 @@ class Service:
     def tools(self) -> dict:
         names = ["environment_check", "game_profiles", "game_scan", "knowledge_search",
                  "manual_read", "manuals_export", "project_create", "image_prepare",
-                 "backup_create", "backup_list", "backup_verify", "backup_restore", "windows_list", "window_capture"]
+                 "backup_create", "backup_list", "backup_verify", "backup_restore", "windows_list", "window_capture",
+                 "tk_index", "tk_tables", "tk_query", "tk_read_field", "tk_project", "tk_patch", "tk_portraits", "tk_portrait_options", "tk_portrait_register"]
         if self.allow_input:
             names.append("window_input")
         return {name: getattr(self, name) for name in names
@@ -64,7 +65,10 @@ class Service:
             with self._lock:
                 return fn(**arguments)
         except ToolError as exc:
-            return Result(False, error=ErrorInfo(exc.code, str(exc)))
+            data = {}
+            if exc.recovery is not None:
+                data["recovery"] = exc.recovery | {"available": exc.recovery["tool"] in self.tools()}
+            return Result(False, data=data, error=ErrorInfo(exc.code, str(exc)))
         except (ValueError, TypeError) as exc:
             return Result(False, error=ErrorInfo("invalid_arguments", str(exc)))
         except subprocess.TimeoutExpired:
@@ -235,6 +239,126 @@ class Service:
     def windows_list(self) -> Result:
         """List visible Windows processes with exact process and window IDs."""
         return Result(True, {"windows": self.windows.list_windows()})
+
+    def tk_index(self, source: str, catalog: str = "default") -> Result:
+        """Create/refresh a read-only source's SQLite snapshot; returns counts, never all records.
+
+        source: directory containing Hero.json, not the game root. catalog: reusable name
+        (1..64 ASCII letters/digits/_/-), not a path. Reuse it on queries; rebuild only
+        when needed (e.g. stale_catalog or after patch). For editing, index tk_project's output.
+        """
+        from um import tkeditor
+        return Result(True, tkeditor.index(self.workspace, source, catalog))
+
+    def tk_tables(self, catalog: str = "default", table: str = "", limit: int = 20, offset: int = 0) -> Result:
+        """Inspect an existing tk_index catalog without reading records.
+
+        catalog: same index name used at creation. table empty lists tables/counts;
+        a table name lists its fields/types/editability. limit: 1..50; offset: next page.
+        Use this to resolve unknown tables/fields, not before every known query.
+        """
+        from um import tkeditor
+        return Result(True, tkeditor.tables(self.workspace, catalog, table, limit, offset))
+
+    def tk_query(self, table: str, catalog: str = "default", query: str = "", record_id: str = "",
+                 fields: str = "", limit: int = 10, offset: int = 0) -> Result:
+        """Search an existing TKEditor catalog with bounded output; never dump whole tables.
+
+        catalog: tk_index's name. table: exact table name. query: substring (<=128 chars);
+        record_id: exact ID from results, preferred once known (both filters combine).
+        fields: comma-separated existing names, max 8 (e.g. id,surname,name,icon).
+        limit: 1..50, use 5 for discovery. offset: use data.next_offset only if needed.
+        Values truncate at 512 chars; use tk_read_field for needed long text.
+        """
+        from um import tkeditor
+        return Result(True, tkeditor.query(self.workspace, catalog, table, query, record_id, fields, limit, offset))
+
+    def tk_project(self, source: str, destination: str) -> Result:
+        """Copy source JSON into a new editable workspace data project, preserving IDs.
+
+        source: directory containing Hero.json. destination: new, non-overlapping workspace
+        folder (relative paths use the configured workspace). No assets are copied; this
+        is not a complete publishable mod. Next: tk_index on output with an editing catalog.
+        """
+        from um import tkeditor
+        return Result(True, tkeditor.project(self.workspace, source, destination))
+
+    def tk_read_field(self, table: str, record_id: str, field: str, catalog: str = "default",
+                      start: int = 0, max_chars: int = 1000, row_index: int = -1) -> Result:
+        """Read one needed text field from the same catalog/table/record_id as tk_query.
+
+        field: existing text field. start: 0 initially, then data.next_start if needed.
+        max_chars: 1..2000. row_index: tk_query's row_index for repeated IDs; otherwise -1.
+        Row selection permits reading repeated IDs, never patching them.
+        """
+        from um import tkeditor
+        return Result(True, tkeditor.read_field(self.workspace, catalog, table, record_id, field, start, max_chars, row_index))
+
+    def tk_patch(self, table: str, record_id: str, changes: dict, catalog: str = "default",
+                 apply: bool = False, expected_sha256: str = "") -> Result:
+        """Preview/apply one existing record in an indexed tk_project; backs up before writing.
+
+        catalog: editing project's index name; table/record_id: exact queried target.
+        changes: 1..8 allowed existing display fields or Hero base stats; values are strings
+        (stats e.g. {"force":"50"}, range 0..100). IDs/icon/code are protected.
+        apply: false first. expected_sha256: on apply=true copy preview's data.confirmation,
+        NOT data.source_sha256. Keep catalog/table/record_id/changes identical to preview.
+        After applied=true, refresh that project's catalog with tk_index before further reads.
+        On errors use manual_read(collection="skills", path="linn-modder/file-mod/references/tkeditor.md").
+        """
+        from um import tkeditor
+        data = tkeditor.patch(self.workspace, catalog, table, record_id, changes, expected_sha256, apply)
+        artifacts = [self._artifact(Path(data[key]), role) for key, role in (("output", "output"), ("backup", "undo"))
+                     if key in data]
+        return Result(True, data, artifacts)
+
+    def tk_portraits(self, full: str, half: str, icon: str, destination: str, name: str = "",
+                    mode: str = "strict", catalog: str = "default", hero_id: str = "",
+                    intent: str = "new_option") -> Result:
+        """Prepare 3 PNGs as an external CG pack in the workspace; does not install into game.
+
+        full/half/icon: PNG paths, required output sizes 1000x1400 / 1024x1024 / 260x340.
+        Relative paths use configured workspace. destination: new folder, never overwritten.
+        name: display name <=80 chars. mode: strict (default, reject wrong sizes), contain
+        (transparent padding), cover (center crop). Inspect composition with client vision.
+        intent: new_option (default) adds an independent option; omit hero_id, no Hero edit.
+        catalog: optional existing index for new-option collision checks; replacement needs
+        the queried Hero catalog plus intent=replace and hero_id (unique exact Hero ID).
+        Read the TKEditor manual before replacement. On portrait_registration_failed use
+        data.recovery; do not regenerate over the preserved pack. Report format vs visual vs
+        in-game verification separately; without image viewing, visual checks are unverified.
+        """
+        from um import tkeditor
+        data = tkeditor.portraits(self.workspace, full, half, icon, name, destination, mode, catalog, hero_id, intent)
+        return self._portrait_result(data)
+
+    def tk_portrait_register(self, pack: str) -> Result:
+        """Recover registration after portrait_registration_failed, without regenerating images.
+
+        pack: existing workspace pack directory from data.recovery or data.output, not its
+        manifest file. Checks identity/paths/PNG sizes/hashes; repeat registration is safe.
+        A conflict or invalid pack must not be bypassed by editing its manifest or deleting data.
+        """
+        from um import tkeditor
+        return self._portrait_result(tkeditor.portrait_register(self.workspace, pack))
+
+    def _portrait_result(self, data: dict) -> Result:
+        root = Path(data["output"])
+        error = None if data["registered"] else ErrorInfo("portrait_registration_failed",
+            "The pack is preserved, but database registration failed. Use the recovery tool and arguments in data.")
+        return Result(data["registered"], data, [self._artifact(root / entry["path"]) for entry in data["files"]]
+                      + [self._artifact(root / "portrait-pack.json")], error)
+
+    def tk_portrait_options(self, query: str = "", intent: str = "new_option", limit: int = 10,
+                            offset: int = 0) -> Result:
+        """Find prepared workspace portrait packs; requires no tk_index catalog.
+
+        query: substring <=128 chars. intent: new_option (default), replace or all.
+        limit: 1..50; offset: use data.next_offset only if more candidates are needed.
+        Registration does not establish game installation, loading or visual correctness.
+        """
+        from um import tkeditor
+        return Result(True, tkeditor.portrait_options(self.workspace, query, intent, limit, offset))
 
     def window_capture(self, hwnd: int) -> Result:
         """Capture one window; return a saved PNG plus a bounded preview suitable for vision agents."""
