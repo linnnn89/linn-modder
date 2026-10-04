@@ -96,9 +96,15 @@ full reads retain their result shape. See [measurements and rollback](performanc
   not a transaction over the entire directory: a later filesystem failure can
   leave some files restored, with the undo snapshot available for recovery.
   Legacy backup commands accept `--store WORKSPACE/.um` to access the same files.
-- Paths are resolved before containment checks. Recursive scans/backups reject
-  linked trees. This is protection from accidental traversal, not an OS sandbox
-  against another local process racing filesystem changes.
+- Paths are resolved before containment checks. Scans use one streaming traversal:
+  reject encountered symlinks/reparse points before descent or binary reads, and
+  retain original paths for indexed files. The 80,000-entry budget counts files
+  and directories; depth remains six. `index_truncation_reasons` reports
+  `max_entries`/`max_depth`; `entries_visited` excludes the one-item limit lookahead.
+  Ignored cache/VCS directories and truncated subtrees are never entered or certified
+  safe. Unreadable visited directories fail the operation. Legacy CLI scans use
+  the same link rejection and limits. Backup operations retain full-tree checks.
+  These checks prevent accidental traversal, not another local process racing changes.
 - Input tools are absent unless the launcher enables `--allow-input` following
   user consent. MCP annotations describe tools; the service enforces configuration.
 - Input is bound to an exact PID/process lifetime. Focusing is an explicit action;
