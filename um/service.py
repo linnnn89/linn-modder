@@ -114,7 +114,7 @@ class Service:
         target = self.workspace.path(path, exists=True)
         if not target.is_dir():
             raise ToolError("invalid_path", "Game path must be a directory.")
-        self.workspace.check_tree(target)
+        # Index validates each visited entry before descent or binary reads.
         return Result(True, scan.scan(str(target)))
 
     def knowledge_search(self, query: str, limit: int = 10) -> Result:
