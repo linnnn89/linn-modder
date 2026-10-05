@@ -247,7 +247,7 @@ class Service:
         (1..64 ASCII letters/digits/_/-), not a path. Reuse it on queries; rebuild only
         when needed (e.g. stale_catalog or after patch). For editing, index tk_project's output.
         """
-        from um import tkeditor
+        from um.editors.heroes_vow import tkeditor
         return Result(True, tkeditor.index(self.workspace, source, catalog))
 
     def tk_tables(self, catalog: str = "default", table: str = "", limit: int = 20, offset: int = 0) -> Result:
@@ -257,7 +257,7 @@ class Service:
         a table name lists its fields/types/editability. limit: 1..50; offset: next page.
         Use this to resolve unknown tables/fields, not before every known query.
         """
-        from um import tkeditor
+        from um.editors.heroes_vow import tkeditor
         return Result(True, tkeditor.tables(self.workspace, catalog, table, limit, offset))
 
     def tk_query(self, table: str, catalog: str = "default", query: str = "", record_id: str = "",
@@ -270,7 +270,7 @@ class Service:
         limit: 1..50, use 5 for discovery. offset: use data.next_offset only if needed.
         Values truncate at 512 chars; use tk_read_field for needed long text.
         """
-        from um import tkeditor
+        from um.editors.heroes_vow import tkeditor
         return Result(True, tkeditor.query(self.workspace, catalog, table, query, record_id, fields, limit, offset))
 
     def tk_project(self, source: str, destination: str) -> Result:
@@ -280,7 +280,7 @@ class Service:
         folder (relative paths use the configured workspace). No assets are copied; this
         is not a complete publishable mod. Next: tk_index on output with an editing catalog.
         """
-        from um import tkeditor
+        from um.editors.heroes_vow import tkeditor
         return Result(True, tkeditor.project(self.workspace, source, destination))
 
     def tk_read_field(self, table: str, record_id: str, field: str, catalog: str = "default",
@@ -291,7 +291,7 @@ class Service:
         max_chars: 1..2000. row_index: tk_query's row_index for repeated IDs; otherwise -1.
         Row selection permits reading repeated IDs, never patching them.
         """
-        from um import tkeditor
+        from um.editors.heroes_vow import tkeditor
         return Result(True, tkeditor.read_field(self.workspace, catalog, table, record_id, field, start, max_chars, row_index))
 
     def tk_patch(self, table: str, record_id: str, changes: dict, catalog: str = "default",
@@ -306,7 +306,7 @@ class Service:
         After applied=true, refresh that project's catalog with tk_index before further reads.
         On errors use manual_read(collection="skills", path="linn-modder/file-mod/references/tkeditor.md").
         """
-        from um import tkeditor
+        from um.editors.heroes_vow import tkeditor
         data = tkeditor.patch(self.workspace, catalog, table, record_id, changes, expected_sha256, apply)
         artifacts = [self._artifact(Path(data[key]), role) for key, role in (("output", "output"), ("backup", "undo"))
                      if key in data]
@@ -328,7 +328,7 @@ class Service:
         data.recovery; do not regenerate over the preserved pack. Report format vs visual vs
         in-game verification separately; without image viewing, visual checks are unverified.
         """
-        from um import tkeditor
+        from um.editors.heroes_vow import tkeditor
         data = tkeditor.portraits(self.workspace, full, half, icon, name, destination, mode, catalog, hero_id, intent)
         return self._portrait_result(data)
 
@@ -339,7 +339,7 @@ class Service:
         manifest file. Checks identity/paths/PNG sizes/hashes; repeat registration is safe.
         A conflict or invalid pack must not be bypassed by editing its manifest or deleting data.
         """
-        from um import tkeditor
+        from um.editors.heroes_vow import tkeditor
         return self._portrait_result(tkeditor.portrait_register(self.workspace, pack))
 
     def _portrait_result(self, data: dict) -> Result:
@@ -357,7 +357,7 @@ class Service:
         limit: 1..50; offset: use data.next_offset only if more candidates are needed.
         Registration does not establish game installation, loading or visual correctness.
         """
-        from um import tkeditor
+        from um.editors.heroes_vow import tkeditor
         return Result(True, tkeditor.portrait_options(self.workspace, query, intent, limit, offset))
 
     def window_capture(self, hwnd: int) -> Result:

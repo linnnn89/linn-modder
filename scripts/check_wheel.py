@@ -4,11 +4,14 @@ import tempfile
 from pathlib import Path
 
 from um import resources
+from um import tkeditor as legacy_tkeditor
+from um.editors.heroes_vow import tkeditor
 from um.service import Service
 from check_docs import check_skill_tree
 
 
 def main():
+    assert legacy_tkeditor is tkeditor, "Legacy editor imports must use the packaged implementation"
     for kind in resources.KINDS:
         assert "data" in resources.root(kind).parts, "resources resolved to a checkout, not the wheel"
     assert "Mod any game" in resources.read("skills", "linn-modder/mod-any-game/GUIDE.md")
@@ -31,6 +34,7 @@ def main():
         for relative in ("linn-modder/mod-research/references/art-and-ui-sources.md",
                          "linn-modder/ui-mod/references/fonts-and-localization.md",
                          "linn-modder/file-mod/references/text-and-data.md",
+                         "linn-modder/file-mod/references/tkeditor.md",
                          "linn-modder/asset-pipeline/references/anime-assets.md"):
             read = service.invoke("manual_read", {"collection": "skills", "path": relative})
             assert read.ok, read.to_dict()
@@ -62,8 +66,27 @@ def main():
         restored = service.invoke("backup_restore", {"name": "wheel", "target": "restored", "apply": True})
         assert restored.ok, restored.to_dict()
         assert (Path(directory) / "restored/save.dat").read_bytes() == b"fixture"
+        # Exercise the moved editor through the installed Service, not checkout imports.
+        source = Path(directory) / "tk-source"
+        source.mkdir()
+        original = b'[{"id":"WJ1","name":"Fixture","force":"35"}]'
+        (source / "Hero.json").write_bytes(original)
+        for operation, arguments in (
+            ("tk_project", {"source": str(source), "destination": "tk-project"}),
+            ("tk_index", {"source": "tk-project", "catalog": "wheel"}),
+        ):
+            result = service.invoke(operation, arguments)
+            assert result.ok, result.to_dict()
+        edit = {"catalog": "wheel", "table": "Hero", "record_id": "WJ1", "changes": {"force": "50"}}
+        preview = service.invoke("tk_patch", edit)
+        assert preview.ok, preview.to_dict()
+        applied = service.invoke("tk_patch", edit | {"apply": True, "expected_sha256": preview.data["confirmation"]})
+        assert applied.ok and applied.data["applied"], applied.to_dict()
+        assert json.loads((Path(directory) / "tk-project/Hero.json").read_text(encoding="utf-8"))[0]["force"] == "50"
+        assert (source / "Hero.json").read_bytes() == original
+        assert Path(applied.data["backup"]).read_bytes() == original
         service.close()
-    print("Installed wheel: resources, PowerShell, projects and backup round trip passed.")
+    print("Installed wheel: resources, PowerShell, projects, backups and TKEditor edit round trip passed.")
 
 
 if __name__ == "__main__":

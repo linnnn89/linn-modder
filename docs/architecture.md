@@ -161,6 +161,10 @@ confirmation, preserve an original JSON backup, and only replace staged project 
 Portrait preparation defaults to an additive, uniquely named external CG option;
 replacement requires explicit intent and a Hero ID. Game deployment and Unity
 AssetBundle compilation are not part of this adapter.
+Game-specific implementations live in `um/editors/`; TKEditor uses
+`um/editors/heroes_vow/tkeditor.py`, with `um.tkeditor` retained as a compatibility
+import. User-facing entries are grouped under [`editors/`](../editors/README.md).
+The shared Service, operation names and `.um/tkeditor/` storage layout are unchanged.
 Catalog v2 stores file size, timestamps and filesystem identity for snapshot reads;
 metadata changes and all edit previews/applies require full source hashing. V1
 catalogs remain readable with full hashing until explicitly rebuilt. Portrait packs

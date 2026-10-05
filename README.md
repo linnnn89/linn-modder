@@ -17,7 +17,7 @@ agent harness 复用同一套操作。Agent 负责规划和代码，工具负责
 | 联网查证版本、工具和英中日免费学习资料 | [MOD 联网查证](skills/linn-modder/mod-research/GUIDE.md) |
 | 学习完整内容 MOD 的组织方式 | [资源分层、稳定标识与交付边界](knowledge/techniques/content-mod-design.md) |
 | 找不到 Steam 已下载 MOD | [工坊位置发现方法](skills/linn-modder/game-recon/references/steam-workshop.md) |
-| TKEditor 检索、受限编辑和新增头像选项 | [Agent 工具与使用](docs/tkeditor.md) |
+| 自制游戏编辑器：检索、受限编辑和头像工具 | [编辑器目录](editors/README.md) · [英雄立志传：三国志](editors/heroes-vow-three-kingdoms/README.md) |
 | 找官方素材参考、用 GPT Image 制作底图或准备 PSD | [素材流程](skills/linn-modder/asset-pipeline/references/sourcing-and-psd.md) |
 | 开发或修改工具本身 | [开发指南](docs/development.md) · [架构](docs/architecture.md) |
 | 查看效率实测、专用工具配置与回退方法 | [效率报告](docs/performance.md) |
