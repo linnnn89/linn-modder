@@ -81,7 +81,7 @@ Codex 使用统一技能 `$linn-modder`；MCP 先读 `um://guide` 或 `um://work
 
 ### 专用任务的工具清单
 
-通用配置默认暴露全部 14 个工具；`--allow-input` 额外启用输入工具。
+通用配置默认暴露全部 23 个工具；`--allow-input` 额外启用输入工具。
 专用 harness 可以重复传 `--enable-tool NAME`，只加载当前任务所需的 schema，例如：
 
 ```powershell

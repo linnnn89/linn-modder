@@ -14,6 +14,7 @@ scale; painted art can use smooth fitting.
 ## Read when needed
 | Task | Read |
 |---|---|
+| TKEditor 新增可选头像、三尺寸 PNG 或明确替换旧头像 | [TKEditor Agent 接口](../file-mod/references/tkeditor.md) |
 | Official images, GPT Image bases/edits or an editable PSD | [Sourcing and PSD](references/sourcing-and-psd.md) |
 | Anime portraits, expressions, Live2D or anime-style 3D | [Anime assets](references/anime-assets.md) |
 | Menus, HUD, skins or fonts | [UI MOD](../ui-mod/GUIDE.md) |

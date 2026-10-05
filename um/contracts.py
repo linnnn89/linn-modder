@@ -4,9 +4,10 @@ from typing import Any
 
 
 class ToolError(Exception):
-    def __init__(self, code: str, message: str):
+    def __init__(self, code: str, message: str, *, recovery: dict | None = None):
         super().__init__(message)
         self.code = code
+        self.recovery = recovery
 
 
 @dataclass

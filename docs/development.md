@@ -7,6 +7,9 @@ are sufficient for toolkit tests; real game installation is not required.
 ## Boundaries and ownership
 
 - Python 3.10+; core modules live in `um/`. CLI groups expose `register(sub)` and `--help`.
+- Game editor entry points live in [`editors/`](../editors/README.md), shared-service
+  implementations in `um/editors/<game_module>/`, and workflow tests in `tests/editors/`.
+  Preserve existing operation names, Python imports and workspace data paths when moving code.
 - Add agent operations to `um/service.py`; keep `um/tool.py` and `um/mcp.py` thin.
   Read [architecture](architecture.md) before changing boundaries or capability policy.
 - Preserve one JSON result on CLI stdout and protocol-only MCP stdout. Return structured errors.
