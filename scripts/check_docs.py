@@ -102,6 +102,7 @@ def check_repository(root: Path):
     paths.extend(root / name for name in ('CLAUDE.md', 'GEMINI.md', 'CONTRIBUTING.md')
                  if (root / name).is_file())
     paths.extend((root / 'docs').rglob('*.md'))
+    paths.extend((root / 'editors').rglob('*.md'))
     paths.extend((root / 'knowledge').rglob('*.md'))
     problems.extend(check_links(paths))
     if len((root / 'AGENTS.md').read_text(encoding='utf-8')) > 2000:

@@ -18,7 +18,7 @@ prepared files, format checks and in-game verification are separate outcomes.
 | Locate game/Workshop, install/debug mods / 目录与排错 | [Recon](game-recon/GUIDE.md) |
 | Unknown tools/formats or version changes / 联网查证 | [Research](mod-research/GUIDE.md) |
 | HUD, menus, fonts, localization / 界面汉化 | [UI](ui-mod/GUIDE.md) |
-| Config, scripts, saves, textures/audio, unpack/repack / 文件修改 | [Files](file-mod/GUIDE.md) |
+| TKEditor; config, scripts, saves, textures/audio, unpack/repack / 文件修改 | [Files](file-mod/GUIDE.md) |
 | Anime strategy characters, factions / 二次元策略 | [Strategy](anime-strategy-mod/GUIDE.md) |
 | Portraits, transparency, PSD/Live2D, sprites/3D / 素材 | [Assets](asset-pipeline/GUIDE.md) |
 | Unknown binaries, internals, round trips / 逆向 | [Reverse](reverse-engineering/GUIDE.md) |
