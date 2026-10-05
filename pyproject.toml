@@ -31,4 +31,4 @@ packages = ["um"]
 "knowledge" = "um/data/knowledge"
 
 [tool.hatch.build.targets.sdist]
-only-include = ["um", "skills", "knowledge", "tests", "scripts", "docs", "bin", "README.md", "AGENTS.md", "LICENSE", "pyproject.toml"]
+only-include = ["um", "skills", "knowledge", "tests", "scripts", "docs", "editors", "bin", "README.md", "AGENTS.md", "LICENSE", "pyproject.toml"]
