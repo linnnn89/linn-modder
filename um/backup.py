@@ -96,7 +96,7 @@ def create(src: str, name: str | None = None, note: str = '', *, store: Path | N
     out = folder / f'{stamp}.zip'
     created = False
     try:
-        with zipfile.ZipFile(out, 'x', zipfile.ZIP_DEFLATED, compresslevel=6) as z:
+        with zipfile.ZipFile(out, 'x', zipfile.ZIP_DEFLATED, compresslevel=6, strict_timestamps=False) as z:
             created = True
             for rel in files:
                 z.write(s / rel, rel)

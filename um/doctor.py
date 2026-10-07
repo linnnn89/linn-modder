@@ -3,15 +3,17 @@ import os
 import platform
 import shutil
 import sys
+from pathlib import Path
 
-from um.common import is_windows, is_wsl
+from um.common import is_windows, is_wsl, ps_exe
 from um.dependencies import find_ffmpeg, probe_ffmpeg
 
 
 def inspect_environment() -> dict:
     from um import resources
     windows = is_windows() or is_wsl()
-    ps = shutil.which("powershell.exe" if is_wsl() else "powershell")
+    ps = ps_exe()
+    ps = ps if Path(ps).is_file() else shutil.which(ps)
     ffmpeg = find_ffmpeg(windows=is_windows(), wsl=is_wsl())
     probe = probe_ffmpeg(ffmpeg) if ffmpeg else {"gfxcapture": False, "error": None}
     gfxcapture, ffmpeg_error = probe["gfxcapture"], probe["error"]

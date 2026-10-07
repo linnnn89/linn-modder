@@ -1,6 +1,13 @@
 # Other engines, quick routes
 
 ## GameMaker (`data.win`, `game.unx`)
+
+A GEN8 bytecode version does not prove editable GML. Before selecting a code-editing
+route, search `GameMaker YYC` in the knowledge base and read
+`techniques/gamemaker-yyc-vs-vm-check-the-code-chunks-before-trusting-th.md`
+for the CODE-chunk check. The scanner identifies the engine but does not yet
+classify VM versus YYC.
+
 - **UndertaleModTool (UTMT):** opens `data.win`. You get GML decompile/recompile, sprites, rooms, sounds
   and fonts, plus C# scripts for batch edits (a CLI build exists for automation). It covers Undertale,
   Deltarune, Pizza Tower and most GMS2 games. The YYC (compiled) export is native code, so treat that as
