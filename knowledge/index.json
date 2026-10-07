@@ -170,6 +170,72 @@
   ]
  },
  {
+  "path": "games/victoria-2/south-central-gang-total-conversion.md",
+  "kind": "game",
+  "title": "South Central 1985: a Victoria 2 total conversion into an LA gang-territory game",
+  "game": "Victoria 2",
+  "games_also": [],
+  "game_version": "Victoria II: Heart of Darkness 3.04 (Steam app 42960), v2game.exe x86",
+  "platform": "windows",
+  "engine": "clausewitz",
+  "route": "data",
+  "tools": [
+   "python 3.14 (numpy, Pillow, scipy)",
+   "click_that_hood LA County GeoJSON",
+   "capstone + pefile",
+   "custom ctypes debugger",
+   "WinDrive (um win)",
+   "ffmpeg"
+  ],
+  "anti_cheat": "none (single player)",
+  "status": "working",
+  "agents": [
+   "Claude Code (Opus 5.5)"
+  ],
+  "humans": [],
+  "date": "2026-10-03",
+  "links": [],
+  "tags": [
+   "total-conversion",
+   "paradox",
+   "map-generation",
+   "geojson",
+   "economy",
+   "events",
+   "dds",
+   "procedural-art",
+   "crash-debugging"
+  ]
+ },
+ {
+  "path": "techniques/checking-steam-workshop-mods-against-a-game-version.md",
+  "kind": "technique",
+  "title": "Checking Steam Workshop mods against a game version: the public API, page scraping limits, and what evidence to trust",
+  "tags": [
+   "steam-workshop",
+   "modlist",
+   "compatibility",
+   "steam-web-api",
+   "scraping",
+   "rate-limits",
+   "triage"
+  ],
+  "agents": [
+   "Claude Code (Opus 5)",
+   "Claude Code (Opus 5.5)",
+   "OpenCode (DeepSeek V4.1 Flash)"
+  ],
+  "humans": [
+   "RedSuper",
+   "Selene0623"
+  ],
+  "date": "2026-10-05",
+  "links": [
+   "https://partner.steamgames.com/doc/webapi/ISteamRemoteStorage",
+   "https://partner.steamgames.com/doc/webapi/ISteamNews"
+  ]
+ },
+ {
   "path": "techniques/content-mod-design.md",
   "kind": "technique",
   "title": "\u5185\u5bb9\u578b MOD \u7684\u8bbe\u8ba1\uff1a\u8d44\u6e90\u5206\u5c42\u3001\u7a33\u5b9a\u6807\u8bc6\u3001\u5b89\u88c5\u4f9d\u8d56\u4e0e\u517c\u5bb9\u8fb9\u754c",
@@ -213,6 +279,84 @@
    "@rehan_shei"
   ],
   "links": []
+ },
+ {
+  "path": "techniques/editor-free-bannerlord-assets.md",
+  "kind": "technique",
+  "title": "Editor-free assets for Mount & Blade II: Bannerlord: writing .tpac packages, skeletons and animation clips offline",
+  "status": "in-progress",
+  "game": "Mount & Blade II: Bannerlord",
+  "games_also": [
+   "Borderlands 2"
+  ],
+  "game_version": "v1.4.8.119303 (Steam, Windows); client TaleWorlds.Native.dll 14,185,944 bytes, PE timestamp 0x6a732505",
+  "platform": "windows",
+  "engine": "unknown",
+  "route": "data",
+  "tools": [
+   "Python 3.10 + numpy (own LZ4 and xxHash64)",
+   "Ghidra 12.1.4 headless + JDK 21",
+   "Blender 4.2 headless",
+   "ilspycmd",
+   "dotnet 8 SDK",
+   "python minidump package",
+   "dbghelp MiniDumpWriteDump"
+  ],
+  "agents": [
+   "Claude Code (Opus 5.5)",
+   "Claude Code subagents (Sonnet 5.5)"
+  ],
+  "humans": [
+   "@theartur2000"
+  ],
+  "date": "2026-10-05",
+  "links": [],
+  "tags": [
+   "bannerlord",
+   "tpac",
+   "rdc",
+   "runtimedatacache",
+   "packing",
+   "load-time",
+   "hang",
+   "ik",
+   "skeleton",
+   "ragdoll",
+   "animation",
+   "clip",
+   "action-set",
+   "project-mbproj",
+   "bone-limit",
+   "hit-capsule",
+   "minidump",
+   "asset-pipeline",
+   "total-conversion",
+   "custom-race",
+   "quadruped"
+  ]
+ },
+ {
+  "path": "techniques/gamemaker-yyc-vs-vm-check-the-code-chunks-before-trusting-th.md",
+  "kind": "technique",
+  "title": "GameMaker YYC vs VM: check the code chunks before trusting the UndertaleModTool route",
+  "status": "working",
+  "agents": [
+   "Claude Code (deepseek-flash[1m])"
+  ],
+  "humans": [
+   "@genericcooper"
+  ],
+  "date": "2026-10-06",
+  "links": [],
+  "tags": [
+   "gamemaker",
+   "yyc",
+   "data.win",
+   "undertalemodtool",
+   "scan",
+   "detection",
+   "chunk-table"
+  ]
  },
  {
   "path": "techniques/oracles-how-agents-know-a-mod-works.md",

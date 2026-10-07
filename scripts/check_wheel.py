@@ -20,6 +20,8 @@ def main():
     assert len(list(resources.root("skills").rglob("SKILL.md"))) == 1
     assert "ck3" in resources.read("skills", "linn-modder/anime-strategy-mod/references/targets.md")
     assert (Path(__import__("um").__file__).parent / "ps1/WinDrive.ps1").is_file()
+    assert "Victoria II" in resources.read("knowledge", "games/victoria-2/south-central-gang-total-conversion.md")
+    assert "Wayback" in resources.read("skills", "linn-modder/mod-research/references/archived-sources.md")
     with tempfile.TemporaryDirectory() as directory:
         service = Service(directory)
         assert len(service.invoke("game_profiles").data["profiles"]) == 4
