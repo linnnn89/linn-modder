@@ -41,3 +41,9 @@ The last command is a dry run; add `--yes` only within user authorization after 
 reviewable. Do not publish game files, extracted assets, decompiled dumps or secrets.
 Writing a note needs a writable checkout or explicit `--root`, not the installed package directory.
 Read the writing/contributing reference in the field-note skill only when needed.
+
+## Selected upstream reports
+
+Imported reports retain their original authors, dates, status and version limits.
+Their game verification was performed by upstream authors, not repeated by Linn Modder.
+Sources and selection are recorded in [upstream updates](../docs/upstream-updates.md).

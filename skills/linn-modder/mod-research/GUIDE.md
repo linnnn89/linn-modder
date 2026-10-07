@@ -15,6 +15,7 @@ Codex 使用当前会话可用的搜索/网页工具；其他 harness 用等价�
 | 当前问题 | 抽屉 |
 |---|---|
 | 怎么检索、页面打不开、证据冲突 | [检索与证据](references/search-and-evidence.md) |
+| 旧论坛已关闭、工具链接失效、工坊版本核对 | [存档与社区资料](references/archived-sources.md) |
 | 游戏引擎、loader、文件格式、读写工具 | [引擎与文件资料](references/engine-and-file-sources.md) |
 | 二次元立绘、模型、UI、字体与本地化 | [美术与 UI 资料](references/art-and-ui-sources.md) |
 

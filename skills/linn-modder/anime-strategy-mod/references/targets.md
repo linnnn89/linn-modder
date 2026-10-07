@@ -18,3 +18,11 @@ Use these profile IDs:
   before choosing built-in portrait import, an editor, or a resource adapter.
 - `nobunagas-ambition`: planning only; Souzou, Taishi and Shinsei formats must be
   treated independently, including expansion editions.
+
+## Victoria II prior work
+
+Search `knowledge_search` for `Victoria 2` or `South Central`, then read
+`manual_read(collection="knowledge",path="games/victoria-2/south-central-gang-total-conversion.md")`.
+The imported upstream report covers HoD 3.04 map formats, non-recursive
+`replace_path`, event pictures and icon strips. Preserve its version and original
+verification context; it does not establish compatibility for another build.

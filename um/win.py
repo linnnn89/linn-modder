@@ -33,7 +33,7 @@ import queue
 import threading
 from pathlib import Path
 
-from um.common import die, is_windows, is_wsl, to_posix, to_win
+from um.common import die, is_windows, is_wsl, ps_exe, to_posix, to_win
 from um.dependencies import find_ffmpeg, probe_ffmpeg
 
 HERE = Path(__file__).resolve().parent
@@ -45,10 +45,6 @@ def _check_platform():
     if not (is_windows() or is_wsl()):
         die("`um win` drives Windows games (native Windows or WSL). On Linux use xdotool/ydotool + ffmpeg x11grab/pipewire; "
             "on macOS use screencapture + ffmpeg avfoundation (see skills/game-automation).")
-
-
-def ps_exe() -> str:
-    return "powershell.exe" if is_wsl() else "powershell"
 
 
 def powershell(script: str, timeout: float = 60) -> str:

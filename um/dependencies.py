@@ -5,7 +5,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from um.common import to_posix
+from um.common import ps_exe, to_posix
 
 
 def find_ffmpeg(*, windows: bool, wsl: bool = False) -> str | None:
@@ -21,7 +21,7 @@ def find_ffmpeg(*, windows: bool, wsl: bool = False) -> str | None:
                   "@{local=[Environment]::GetFolderPath('LocalApplicationData'); "
                   "ffmpeg=(Get-Command ffmpeg.exe -ErrorAction SilentlyContinue).Source} | ConvertTo-Json -Compress")
         try:
-            result = subprocess.run(['powershell.exe', '-NoProfile', '-NonInteractive', '-Command', script],
+            result = subprocess.run([ps_exe(), '-NoProfile', '-NonInteractive', '-Command', script],
                                     capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=10)
             if result.returncode == 0:
                 data = json.loads(result.stdout)
