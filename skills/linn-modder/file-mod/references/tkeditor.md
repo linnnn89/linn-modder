@@ -186,6 +186,9 @@ SQLite 按表/ID建立索引，中文子串用数据库条件过滤；没有语�
 | `protected_field` / `invalid_project` / `path_outside_roots` / `game_root_read_only` | 遵守可写字段和工作区边界；需要时创建独立工程，不能改用 shell/SQL 绕过限制 |
 | `ambiguous_record` | 读取可用查询返回的 `row_index`；修改或替换不能用它绕过 ID 歧义，停止该操作并报告 |
 | `ambiguous_name` | 同名武将无法安全通过外部文件名定向替换，停止替换并报告 |
+| `invalid_id` | ID 须为 1..128 字符，与精确查询范围一致；检查来源，不截短 ID 或改写关联。 |
+| `output_limit` | 单条记录已超过查询预算，减少 `fields` 后重试。查询 `data` 的 JSON 文本（不转义非 ASCII 字符）最多 12,000 字符，包含截断提示。 |
+| `file_limit` | 文件或修改后 JSON 超过 64 MiB；超限修改不会写入，原工程保持不变。 |
 | `invalid_value` | 对照可写字段类型/范围修正，如属性用 `"50"` 而非数值 `50`；不静默改成其他目标值 |
 | `invalid_dimensions` | 提供正确尺寸；需要缩放时按构图要求显式选择 `contain` 或 `cover`，然后检查产物 |
 | `target_exists` / `invalid_target` | 使用新的工作区输出目录，不删除或覆盖旧目录；若是登记失败的已有包，走下面的恢复流程 |

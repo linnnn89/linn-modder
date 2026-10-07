@@ -383,3 +383,74 @@ def test_index_read_fast_path_keeps_strict_write_verification(tmp_path):
         read_paths.clear()
         good(service, "tk_query", table="Hero", catalog="legacy", record_id="WJ100")
     assert target in read_paths
+
+
+def test_oversized_patch_preserves_project_and_index(tmp_path):
+    source = tmp_path / 'source'; source.mkdir()
+    original = b'[{"id":"1","name":"A","description":"x"}]'
+    (source / 'Hero.json').write_bytes(original)
+    service = Service(tmp_path)
+    good(service, 'tk_project', source='source', destination='project')
+    good(service, 'tk_index', source='project')
+    args = dict(table='Hero', record_id='1', changes={'description': 'x' * 600})
+    preview = good(service, 'tk_patch', **args)
+    with patch.object(tkeditor, 'MAX_FILE', 512):
+        failed = service.invoke('tk_patch', args | {'apply': True, 'expected_sha256': preview.data['confirmation']})
+    assert failed.error.code == 'file_limit'
+    assert (tmp_path / 'project/Hero.json').read_bytes() == original
+    assert not (tmp_path / '.um/tkeditor/backups').exists()
+    assert good(service, 'tk_query', table='Hero').data['records'][0]['values']['description'] == 'x'
+    service.close()
+
+
+def test_long_ids_rejected_at_index_and_in_legacy_catalog(tmp_path):
+    source = tmp_path / 'source'; source.mkdir()
+    path = source / 'Hero.json'
+    path.write_text(json.dumps([{'id': 'x' * 200000, 'name': 'fixture'}]), encoding='utf-8')
+    service = Service(tmp_path)
+    assert service.invoke('tk_index', {'source': 'source'}).error.code == 'invalid_id'
+    path.write_text(json.dumps([{'id': 'x' * 128, 'name': 'fixture'}]), encoding='utf-8')
+    good(service, 'tk_index', source='source')
+    assert good(service, 'tk_query', table='Hero', record_id='x' * 128).data['records']
+    with sqlite3.connect(tkeditor.catalog_path(service.workspace, 'default')) as con:
+        con.execute('UPDATE records SET record_id=?', ('x' * 200000,))
+    result = service.invoke('tk_query', {'table': 'Hero', 'fields': 'name'})
+    assert result.error.code == 'invalid_id'
+    assert len(json.dumps(result.to_dict())) < 1000
+    service.close()
+
+
+def test_query_budget_includes_metadata_and_pages_without_missing_rows(tmp_path):
+    source = tmp_path / 'source'; source.mkdir()
+    fields = [f'text{i}' for i in range(8)]
+    rows = [{'id': str(i), **dict.fromkeys(fields, '界' * 1000)} for i in range(20)]
+    (source / 'Hero.json').write_text(json.dumps(rows), encoding='utf-8')
+    service = Service(tmp_path)
+    good(service, 'tk_index', source='source')
+    offset, found = 0, []
+    while offset is not None:
+        data = good(service, 'tk_query', table='Hero', fields=','.join(fields), limit=50, offset=offset).data
+        assert len(json.dumps(data, ensure_ascii=False)) <= 12000
+        ids = [row['record_id'] for row in data['records']]
+        assert ids
+        assert all(item['record_id'] in ids for item in data['truncated'])
+        found.extend(ids)
+        next_offset = data['next_offset']
+        assert next_offset is None or next_offset > offset
+        offset = next_offset
+    assert found == [str(i) for i in range(20)]
+    service.close()
+
+
+def test_first_query_record_cannot_bypass_budget(tmp_path):
+    source = tmp_path / 'source'; source.mkdir()
+    fields = [f'number{i}' for i in range(8)]
+    # Numeric values are not text-truncated but still count toward the budget.
+    rows = [{'id': '1', **dict.fromkeys(fields, 10 ** 2000)}]
+    (source / 'Hero.json').write_text(json.dumps(rows), encoding='utf-8')
+    service = Service(tmp_path)
+    good(service, 'tk_index', source='source')
+    result = service.invoke('tk_query', {'table': 'Hero', 'fields': ','.join(fields)})
+    assert result.error.code == 'output_limit'
+    assert good(service, 'tk_query', table='Hero', fields=fields[0]).data['records']
+    service.close()
