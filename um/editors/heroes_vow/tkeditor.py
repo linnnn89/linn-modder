@@ -76,8 +76,8 @@ def rows_from(raw):
         fail("row_limit", "At most 100000 rows per table.")
     for row in rows:
         if "id" in row:
-            if not isinstance(row["id"], str) or not row["id"]:
-                fail("invalid_id", "Record IDs must be nonempty strings.")
+            if not isinstance(row["id"], str) or not 1 <= len(row["id"]) <= 128:
+                fail("invalid_id", "Record IDs must be strings of 1..128 characters.")
     # Relationship tables repeat an ID across stories/conditions. Preserve every
     # row, and refuse ID-only edits when more than one row matches.
     return rows
@@ -248,10 +248,16 @@ def query(ws, catalog, table, query_text, record_id, fields, limit, offset):
             parameters.append(query_text.casefold())
         sql += " ORDER BY ordinal LIMIT ? OFFSET ?"
         entries = con.execute(sql, parameters + [limit + 1, offset]).fetchall()
-        records, truncated, used = [], [], 0
+        result = {"table": table, "sha256": entry["sha256"], "records": [],
+                  "truncated": [], "next_offset": None}
         for entry_row in entries[:limit]:
+            # Existing catalogs may predate the index-time ID limit. Never shorten
+            # an identity silently or return an ID that tk_query cannot accept.
+            if not 1 <= len(entry_row["record_id"]) <= 128:
+                fail("invalid_id", "Record IDs must be strings of 1..128 characters.")
             body = json.loads(entry_row["body"])
             record = {"record_id": entry_row["record_id"], "row_index": entry_row["ordinal"], "values": {}}
+            truncated = []
             for field in selected:
                 value = body.get(field)
                 if isinstance(value, (dict, list)):
@@ -260,14 +266,19 @@ def query(ws, catalog, table, query_text, record_id, fields, limit, offset):
                     value = value[:512] + "…"
                     truncated.append({"record_id": entry_row["record_id"], "field": field})
                 record["values"][field] = value
-            size = len(json.dumps(record, ensure_ascii=False))
-            if records and used + size > 12000:
+            count = len(result["records"]) + 1
+            candidate = result | {"records": result["records"] + [record],
+                                  "truncated": result["truncated"] + truncated,
+                                  "next_offset": offset + count if len(entries) > count else None}
+            # Budget the whole data object, including IDs, keys and truncation
+            # metadata. The first record is subject to the same bound as others.
+            if len(json.dumps(candidate, ensure_ascii=False)) > 12000:
+                if not result["records"]:
+                    fail("output_limit", "Selected record exceeds the query output limit; request fewer fields.")
                 break
-            records.append(record)
-            used += size
-        more = len(entries) > len(records)
-        return {"table": table, "sha256": entry["sha256"], "records": records,
-                "truncated": truncated[:400], "next_offset": offset + len(records) if more else None}
+            result = candidate
+        return result
+
 
 
 def project(ws, source, destination):
@@ -361,6 +372,8 @@ def patch(ws, catalog, table, record_id, changes, expected_sha256, apply):
     ws.check_tree(path.parent)
     matches[0].update(changes)
     new_raw = json.dumps(rows, ensure_ascii=False, indent=2, allow_nan=False).encode("utf-8") + b"\n"
+    if len(new_raw) > MAX_FILE:
+        fail("file_limit", "Edited JSON would exceed 64 MiB; no files were changed.")
     rows_from(new_raw)
     backup = ws.path(f".um/tkeditor/backups/{uuid.uuid4().hex}", write=True)
     backup.mkdir(parents=True)
