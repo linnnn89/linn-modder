@@ -43,6 +43,54 @@
   ]
  },
  {
+  "path": "games/crusader-kings-iii/modding-playbook.md",
+  "kind": "game",
+  "title": "CK3 MOD \u5236\u4f5c\u6280\u5de7\uff1a\u811a\u672c\u3001\u89d2\u8272\u3001\u7acb\u7ed8\u3001\u5b58\u6863\u4e0e\u517c\u5bb9\u6392\u9519",
+  "game": "Crusader Kings III",
+  "games_also": [],
+  "game_version": "1.20.0.4 (Crozier), Steam; observations from 2026-10-09 to 2026-10-11",
+  "platform": "windows",
+  "engine": "clausewitz",
+  "route": "data",
+  "tools": [
+   "Linn Modder",
+   "Python",
+   "PowerShell",
+   "rg",
+   "CK3 native scripts and logs"
+  ],
+  "anti_cheat": "Offline single-player modding; no protection changes",
+  "status": "in-progress",
+  "agents": [
+   "Codex"
+  ],
+  "humans": [],
+  "date": "2026-10-11",
+  "links": [
+   "https://forum.paradoxplaza.com/forum/developer-diary/ck3-dev-diary-37-making-mods.1410656/",
+   "https://github.com/amtep/tiger",
+   "https://github.com/cwtools/cwtools-vscode",
+   "https://github.com/skonester/Skonester-Cheat-Menu/blob/main/readme.md"
+  ],
+  "tags": [
+   "CK3",
+   "\u5341\u5b57\u519b\u4e4b\u738b3",
+   "\u840c\u6218",
+   "scripting",
+   "scopes",
+   "events",
+   "localization",
+   "portraits",
+   "culture",
+   "religion",
+   "marriage",
+   "reincarnation",
+   "save-compatibility",
+   "DLC",
+   "debugging"
+  ]
+ },
+ {
   "path": "games/gta-v/minecraft-passthrough.md",
   "kind": "game",
   "title": "Minecraft inside GTA V (passthrough mod)",
