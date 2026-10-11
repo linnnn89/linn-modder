@@ -2,6 +2,10 @@
 
 Read when preparing a character set, portraits, flags or illustrations. Follow the user's requested scope and validation level.
 
+For gameplay attributes, personality, faction placement and persistent identity,
+read [Character design principles](character-design-principles.md). An existing
+portrait or imported roster is not evidence that its stats or relationships match canon.
+
 ## Build a consistent cast
 
 Retrieve official character references first and record source URLs/hashes in
