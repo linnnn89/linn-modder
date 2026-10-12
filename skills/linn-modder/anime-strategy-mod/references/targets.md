@@ -12,6 +12,7 @@ Use these profile IDs:
 
 - `ck3`: project scaffold; native mod descriptor, additive data and UTF-8 BOM YAML
   localization. Main character portraits use a 3D model/material/animation pipeline.
+  Follow the [CK3 workflow](ck3-design.md); a 2D portrait framework needs its own GUI/identity integration.
 - `victoria2`: project scaffold; legacy .mod and semicolon CSV localization.
   Preserve language columns and verify encoding against the target build/patch.
 - `romance-of-the-three-kingdoms`: planning only; select the exact title and edition
