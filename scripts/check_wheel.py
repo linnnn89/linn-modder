@@ -37,10 +37,18 @@ def main():
                          "linn-modder/ui-mod/references/fonts-and-localization.md",
                          "linn-modder/file-mod/references/text-and-data.md",
                          "linn-modder/file-mod/references/tkeditor.md",
+                         "linn-modder/anime-strategy-mod/references/ck3-design.md",
+                         "linn-modder/anime-strategy-mod/references/ck3-moe-project.md",
                          "linn-modder/asset-pipeline/references/anime-assets.md"):
             read = service.invoke("manual_read", {"collection": "skills", "path": relative})
             assert read.ok, read.to_dict()
             assert read.data["text"] == (Path(directory) / "manuals/skills" / relative).read_text(encoding="utf-8")
+        ck3_path = "games/crusader-kings-iii/modding-playbook.md"
+        ck3_note = service.invoke("manual_read", {"collection": "knowledge", "path": ck3_path, "max_lines": 60})
+        assert ck3_note.ok, ck3_note.to_dict()
+        assert ck3_note.data["next_line"] == 61
+        assert ck3_note.data["text"] == "".join(
+            (Path(directory) / "manuals/knowledge" / ck3_path).read_text(encoding="utf-8").splitlines(keepends=True)[:60])
         skill_tree = Path(directory) / "manuals/skills"
         assert [p.relative_to(skill_tree).as_posix() for p in skill_tree.rglob("SKILL.md")] == ["linn-modder/SKILL.md"]
         assert (skill_tree / "linn-modder/agents/openai.yaml").read_bytes() == (
