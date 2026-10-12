@@ -1,8 +1,8 @@
 # CK3 and anime strategy-game mods
 
-For CK3 design, scripting, saves, portraits or compatibility, start with
-[CK3 design workflow](references/ck3-design.md). It selects the relevant method
-and prior evidence; the general asset workflow below applies when assets are needed.
+New CK3 feature or uncertain route: read [CK3 design workflow](references/ck3-design.md).
+For a known task, select its reference below directly; reuse loaded guidance.
+The asset workflow applies only when assets are needed.
 
 ## Minimum workflow
 1. Call `game_profiles`; record the exact title, build, language and expansion/PK edition.
@@ -20,7 +20,7 @@ Game roots stay read-only; use a generation provider only when requested and con
 
 | Task | Read |
 |---|---|
-| CK3 feature design, scopes, saves, portraits or compatibility | [CK3 workflow](references/ck3-design.md) |
+| New CK3 feature or uncertain implementation route | [CK3 workflow](references/ck3-design.md) |
 | Official references, GPT Image character bases or layered PSD | [Sourcing and PSD](../asset-pipeline/references/sourcing-and-psd.md) |
 | Choose CK3, Victoria II or a Koei edition/route | [Target games](references/targets.md) |
 | Character identity, crops, flags, provenance or a first slice | [Cast and assets](references/cast-and-assets.md) |
