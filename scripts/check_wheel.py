@@ -39,10 +39,18 @@ def main():
                          "linn-modder/file-mod/references/tkeditor.md",
                          "linn-modder/anime-strategy-mod/references/ck3-design.md",
                          "linn-modder/anime-strategy-mod/references/ck3-moe-project.md",
+                         "linn-modder/mod-any-game/references/engines/paradox.md",
                          "linn-modder/asset-pipeline/references/anime-assets.md"):
             read = service.invoke("manual_read", {"collection": "skills", "path": relative})
             assert read.ok, read.to_dict()
             assert read.data["text"] == (Path(directory) / "manuals/skills" / relative).read_text(encoding="utf-8")
+            args = {"collection": "skills", "path": relative}
+            outline = service.invoke("manual_read", args | {"outline": True})
+            assert outline.ok, outline.to_dict()
+            section = outline.data["sections"][-1]
+            start, end = section["start_line"], section["end_line"]
+            page = service.invoke("manual_read", args | {"start_line": start, "max_lines": end - start + 1})
+            assert page.ok and page.data["text"] == "".join(read.data["text"].splitlines(keepends=True)[start - 1:end])
         ck3_path = "games/crusader-kings-iii/modding-playbook.md"
         ck3_note = service.invoke("manual_read", {"collection": "knowledge", "path": ck3_path, "max_lines": 60})
         assert ck3_note.ok, ck3_note.to_dict()

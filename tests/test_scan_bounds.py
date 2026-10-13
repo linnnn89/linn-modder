@@ -125,3 +125,32 @@ def test_unreadable_tree_is_an_error_not_a_complete_report(tmp_path, monkeypatch
     monkeypatch.setattr(scan.os, 'scandir', denied)
     result = Service(tmp_path).invoke('game_scan', {'path': '.'})
     assert not result.ok and result.error.code == 'operation_failed'
+
+
+@pytest.mark.parametrize('directories, files, paradox', [
+    (('common', 'events'), ('launcher-settings.json',), True),
+    (('game/common', 'game/events'), ('launcher/launcher-settings.json',), True),
+    (('Game/Common', 'Game/Events'), ('launcher-settings.json',), True),
+    (('common', 'events'), ('v2game.exe', 'victoria2.exe'), True),
+    (('common', 'game/events'), ('launcher-settings.json',), False),
+    (('common', 'events'), (), False),
+    ((), ('v2game.exe',), False),
+])
+def test_paradox_layout_routes_need_matching_content_evidence(tmp_path, monkeypatch, directories, files, paradox):
+    from um import resources
+    for name in directories:
+        (tmp_path / name).mkdir(parents=True, exist_ok=True)
+    for name in files:
+        path = tmp_path / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b'fixture')
+    monkeypatch.setattr(scan, 'all_games', lambda: [])
+    monkeypatch.setattr(scan, 'win_folders', lambda: {})
+    # The legacy launcher is managed; engine evidence must outrank that route.
+    monkeypatch.setattr(scan, 'pe_info', lambda p: {'arch': 'x86', 'managed': p.name == 'victoria2.exe'})
+    result = Service(tmp_path).invoke('game_scan', {'path': '.'})
+    assert result.ok, result.to_dict()
+    assert (result.data['engine']['key'] == 'clausewitz') is paradox
+    if paradox:
+        assert result.data['routes'][0]['playbook'] == 'paradox.md'
+        assert resources.read('skills', result.data['playbook'].removeprefix('skills/'))

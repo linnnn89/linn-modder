@@ -31,9 +31,9 @@ Read with `unrpa` (archives) and `unrpyc` (compiled scripts). Mods are extra `.r
 (Shift+O) is enabled via `config.developer = True`.
 
 ## Paradox (Clausewitz/Jomini: EU4, CK3, HOI4, Stellaris, Victoria 3)
-Plain-text script mods in `Documents/Paradox Interactive/<Game>/mod/<mod>/` with a `.mod` descriptor, or
-`.metadata/metadata.json` in newer games. Everything is data: events, decisions, units, GUI. Error log:
-`logs/error.log`. The official wikis document every trigger and effect.
+Use the [Paradox playbook](paradox.md) for the exact game/version, descriptor,
+localization format, scope rules, dependency-aware checks and shortest debugging route.
+CK3, Victoria II and Victoria 3 do not share one mod format or scripting API.
 
 ## id Tech / Doom family
 - **Classic Doom:** WAD/PK3 mods on a source port (GZDoom/UZDoom) with ZScript/DECORATE. Edit maps with

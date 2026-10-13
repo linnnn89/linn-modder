@@ -27,6 +27,7 @@ Never bypass protections, modify protected online clients or distribute game ass
 | HUD, menu, fonts or interface localization | [ui-mod](../ui-mod/GUIDE.md) |
 | Known data, script or asset file edits | [file-mod](../file-mod/GUIDE.md) |
 | Engine-specific behavior | Only the playbook named by the scan in `references/engines/` |
+| Paradox scripts, dependencies or update failures | [Paradox](references/engines/paradox.md) |
 | Permissions or distribution question | [Safety](references/safety.md) |
 | A comparable historical project | [Case studies](references/case-studies.md) |
 
