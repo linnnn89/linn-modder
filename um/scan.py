@@ -448,7 +448,7 @@ ENGINES = {
     "source2": ("Source 2", "source.md", "Workshop tools / addons, VScript/Panorama; decompile assets with Source 2 Viewer (VRF)"),
     "creation": ("Bethesda Creation/Gamebryo", "bethesda.md", "ESP/ESL plugins (xEdit, Creation Kit), Papyrus scripts, script-extender plugins, MO2 profiles"),
     "genie": ("Genie (Age of Empires DE)", "genie-aoe2.md", "data mods (genieutils-py), graphics/UI mods, scenarios; SLD sprites"),
-    "clausewitz": ("Paradox Clausewitz/Jomini", "misc-engines.md", "script mods (plain text) in Documents/Paradox Interactive/<game>/mod"),
+    "clausewitz": ("Paradox Clausewitz/Jomini", "paradox.md", "version-specific script/data mods; resolve the game's mod root, descriptor, dependencies and localization format first"),
     "re-engine": ("Capcom RE Engine", "big-frameworks.md", "REFramework (Lua scripts, in-game UI) + Fluffy Mod Manager for pak/natives replacements"),
     "fromsoft": ("FromSoftware (Dantelion)", "big-frameworks.md", "ModEngine2 + Smithbox/DSMapStudio, param edits; offline only"),
     "rage": ("Rockstar RAGE", "big-frameworks.md", "story mode: ScriptHookV + ASI loader, OpenIV/CodeWalker for assets; never online"),
@@ -582,9 +582,16 @@ def detect(ix: Index) -> tuple[list[tuple[str, int, list[str], dict]], dict]:
     if ix.has("resources/_common/dat/*.dat") and ix.has("aoe2de_s.exe", "aoede_s.exe", "aoe*_s.exe"):
         add("genie", 100, ix.find("resources/_common/dat/*.dat")[:1])
 
-    # Paradox
-    if ix.has_dir("common") and ix.has_dir("events") and ix.has("launcher-settings.json", "*/launcher-settings.json"):
-        add("clausewitz", 90, ["common/ + events/ + launcher-settings.json"])
+    # Modern installs may keep content under game/; legacy Victoria II has no launcher JSON.
+    for prefix in ("", "game/"):
+        if not (ix.has_dir(prefix + "common") and ix.has_dir(prefix + "events")):
+            continue
+        launchers = ix.find("launcher-settings.json", "*/launcher-settings.json")
+        if not prefix and ix.has("v2game.exe"):
+            launchers = ["v2game.exe"]
+        if launchers:
+            add("clausewitz", 90, [prefix + "common/", prefix + "events/", launchers[0]])
+            break
 
     # RE Engine
     if ix.has("re_chunk_000.pak", "re_chunk_000.pak.*"):

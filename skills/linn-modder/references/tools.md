@@ -92,6 +92,16 @@ step. Use `knowledge_search` for reusable findings and read its matching note fr
 
 ## Reading a long manual
 
+If the needed section is unknown, `manual_read(collection, path, outline=True)` returns
+ATX headings (`#` through `######`) with `level`, inclusive `start_line`/`end_line`,
+and `total_lines`, without the body. YAML frontmatter and fenced examples are ignored.
+Choose a section, then read with `start_line` and `max_lines=end_line-start_line+1`;
+use pages of at most 1000 lines for a larger section, stopping at its `end_line`.
+Parent ranges include child sections. Keep duplicate headings separate by line number.
+Use outline separately from range parameters; an empty outline means use normal paging.
+Check the opening version/evidence context if not already read. Reuse an outline only
+for the same installed manual version; short manuals or known line ranges need no extra call.
+
 `manual_read(collection, path)` returns the full text with its existing result fields.
 For an initial bounded read, add `start_line:1,max_lines:40`. Ranged results include
 `start_line`, `end_line`, `total_lines` and `next_line`; continue with `next_line` until

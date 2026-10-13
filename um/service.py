@@ -124,12 +124,18 @@ class Service:
             raise ToolError("invalid_limit", "Limit must be 1..50.")
         return Result(True, {"matches": kb.search(resources.root("knowledge"), query.split(), limit=limit)})
 
-    def manual_read(self, collection: str, path: str, start_line: int = 1, max_lines: int = 0) -> Result:
-        """Read a bundled manual. Default: full text. Use max_lines for pages with next_line; lines start at 1."""
+    def manual_read(self, collection: str, path: str, start_line: int = 1, max_lines: int = 0,
+                    outline: bool = False) -> Result:
+        """Read a manual: full text by default, outline=True for section lines, or max_lines for pages with next_line."""
         from um import resources
         if start_line < 1 or not 0 <= max_lines <= 1000:
             raise ToolError("invalid_range", "start_line must be >=1; max_lines must be 0 (all remaining) or 1..1000.")
+        if outline and (start_line != 1 or max_lines):
+            raise ToolError("invalid_arguments", "Read the outline first, then use its line range without outline=True.")
         text = resources.read(collection, path)
+        if outline:
+            return Result(True, {"collection": collection, "path": path,
+                                 "total_lines": len(text.splitlines()), "sections": resources.outline(text)})
         data = {"collection": collection, "path": path, "text": text}
         if start_line != 1 or max_lines:
             lines = text.splitlines(keepends=True)

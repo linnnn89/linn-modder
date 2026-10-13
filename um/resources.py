@@ -1,5 +1,6 @@
 """Versioned manuals available both from a checkout and an installed wheel."""
 from pathlib import Path
+import re
 import shutil
 
 from um.contracts import ToolError
@@ -39,6 +40,39 @@ def read(kind: str, name: str) -> str:
     if path.stat().st_size > 256 * 1024:
         raise ToolError("resource_too_large", "Resource exceeds 256 KiB.")
     return path.read_text(encoding="utf-8")
+
+
+def outline(text: str) -> list[dict]:
+    """ATX Markdown sections with inclusive source lines; ignore YAML and fenced code."""
+    lines = text.splitlines()
+    start = 0
+    if lines and lines[0].lstrip("\ufeff").strip() == "---":
+        end = next((i for i in range(1, len(lines)) if lines[i].strip() in ("---", "...")), None)
+        if end is not None:
+            start = end + 1
+    sections, parents = [], []
+    fence = None
+    for index in range(start, len(lines)):
+        line = lines[index]
+        if fence:
+            if re.fullmatch(r" {0,3}" + re.escape(fence[0]) + "{" + str(fence[1]) + r",}[ \t]*", line):
+                fence = None
+            continue
+        marker = re.match(r" {0,3}(`{3,}|~{3,})(.*)$", line)
+        if marker and not (marker[1][0] == "`" and "`" in marker[2]):
+            fence = (marker[1][0], len(marker[1]))
+            continue
+        heading = re.match(r" {0,3}(#{1,6})(?:[ \t]+(.*)|$)", line)
+        if heading is None:
+            continue
+        level = len(heading[1])
+        while parents and parents[-1]["level"] >= level:
+            parents.pop()["end_line"] = index
+        section = {"heading": re.sub(r"(?:^|[ \t]+)#+[ \t]*$", "", heading[2] or "").strip(),
+                   "level": level, "start_line": index + 1, "end_line": len(lines)}
+        sections.append(section)
+        parents.append(section)
+    return sections
 
 
 def export(destination: Path) -> dict:

@@ -82,6 +82,9 @@ An optional tool allowlist limits both discovery and `Service.invoke`; it does n
 change the default tool set or replace the separate desktop input gate. Manual
 line ranges bound returned text and expose continuation metadata, while default
 full reads retain their result shape. See [measurements and rollback](performance.md).
+`manual_read(outline=True)` exposes Markdown section line ranges without body text;
+the same range reader then retrieves a selected section. YAML and fenced examples
+are excluded from headings. No search index, game parser or additional tool is needed.
 
 ## Workspaces and capabilities
 
