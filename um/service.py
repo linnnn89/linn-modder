@@ -36,13 +36,29 @@ class Service:
 
     def tools(self) -> dict:
         names = ["environment_check", "game_profiles", "game_scan", "knowledge_search",
-                 "manual_read", "manuals_export", "project_create", "image_prepare",
+                 "manual_read", "manuals_export", "project_create", "image_prepare", "ck3_check",
                  "backup_create", "backup_list", "backup_verify", "backup_restore", "windows_list", "window_capture",
                  "tk_index", "tk_tables", "tk_query", "tk_read_field", "tk_project", "tk_patch", "tk_portraits", "tk_portrait_options", "tk_portrait_register"]
         if self.allow_input:
             names.append("window_input")
         return {name: getattr(self, name) for name in names
                 if self._enabled_tools is None or name in self._enabled_tools}
+
+    def parameter_hints(self, name: str) -> dict:
+        """Game-owned JSON Schema hints; shared discovery, not a replacement for validation."""
+        fn = self.tools().get(name)
+        if fn is None:
+            return {}
+        if name.startswith("tk_"):
+            from um.editors.heroes_vow.metadata import input_hints
+            hints = input_hints(name)
+        elif name == "ck3_check":
+            from um.editors.ck3.check import input_hints
+            hints = input_hints()
+        else:
+            return {}
+        parameters = inspect.signature(fn).parameters
+        return {key: value for key, value in hints.items() if key in parameters}
 
     def invoke(self, name: str, arguments: dict | None = None) -> Result:
         try:
@@ -166,6 +182,11 @@ class Service:
         dst = self.workspace.path(output, write=True)
         data = projects.prepare_image(src, dst, width, height, mode, anchor)
         return Result(True, data, [self._artifact(dst)])
+
+    def ck3_check(self, source: str, tiger_report: str = "", limit: int = 50, offset: int = 0) -> Result:
+        """Check a CK3 content directory's descriptor/localization; optionally read existing Tiger JSON. Inspect data.passed and data.next_offset; no game or validator is run."""
+        from um.editors.ck3 import check
+        return Result(True, check.check(self.workspace, source, tiger_report, limit, offset))
 
     def backup_create(self, source: str, name: str, note: str = "") -> Result:
         """Snapshot a bounded source folder into workspace/.um/backups with a manifest."""

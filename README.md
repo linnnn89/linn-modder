@@ -9,6 +9,7 @@ agent harness 复用同一套操作。Agent 负责规划和代码，工具负责
 | 你要做什么 | 入口 |
 |---|---|
 | 安装工具、接入 MCP 或命令行 | [安装与接入](docs/setup.md) |
+| CK3/P 社或 TKEditor 专用 harness，减少无关工具 | [可复制的工具配置](skills/linn-modder/references/toolsets.md) |
 | 让 agent 选择当前任务的资料 | [统一技能入口](skills/linn-modder/SKILL.md)，再进入对应主题子文件夹 |
 | 做二次元策略游戏 Mod | [anime-strategy-mod](skills/linn-modder/anime-strategy-mod/GUIDE.md) · [工作流与支持范围](docs/anime-mods.md) |
 | 二次元立绘、表情、Live2D/3D 的制作注意事项 | [二次元素材抽屉](skills/linn-modder/asset-pipeline/references/anime-assets.md) |
@@ -53,7 +54,7 @@ um tool list --workspace $ModWorkspace
 
 | 游戏 | 当前实现 | 适合的起点 |
 |---|---|---|
-| CK3 | 项目脚手架、descriptor、本地化占位文件 | 图标、事件图、文本与数据；主要肖像为 3D 流程 |
+| CK3 | 项目脚手架、描述文件/本地化格式检查、已有 Tiger 报告读取 | 图标、事件图、文本与数据；主要肖像为 3D 流程 |
 | Victoria II | `.mod` 和目录脚手架 | 旗帜、事件图与按版本核对编码的本地化 |
 | 英雄立志传：三国志 / TKEditor | JSON 检索与受限编辑、外部 CG 选项包 | 默认新增头像；数据工程不包含原 MOD 资源，导入与游戏显示尚未验证 |
 | 三国志 | 规划配置与素材工作区 | 明确作品、版本、PK 和头像导入方式 |

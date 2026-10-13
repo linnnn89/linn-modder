@@ -6,6 +6,7 @@
       "name": "Crusader Kings III",
       "family": "paradox",
       "support": "project-scaffold",
+      "validation": "ck3_check: descriptor presence/UTF-8/nonempty and localization filename/BOM/header; optional existing Tiger JSON import. No script or runtime verification.",
       "route": "Native mod folder with descriptor.mod; additive data and asset overrides.",
       "localization": {"format": "yaml", "encoding": "utf-8-sig", "requires_language_header": true},
       "anime_targets": ["interface icons", "event illustrations", "character and dynasty data", "events and localization", "3D portrait materials and models"],

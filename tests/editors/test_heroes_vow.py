@@ -49,6 +49,10 @@ def test_agent_schema_constraints_keep_strict_dispatch(tmp_path):
         assert query["limit"]["minimum"] == 1 and query["limit"]["maximum"] == 50
         assert query["catalog"]["pattern"] == "^[A-Za-z0-9_-]{1,64}$"
         assert "data.confirmation" in tools["tk_patch"].inputSchema["properties"]["expected_sha256"]["description"]
+        for name, tool in tools.items():
+            for parameter, hints in service.parameter_hints(name).items():
+                assert parameter in tool.inputSchema["properties"]
+                assert all(tool.inputSchema["properties"][parameter][k] == v for k, v in hints.items())
         for arguments, code in [({"table": "Hero", "limit": "5"}, "invalid_arguments"),
                                 ({"table": "Hero", "limit": 51}, "invalid_page")]:
             result = await server.call_tool("tk_query", arguments)

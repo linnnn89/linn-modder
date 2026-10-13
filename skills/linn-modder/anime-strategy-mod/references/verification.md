@@ -11,6 +11,10 @@ in MODLOG.md. Record runtime verification separately; if no game was run, retain
 
 ## CK3 checks at completion
 
+Use [`ck3_check`](ck3-check.md) for descriptor presence/UTF-8/nonempty and localization
+filename/BOM/header checks, or to read an existing Tiger JSON report. It returns file/line
+diagnostics; `data.passed` is separate from operation success and in-game verification.
+
 Choose checks for the changed behavior, not a fixed full-game checklist:
 
 | Change | Offline evidence | Runtime evidence, when requested |
@@ -33,7 +37,8 @@ ck3-tiger --suppress baseline.json "path/to/your/descriptor.mod"
 Keep that baseline tied to its original revision. Review remaining relevant warnings;
 do not generate a new baseline from broken output just to hide it. Tiger may lag game
 updates or report false positives. It complements the target version's scripts/logs.
-It is optional; this toolkit does not install or invoke it automatically.
+It is optional; this toolkit does not install or invoke it automatically. Existing JSON
+output can be passed to `ck3_check` with `tiger_report`; importing does not verify freshness.
 
 ## CK3 author sources
 
