@@ -47,6 +47,10 @@ With no selection all default tools remain available; input still needs `--allow
 
 ## Operations available by default
 
+For a dedicated CK3, Paradox or TKEditor harness, copy the [task tool configurations](toolsets.md).
+JSON CLI `um tool list --details` includes the same game-owned parameter hints used by MCP;
+the default listing stays compact. Python callers can use `Service.parameter_hints(name)`.
+
 | Task | Operation |
 |---|---|
 | Platform, dependencies and allowed capabilities | `environment_check` |
@@ -56,6 +60,7 @@ With no selection all default tools remain available; input still needs `--allow
 | Read one skill/reference/note | `manual_read` |
 | Copy skill and knowledge directories once | `manuals_export` |
 | Create a staging project | `project_create` |
+| CK3 descriptor/localization checks and existing Tiger JSON diagnostics | `ck3_check`; [scope and use](../anime-strategy-mod/references/ck3-check.md) |
 | Alpha-preserving contain/cover crop to PNG | `image_prepare` |
 | TKEditor database indexing, paged tables/records/text | `tk_index`, `tk_tables`, `tk_query`, `tk_read_field` |
 | TKEditor staged data project and guarded edit preview/apply | `tk_project`, `tk_patch` |

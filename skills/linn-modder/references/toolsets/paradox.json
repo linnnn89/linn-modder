@@ -1,0 +1,35 @@
+{
+  "mcpServers": {
+    "linn-modder": {
+      "command": "um",
+      "args": [
+        "mcp",
+        "serve",
+        "--workspace",
+        "<ABSOLUTE_WORKSPACE>",
+        "--enable-tool",
+        "environment_check",
+        "--enable-tool",
+        "game_profiles",
+        "--enable-tool",
+        "game_scan",
+        "--enable-tool",
+        "knowledge_search",
+        "--enable-tool",
+        "manual_read",
+        "--enable-tool",
+        "project_create",
+        "--enable-tool",
+        "image_prepare",
+        "--enable-tool",
+        "backup_create",
+        "--enable-tool",
+        "backup_list",
+        "--enable-tool",
+        "backup_verify",
+        "--enable-tool",
+        "backup_restore"
+      ]
+    }
+  }
+}

@@ -25,9 +25,13 @@ def main(args):
     try:
         service = make_service(args)
         if args.command == "list":
-            result = Result(True, {"tools": [{"name": name, "description": inspect.getdoc(fn),
-                                               "signature": str(inspect.signature(fn))}
-                                              for name, fn in service.tools().items()]})
+            entries = [{"name": name, "description": inspect.getdoc(fn),
+                        "signature": str(inspect.signature(fn))}
+                       for name, fn in service.tools().items()]
+            if args.details:
+                for entry in entries:
+                    entry["parameter_hints"] = service.parameter_hints(entry["name"])
+            result = Result(True, {"tools": entries})
         else:
             raw = Path(args.args_file).read_text(encoding="utf-8-sig") if args.args_file else args.args
             result = service.invoke(args.name, json.loads(raw))
@@ -45,6 +49,7 @@ def register(sub):
     p = sub.add_parser("tool", help="agent-neutral structured JSON interface")
     commands = p.add_subparsers(dest="command", required=True)
     listing = commands.add_parser("list", help="list enabled service operations")
+    listing.add_argument("--details", action="store_true", help="include game-owned parameter constraints and guidance")
     options(listing)
     listing.set_defaults(func=main)
     call = commands.add_parser("call", help="call a service operation")

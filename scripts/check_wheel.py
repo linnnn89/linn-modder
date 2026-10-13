@@ -1,4 +1,5 @@
 """Verify an installed wheel outside the checkout. Run with that environment's Python."""
+import inspect
 import json
 import tempfile
 from pathlib import Path
@@ -38,6 +39,8 @@ def main():
                          "linn-modder/file-mod/references/text-and-data.md",
                          "linn-modder/file-mod/references/tkeditor.md",
                          "linn-modder/anime-strategy-mod/references/ck3-design.md",
+                         "linn-modder/anime-strategy-mod/references/ck3-check.md",
+                         "linn-modder/references/toolsets.md",
                          "linn-modder/anime-strategy-mod/references/ck3-moe-project.md",
                          "linn-modder/mod-any-game/references/engines/paradox.md",
                          "linn-modder/asset-pipeline/references/anime-assets.md"):
@@ -68,8 +71,19 @@ def main():
         assert set(scoped.tools()) == {"manual_read"}
         assert scoped.invoke("project_create", {}).error.code == "unknown_tool"
         scoped.close()
+        for name in ("ck3", "paradox", "tkeditor"):
+            config = json.loads(resources.read("skills", f"linn-modder/references/toolsets/{name}.json"))
+            args = config["mcpServers"]["linn-modder"]["args"]
+            enabled = tuple(args[i + 1] for i, arg in enumerate(args) if arg == "--enable-tool")
+            selected = Service(directory, enabled_tools=enabled)
+            assert set(selected.tools()) == set(enabled)
+            assert all(set(selected.parameter_hints(tool)) <= set(inspect.signature(fn).parameters)
+                       for tool, fn in selected.tools().items())
+            selected.close()
         result = service.invoke("project_create", {"destination": "project", "profile": "ck3", "name": "wheel_test"})
         assert result.ok, result.to_dict()
+        checked = service.invoke("ck3_check", {"source": "project/mod/wheel_test"})
+        assert checked.ok and checked.data["passed"], checked.to_dict()
         data = json.loads((Path(directory) / "project/project.json").read_text(encoding="utf-8"))
         assert data["profile"] == "ck3"
         assert (Path(directory) / "project" / data["asset_workflow"]).read_text(encoding="utf-8") == resources.read(

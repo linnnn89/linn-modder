@@ -27,6 +27,7 @@ Game roots stay read-only; use a generation provider only when requested and con
 | Canon-based attributes, abilities, factions or lifecycle / 人物制作原则 | [Character design](references/character-design-principles.md) |
 | Expressions, layered characters, Live2D/3D or a finished-mod study | [Anime asset contracts](../asset-pipeline/references/anime-assets.md) |
 | Encoding, asset-format or runtime checks | [Verification](references/verification.md) |
+| CK3 descriptor/localization format or existing Tiger diagnostics | [CK3 check operation](references/ck3-check.md) |
 | CK3 loading screen stalls; repeated triggered_desc parser errors / 启动卡死案例 | [Dynamic-description loading failure](references/ck3-dynamic-description-loading-failure.md) |
 | Read, modify and repack a version-specific game container | [Archive round trips](../reverse-engineering/references/archive-roundtrip.md) |
 | Tool parameters or MCP-only access | [Tool interfaces](../references/tools.md) |
