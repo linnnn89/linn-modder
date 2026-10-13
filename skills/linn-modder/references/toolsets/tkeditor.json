@@ -1,0 +1,35 @@
+{
+  "mcpServers": {
+    "linn-modder": {
+      "command": "um",
+      "args": [
+        "mcp",
+        "serve",
+        "--workspace",
+        "<ABSOLUTE_WORKSPACE>",
+        "--enable-tool",
+        "environment_check",
+        "--enable-tool",
+        "manual_read",
+        "--enable-tool",
+        "tk_project",
+        "--enable-tool",
+        "tk_index",
+        "--enable-tool",
+        "tk_tables",
+        "--enable-tool",
+        "tk_query",
+        "--enable-tool",
+        "tk_read_field",
+        "--enable-tool",
+        "tk_patch",
+        "--enable-tool",
+        "tk_portraits",
+        "--enable-tool",
+        "tk_portrait_options",
+        "--enable-tool",
+        "tk_portrait_register"
+      ]
+    }
+  }
+}

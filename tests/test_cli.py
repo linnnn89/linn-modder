@@ -66,3 +66,16 @@ def test_json_cli_tool_selection_and_configuration_error(tmp_path):
     invalid = subprocess.run([*command, "invented"], capture_output=True, text=True, encoding="utf-8")
     assert invalid.returncode == 1
     assert json.loads(invalid.stdout)["error"]["code"] == "invalid_tools"
+
+
+def test_optional_parameter_details_need_no_mcp_dependency(tmp_path):
+    from um.service import Service
+    command = [sys.executable, "-S", "-m", "um", "tool", "list", "--workspace", str(tmp_path),
+               "--enable-tool", "tk_portraits", "--enable-tool", "ck3_check"]
+    default = subprocess.run(command, capture_output=True, text=True, encoding="utf-8")
+    detailed = subprocess.run([*command, "--details"], capture_output=True, text=True, encoding="utf-8")
+    assert default.returncode == detailed.returncode == 0, detailed.stderr
+    assert all(set(t) == {"name", "description", "signature"} for t in json.loads(default.stdout)["data"]["tools"])
+    service = Service(tmp_path)
+    for entry in json.loads(detailed.stdout)["data"]["tools"]:
+        assert entry["parameter_hints"] == service.parameter_hints(entry["name"])

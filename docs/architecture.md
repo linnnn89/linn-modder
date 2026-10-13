@@ -62,8 +62,10 @@ FastMCP supplies named schemas and transport/lifecycle handling. Its public
 `call_tool` method is overridden to dispatch raw JSON to `Service.invoke`, keeping
 the same strict types and structured errors across CLI, SDK and MCP; this avoids
 SDK coercion and discarded unknown arguments. Schemas forbid extra properties.
-TKEditor schemas advertise existing backend enums, ranges and parameter meanings;
-these discovery hints do not replace backend checks or change argument coercion.
+Game adapters own parameter hints; `Service.parameter_hints` exposes only real enabled
+parameters. MCP merges those hints into its generated schemas, while `um tool list --details`
+and Python expose the same guidance without requiring MCP. The default CLI listing remains
+compact. These discovery hints do not replace backend checks or change argument coercion.
 Operational `ToolError` may carry a deterministic recovery action, exposed through
 the existing `data.recovery` object with its tool, arguments and allowlist availability.
 Recovery is never executed automatically; confirmation recovery only previews.
@@ -156,6 +158,14 @@ project creation, 2D image preparation, backups, window discovery/capture and
 opt-in input. Rendering, recording, paid generation and publishing remain in the
 existing CLI. Before exposing them as background MCP tasks, add persistent job
 IDs, bounded concurrency, subprocess cancellation and recoverable job manifests.
+CK3's `um/editors/ck3/check.py` performs bounded, read-only descriptor/localization
+format checks and imports optional existing Tiger JSON. It does not run a validator,
+parse game script semantics or establish a report's freshness. Diagnostics share source,
+severity, code, message and locations; totals cover all findings even when the response
+is paged. `Result.ok` means the operation completed; `data.passed` reflects error/fatal
+findings, with runtime verification always separate. See [usage and scope](../skills/linn-modder/anime-strategy-mod/references/ck3-check.md).
+Task-specific [configuration examples](../skills/linn-modder/references/toolsets.md) reuse
+the existing allowlist; no runtime plugin discovery or extra configuration mechanism is added.
 TKEditor operations add per-workspace SQLite snapshots, projected paged retrieval,
 data-only staging, guarded single-record JSON edits, and an independently indexed
 external portrait library. They reuse Workspace, Result and optional MCP transport;

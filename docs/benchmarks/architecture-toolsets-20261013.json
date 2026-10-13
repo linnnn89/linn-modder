@@ -1,0 +1,97 @@
+{
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "mcp": "1.29.0",
+  "sources": {
+    "before": {
+      "commit": "fdb3a53cc4f3014cb7f528548690c6fa27a73744",
+      "dirty": false,
+      "python_sources_sha256": "a8af273c5558cfdea39e8f6ee40128b35bf27cd76d419c0344a9de966a25fa28"
+    },
+    "after": {
+      "commit": "fdb3a53cc4f3014cb7f528548690c6fa27a73744",
+      "dirty": true,
+      "python_sources_sha256": "0307edbb20e7ab21b017479413ad4b0a5cf24ac0e30c2585d14181eaff666282"
+    }
+  },
+  "default": {
+    "before": {
+      "tools": 23,
+      "characters": 41476,
+      "utf8_bytes": 41476
+    },
+    "after": {
+      "tools": 24,
+      "characters": 43474,
+      "utf8_bytes": 43474
+    }
+  },
+  "toolsets": {
+    "ck3": {
+      "tools": 12,
+      "characters": 18699,
+      "utf8_bytes": 18699,
+      "names": [
+        "environment_check",
+        "game_profiles",
+        "game_scan",
+        "knowledge_search",
+        "manual_read",
+        "project_create",
+        "image_prepare",
+        "ck3_check",
+        "backup_create",
+        "backup_list",
+        "backup_verify",
+        "backup_restore"
+      ],
+      "reduction_vs_before_default_pct": 54.92
+    },
+    "paradox": {
+      "tools": 11,
+      "characters": 16701,
+      "utf8_bytes": 16701,
+      "names": [
+        "environment_check",
+        "game_profiles",
+        "game_scan",
+        "knowledge_search",
+        "manual_read",
+        "project_create",
+        "image_prepare",
+        "backup_create",
+        "backup_list",
+        "backup_verify",
+        "backup_restore"
+      ],
+      "reduction_vs_before_default_pct": 59.73
+    },
+    "tkeditor": {
+      "tools": 11,
+      "characters": 23655,
+      "utf8_bytes": 23655,
+      "names": [
+        "environment_check",
+        "manual_read",
+        "tk_index",
+        "tk_tables",
+        "tk_query",
+        "tk_read_field",
+        "tk_project",
+        "tk_patch",
+        "tk_portraits",
+        "tk_portrait_options",
+        "tk_portrait_register"
+      ],
+      "reduction_vs_before_default_pct": 42.97
+    }
+  },
+  "existing_schemas_unchanged": true,
+  "scope": "Serialized MCP catalog only; no model tokens, task completion time or game behavior measured.",
+  "fixed_context_unchanged": true,
+  "targets": {
+    "three_task_configs": true,
+    "each_config_at_least_40_pct_smaller_than_before_default": true,
+    "preserve_existing_schemas": true,
+    "fixed_context_unchanged": true
+  }
+}
