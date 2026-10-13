@@ -124,6 +124,18 @@ def test_stdio_allowlist_and_paged_manuals(tmp_path):
                 assert data['next_line'] == 41
                 assert full.structuredContent['data']['text'].startswith(data['text'])
                 assert json.loads(first.content[0].text) == first.structuredContent
+                outline = await client.call_tool('manual_read', args | {'outline': True})
+                assert not outline.isError
+                assert json.loads(outline.content[0].text) == outline.structuredContent
+                assert 'text' not in outline.structuredContent['data']
+                section = outline.structuredContent['data']['sections'][-1]
+                start, end = section['start_line'], section['end_line']
+                page = await client.call_tool('manual_read', args | {'start_line': start, 'max_lines': end - start + 1})
+                assert not page.isError
+                assert page.structuredContent['data']['text'] == ''.join(
+                    full.structuredContent['data']['text'].splitlines(keepends=True)[start - 1:end])
+                invalid_outline = await client.call_tool('manual_read', args | {'outline': 'true'})
+                assert invalid_outline.structuredContent['error']['code'] == 'invalid_arguments'
                 invalid = await client.call_tool('manual_read', args | {'max_lines': True})
                 assert invalid.structuredContent['error']['code'] == 'invalid_arguments'
                 await client.send_ping()

@@ -22,6 +22,9 @@ um kb show games/gta-v/minecraft-passthrough.md
 The CLI prefers checkout notes or the installed offline snapshot. Use `um kb sync` or
 `--remote` explicitly for the GitHub copy. MCP `knowledge_search` always searches the
 bundled offline collection; read a matching note with `manual_read(collection="knowledge", path=...)`.
+For a long note, add `outline:true` to get headings and source lines, then read only
+the selected range. Confirm the opening version/evidence context once; reuse it for
+that manual version. Outlines omit body text, YAML and fenced code examples.
 No CLI? Read [INDEX.md](INDEX.md), or the fork's
 [remote index](https://raw.githubusercontent.com/linnnn89/linn-modder/main/knowledge/index.json).
 

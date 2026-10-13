@@ -60,7 +60,9 @@
 
 ## 按问题查证据
 
-经验档：`manual_read(collection="knowledge", path="games/crusader-kings-iii/modding-playbook.md", max_lines=60)` 先读版本与目录，再按需要分页；文件工具可直接定位章节。不要为每个 CK3 任务默认读取整篇。
+经验档：`manual_read(collection="knowledge", path="games/crusader-kings-iii/modding-playbook.md", outline=True)` 返回章节与准确行号；选择一节，用 `start_line` 和 `max_lines=end_line-start_line+1` 读取（每次最多 1000 行）。首次使用还需读开头的版本/证据范围；已读过则复用。文件工具可直接定位章节，不默认载入整篇。
+
+其他 P 社游戏、规则缓存或依赖排错见 [Paradox 路线](../../mod-any-game/references/engines/paradox.md)，不把 CK3 接口移植成跨游戏规则。
 
 | 问题 | 经验档章节 / 直接参考 |
 |---|---|
