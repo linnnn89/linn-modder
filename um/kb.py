@@ -143,6 +143,30 @@ def _term(t: str) -> re.Pattern:
     return re.compile((r"(?<![a-z0-9])" if t[:1].isalnum() else "") + re.escape(t))
 
 
+def _matched_sections(text: str, terms: list[re.Pattern]) -> tuple[list[dict], list[str]]:
+    """Rank a heading's own text, not all its descendants; return original-file ranges."""
+    from um.resources import outline
+    sections = outline(text)
+    lines = text.splitlines()
+    ranked = []
+    for i, section in enumerate(sections):
+        start = section["start_line"]
+        stop = sections[i + 1]["start_line"] - 1 if i + 1 < len(sections) else len(lines)
+        own_lines = lines[start:stop]
+        body = "\n".join(own_lines).lower()
+        # A topic in a heading is a better lead than a game name repeated in prose.
+        score = sum(2 * bool(term.search(section["heading"].lower())) + min(3, len(term.findall(body)))
+                    for term in terms)
+        if score:
+            hits = [line.strip() for line in lines[start - 1:stop]
+                    if line.strip() and any(term.search(line.lower()) for term in terms)]
+            ranked.append((score, section, hits))
+    # At equal relevance, prefer the smaller read over a broad chapter.
+    ranked.sort(key=lambda item: (-item[0], item[1]["end_line"] - item[1]["start_line"], item[1]["start_line"]))
+    selected = ranked[:3]
+    return [item[1] for item in selected], [item[2][0] for item in selected if item[2]]
+
+
 def search(root: Path, terms: list[str], game=None, engine=None, route=None, limit=10) -> list[dict]:
     terms = [_term(t.lower()) for t in terms if t.strip()]
     res = []
@@ -166,10 +190,21 @@ def search(root: Path, terms: list[str], game=None, engine=None, route=None, lim
         if terms and score == 0:
             continue
         hits = [ln.strip() for ln in body.splitlines() if ln.strip() and any(t.search(ln.lower()) for t in terms)][:3]
-        res.append(dict(score=score, path=p.relative_to(root).as_posix(), title=meta.get("title"), game=meta.get("game"),
-                        engine=meta.get("engine"), route=meta.get("route"), status=meta.get("status"), hits=hits))
-    res.sort(key=lambda r: -r["score"])
-    return res[:limit]
+        row = dict(score=score, path=p.relative_to(root).as_posix(), title=meta.get("title"), game=meta.get("game"),
+                   engine=meta.get("engine"), route=meta.get("route"), status=meta.get("status"), hits=hits)
+        res.append((row, p, meta))
+    res.sort(key=lambda item: -item[0]["score"])
+    selected = []
+    # Enrich only the selected notes; keep the existing ranking and result fields.
+    for row, path, meta in res[:limit]:
+        for key in ("game_version", "date", "platform"):
+            value = meta.get(key)
+            row[key] = value.isoformat() if isinstance(value, dt.date) else value
+        row["sections"], hits = _matched_sections(path.read_text(encoding="utf-8", errors="replace"), terms)
+        if hits:
+            row["hits"] = hits
+        selected.append(row)
+    return selected
 
 
 # --------------------------------------------------------------------------- check

@@ -90,6 +90,36 @@ def test_tiger_levels_multiple_locations_and_old_report_status(tmp_path):
     assert "script_semantics" in empty["not_checked"]
 
 
+def test_severity_filter_preserves_global_failure_and_pages_only_matches(tmp_path):
+    write(tmp_path, "mod/descriptor.mod", "# empty: one local error")
+    reports = [{"severity": severity, "key": severity, "message": "Synthetic diagnostic", "locations": [
+                    {"path": "events/test.txt", "linenr": i + 1, "column": 3},
+                    {"path": "common/other.txt", "linenr": None, "column": None}]}
+               for i, severity in enumerate(("tips", "untidy", "warning", "error", "fatal"))]
+    write(tmp_path, "report.json", json.dumps(reports))
+    service = Service(tmp_path)
+    all_data = check(service, tiger_report="report.json")
+    assert "matched_total" not in all_data and "min_severity" not in all_data
+    for threshold in ("tips", "untidy", "warning", "error", "fatal"):
+        levels = ("tips", "untidy", "warning", "error", "fatal")
+        expected = [d for d in all_data["diagnostics"] if levels.index(d["severity"]) >= levels.index(threshold)]
+        actual, offset = [], 0
+        while offset is not None:
+            page = check(service, tiger_report="report.json", min_severity=threshold, limit=1, offset=offset)
+            assert page["min_severity"] == threshold and page["matched_total"] == len(expected)
+            assert page["counts"] == all_data["counts"] and page["total"] == 6 and not page["passed"]
+            actual.extend(page["diagnostics"])
+            offset = page["next_offset"]
+        assert actual == expected  # includes every original location and info field
+    write(tmp_path, "report.json", "[]")
+    empty = check(service, tiger_report="report.json", min_severity="fatal")
+    assert empty["matched_total"] == 0 and empty["diagnostics"] == [] and empty["next_offset"] is None
+    assert empty["counts"] == {"error": 1} and not empty["passed"]
+    assert check(service, min_severity="error", offset=50)["diagnostics"] == []
+    invalid = service.invoke("ck3_check", {"source": "mod", "min_severity": "errors"})
+    assert invalid.error.code == "invalid_severity"
+
+
 @pytest.mark.parametrize("raw", [b"", b"{}", b"[{\"severity\":\"unknown\"}]", "[]".encode("utf-16")])
 def test_invalid_tiger_output_never_becomes_a_clean_report(tmp_path, raw):
     write(tmp_path, "mod/descriptor.mod", 'name="Fixture"')
@@ -130,23 +160,25 @@ def test_missing_descriptor_and_localization_links(tmp_path):
 def test_ck3_cli_and_real_stdio_using_packaged_configuration(tmp_path):
     from mcp import ClientSession, StdioServerParameters
     from mcp.client.stdio import stdio_client
-    write(tmp_path, "mod/descriptor.mod", 'name="Fixture"')
-    write(tmp_path, "args.json", '{"source":"mod"}')
+    write(tmp_path, "mod/descriptor.mod", "# empty: local error")
+    arguments = {"source": "mod", "min_severity": "fatal"}
+    write(tmp_path, "args.json", json.dumps(arguments))
     result = subprocess.run([sys.executable, "-m", "um", "tool", "call", "ck3_check", "--workspace", str(tmp_path),
                              "--args-file", str(tmp_path / "args.json")], capture_output=True, text=True, encoding="utf-8")
     assert result.returncode == 0, result.stderr
-    expected = Service(tmp_path).invoke("ck3_check", {"source": "mod"}).to_dict()
+    expected = Service(tmp_path).invoke("ck3_check", arguments).to_dict()
     assert json.loads(result.stdout) == expected
     config = json.loads(resources.read("skills", "linn-modder/references/toolsets/ck3.json"))
-    arguments = [str(tmp_path) if v == "<ABSOLUTE_WORKSPACE>" else v for v in config["mcpServers"]["linn-modder"]["args"]]
+    server_args = [str(tmp_path) if v == "<ABSOLUTE_WORKSPACE>" else v for v in config["mcpServers"]["linn-modder"]["args"]]
     async def exercise():
-        params = StdioServerParameters(command=sys.executable, args=["-m", "um", *arguments])
+        params = StdioServerParameters(command=sys.executable, args=["-m", "um", *server_args])
         async with stdio_client(params) as (reader, writer):
             async with ClientSession(reader, writer) as client:
                 await client.initialize()
                 tools = {t.name: t for t in (await client.list_tools()).tools}
                 assert not any(name.startswith("tk_") for name in tools)
                 assert tools["ck3_check"].annotations.readOnlyHint
-                response = await client.call_tool("ck3_check", {"source": "mod"})
+                assert tools["ck3_check"].inputSchema["properties"]["min_severity"]["enum"] == ["", "tips", "untidy", "warning", "error", "fatal"]
+                response = await client.call_tool("ck3_check", arguments)
                 assert response.structuredContent == expected
     asyncio.run(asyncio.wait_for(exercise(), timeout=30))

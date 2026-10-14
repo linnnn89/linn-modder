@@ -20,6 +20,24 @@
 
 每个文本/报告最多 16 MiB，本地文本合计 128 MiB，localization 树最多 10,000 个条目；超限或无法读取时报结构化错误，不把未完成检查视为通过。只遍历本地化目录，不扫描整套纹理资源。
 
+## 先定位严重错误
+
+报告较多时，在同一操作中增加 `min_severity`：
+
+```json
+{"source":"project/mod/my_mod","tiger_report":"verification/tiger.json","min_severity":"error"}
+```
+
+级别从低到高为 `tips < untidy < warning < error < fatal`；`error` 同时返回 error 和
+fatal，空字符串或省略表示不过滤。筛选同时适用于本地检查和导入的 Tiger 诊断，保留原始顺序、
+内容和全部位置，不聚合或改写原报告。重新生成报告时，也可按 Tiger 版本使用其
+`--consolidate` 合并部分重复错误，或 `--suppress` 保留已有基线。
+
+**`counts`、`total` 和 `passed` 始终基于全部诊断。** 过滤后另有 `min_severity` 和
+`matched_total`；`offset/next_offset` 是筛选结果内的位置，后续页沿用相同过滤条件。
+零条匹配不代表全部通过，例如仅看 fatal 时仍可能有 error。修改源文件或报告后从第一页重读。
+这只减少返回给 agent 的信息，不减少检查范围，也不证明验证器或游戏已重新运行。
+
 ## 使用已有 Tiger
 
 Tiger 的 scope、引用、脚本语法等诊断由原工具生成，Linn Modder 不重新实现解析器。确认同版原版、依赖与内容根后，可用已安装的 Tiger 生成 UTF-8 JSON。用 Python 保存原始 stdout，避免 Windows PowerShell 5.1 的 `>` 把报告转成 UTF-16：

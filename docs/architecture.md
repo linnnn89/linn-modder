@@ -88,6 +88,13 @@ full reads retain their result shape. See [measurements and rollback](performanc
 the same range reader then retrieves a selected section. YAML and fenced examples
 are excluded from headings. No search index, game parser or additional tool is needed.
 
+`knowledge_search` reuses the knowledge module's optional game-name filter and returns
+version metadata plus ranked source section ranges. It scores a section's own text,
+then favors shorter reads at equal relevance; parent ranges still include children.
+This is keyword lookup, not semantic retrieval. Readers retain the opening evidence
+context and refresh positions when the manual changes. CK3 severity filtering similarly
+narrows returned diagnostics while global counts and the check result remain unchanged.
+
 ## Workspaces and capabilities
 
 - A required existing workspace owns staging files, captures and backup snapshots.

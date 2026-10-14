@@ -43,6 +43,7 @@ def main():
                          "linn-modder/references/toolsets.md",
                          "linn-modder/anime-strategy-mod/references/ck3-moe-project.md",
                          "linn-modder/mod-any-game/references/engines/paradox.md",
+                         "linn-modder/asset-pipeline/references/dds.md",
                          "linn-modder/asset-pipeline/references/anime-assets.md"):
             read = service.invoke("manual_read", {"collection": "skills", "path": relative})
             assert read.ok, read.to_dict()
@@ -55,6 +56,15 @@ def main():
             page = service.invoke("manual_read", args | {"start_line": start, "max_lines": end - start + 1})
             assert page.ok and page.data["text"] == "".join(read.data["text"].splitlines(keepends=True)[start - 1:end])
         ck3_path = "games/crusader-kings-iii/modding-playbook.md"
+        found = service.invoke("knowledge_search", {"query": "旧档", "game": "Crusader Kings III"})
+        assert found.ok and len(found.data["matches"]) == 1
+        match = found.data["matches"][0]
+        assert match["path"] == ck3_path and match["game_version"]
+        section = match["sections"][0]
+        page = service.invoke("manual_read", {"collection": "knowledge", "path": ck3_path,
+                              "start_line": section["start_line"], "max_lines": section["end_line"] - section["start_line"] + 1})
+        assert page.ok and page.data["text"] == "".join(resources.read("knowledge", ck3_path).splitlines(keepends=True)[
+            section["start_line"] - 1:section["end_line"]])
         ck3_note = service.invoke("manual_read", {"collection": "knowledge", "path": ck3_path, "max_lines": 60})
         assert ck3_note.ok, ck3_note.to_dict()
         assert ck3_note.data["next_line"] == 61
@@ -84,6 +94,8 @@ def main():
         assert result.ok, result.to_dict()
         checked = service.invoke("ck3_check", {"source": "project/mod/wheel_test"})
         assert checked.ok and checked.data["passed"], checked.to_dict()
+        filtered = service.invoke("ck3_check", {"source": "project/mod/wheel_test", "min_severity": "error"})
+        assert filtered.ok and filtered.data["passed"] and filtered.data["matched_total"] == 0
         data = json.loads((Path(directory) / "project/project.json").read_text(encoding="utf-8"))
         assert data["profile"] == "ck3"
         assert (Path(directory) / "project" / data["asset_workflow"]).read_text(encoding="utf-8") == resources.read(
