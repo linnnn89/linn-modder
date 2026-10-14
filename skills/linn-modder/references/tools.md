@@ -97,6 +97,11 @@ step. Use `knowledge_search` for reusable findings and read its matching note fr
 
 ## Reading a long manual
 
+`knowledge_search(query, game="...")` can return matching section ranges together
+with game version/date/platform. Use a returned range directly; the full search
+contract and examples are in [knowledge lookup](../share-field-notes/references/search.md).
+Read the opening evidence context once before applying a note's advice.
+
 If the needed section is unknown, `manual_read(collection, path, outline=True)` returns
 ATX headings (`#` through `######`) with `level`, inclusive `start_line`/`end_line`,
 and `total_lines`, without the body. YAML frontmatter and fenced examples are ignored.

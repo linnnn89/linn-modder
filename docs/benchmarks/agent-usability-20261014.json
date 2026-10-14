@@ -1,0 +1,431 @@
+{
+  "recorded_utc": "2026-10-14T13:44:52.514570+00:00",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "mcp": "1.30.0",
+  "sources": {
+    "before": {
+      "commit": "57fb14bd577e298c3dc7fe6e9f03623a2dfa5324",
+      "dirty": false,
+      "implementation_sha256": {
+        "um/kb.py": "12a406ef3c33e0cdf55c803c1a55a8b6121bd8285db118b691bbcc36b2d46f90",
+        "um/service.py": "71ea3e12dbcaa8bd68ff68a6bdf06eb29171f3cef8932aa562818339d03d372e",
+        "um/resources.py": "61bd919ff611d400a5a1512e6573ef4d726117c5b897aef9613c30f6cd7cf244",
+        "um/editors/ck3/check.py": "f2e8b4e6027f4578dbdd6655663cbb361bf8f2f34fe0194d6c7287f7be92862a",
+        "um/mcp.py": "094dc61feffd062fcc56be8c425696504ce508cd4992a789baad4e19c3dfcd39"
+      }
+    },
+    "after": {
+      "commit": "57fb14bd577e298c3dc7fe6e9f03623a2dfa5324",
+      "dirty": true,
+      "implementation_sha256": {
+        "um/kb.py": "73a718bc6b7e13387d816abfc3097dbb871aa9fd53b490c50c9465932cc98585",
+        "um/service.py": "c2fce3d1d9f4ebcfb077fcd9f19106745750edb1bad1a4a8629e08782e363852",
+        "um/resources.py": "61bd919ff611d400a5a1512e6573ef4d726117c5b897aef9613c30f6cd7cf244",
+        "um/editors/ck3/check.py": "11197bb0f8b875eabac54f64944bb4bc9f63d7b6dc8f999f5ca4646c26bda8d9",
+        "um/mcp.py": "094dc61feffd062fcc56be8c425696504ce508cd4992a789baad4e19c3dfcd39"
+      }
+    }
+  },
+  "queries": {
+    "ck3_3d": {
+      "before": {
+        "game": "Crusader Kings III",
+        "query": "3D 外貌",
+        "path": "games/crusader-kings-iii/modding-playbook.md",
+        "section": {
+          "heading": "15. ACG 路人与自创人物失去原生 3D 外貌",
+          "level": 3,
+          "start_line": 200,
+          "end_line": 207
+        },
+        "section_rank": null,
+        "matching_notes": 2,
+        "only_requested_game": false,
+        "correct_section": true,
+        "opening_sha256": "43eb15c46c07fa5e5f1463cabe1ab6e0ddc90857db41dae922c716ea894ff4f7",
+        "section_sha256": "0836b48512b0c75a9e56139b70e31d25dc31debe3b8a892dcfc659e37609dbfd",
+        "manual_sha256": "1f693f6274716edc8bce47050a4075667cae37a474cde9506d788dbcb4d93e64",
+        "workflow": {
+          "calls": 4,
+          "characters": 7606,
+          "utf8_bytes": 11222
+        }
+      },
+      "after": {
+        "game": "Crusader Kings III",
+        "query": "3D 外貌",
+        "path": "games/crusader-kings-iii/modding-playbook.md",
+        "section": {
+          "heading": "15. ACG 路人与自创人物失去原生 3D 外貌",
+          "level": 3,
+          "start_line": 200,
+          "end_line": 207
+        },
+        "section_rank": 1,
+        "matching_notes": 1,
+        "only_requested_game": true,
+        "correct_section": true,
+        "opening_sha256": "43eb15c46c07fa5e5f1463cabe1ab6e0ddc90857db41dae922c716ea894ff4f7",
+        "section_sha256": "0836b48512b0c75a9e56139b70e31d25dc31debe3b8a892dcfc659e37609dbfd",
+        "manual_sha256": "1f693f6274716edc8bce47050a4075667cae37a474cde9506d788dbcb4d93e64",
+        "workflow": {
+          "calls": 3,
+          "characters": 3928,
+          "utf8_bytes": 6390
+        }
+      },
+      "reduction_pct": {
+        "calls": 25.0,
+        "characters": 48.36,
+        "utf8_bytes": 43.06
+      }
+    },
+    "ck3_old_save": {
+      "before": {
+        "game": "Crusader Kings III",
+        "query": "旧档",
+        "path": "games/crusader-kings-iii/modding-playbook.md",
+        "section": {
+          "heading": "24. 旧档兼容不是一句“重启即可”",
+          "level": 3,
+          "start_line": 270,
+          "end_line": 283
+        },
+        "section_rank": null,
+        "matching_notes": 1,
+        "only_requested_game": true,
+        "correct_section": true,
+        "opening_sha256": "43eb15c46c07fa5e5f1463cabe1ab6e0ddc90857db41dae922c716ea894ff4f7",
+        "section_sha256": "d6b239b5d7d82cb25a13200b8ec2982749696619cfd04e1c33aaf16642f7041a",
+        "manual_sha256": "1f693f6274716edc8bce47050a4075667cae37a474cde9506d788dbcb4d93e64",
+        "workflow": {
+          "calls": 4,
+          "characters": 7050,
+          "utf8_bytes": 10720
+        }
+      },
+      "after": {
+        "game": "Crusader Kings III",
+        "query": "旧档",
+        "path": "games/crusader-kings-iii/modding-playbook.md",
+        "section": {
+          "heading": "24. 旧档兼容不是一句“重启即可”",
+          "level": 3,
+          "start_line": 270,
+          "end_line": 283
+        },
+        "section_rank": 1,
+        "matching_notes": 1,
+        "only_requested_game": true,
+        "correct_section": true,
+        "opening_sha256": "43eb15c46c07fa5e5f1463cabe1ab6e0ddc90857db41dae922c716ea894ff4f7",
+        "section_sha256": "d6b239b5d7d82cb25a13200b8ec2982749696619cfd04e1c33aaf16642f7041a",
+        "manual_sha256": "1f693f6274716edc8bce47050a4075667cae37a474cde9506d788dbcb4d93e64",
+        "workflow": {
+          "calls": 3,
+          "characters": 4076,
+          "utf8_bytes": 6790
+        }
+      },
+      "reduction_pct": {
+        "calls": 25.0,
+        "characters": 42.18,
+        "utf8_bytes": 36.66
+      }
+    },
+    "ck3_dlc": {
+      "before": {
+        "game": "Crusader Kings III",
+        "query": "DLC 解析",
+        "path": "games/crusader-kings-iii/modding-playbook.md",
+        "section": {
+          "heading": "20. DLC 开关能挡执行，不一定能挡解析",
+          "level": 3,
+          "start_line": 240,
+          "end_line": 245
+        },
+        "section_rank": null,
+        "matching_notes": 2,
+        "only_requested_game": false,
+        "correct_section": true,
+        "opening_sha256": "43eb15c46c07fa5e5f1463cabe1ab6e0ddc90857db41dae922c716ea894ff4f7",
+        "section_sha256": "5a9784c62674b89b7627e89985ed61b7280da7169232d20ad71e4ded8fb32a0c",
+        "manual_sha256": "1f693f6274716edc8bce47050a4075667cae37a474cde9506d788dbcb4d93e64",
+        "workflow": {
+          "calls": 4,
+          "characters": 7393,
+          "utf8_bytes": 11429
+        }
+      },
+      "after": {
+        "game": "Crusader Kings III",
+        "query": "DLC 解析",
+        "path": "games/crusader-kings-iii/modding-playbook.md",
+        "section": {
+          "heading": "20. DLC 开关能挡执行，不一定能挡解析",
+          "level": 3,
+          "start_line": 240,
+          "end_line": 245
+        },
+        "section_rank": 1,
+        "matching_notes": 1,
+        "only_requested_game": true,
+        "correct_section": true,
+        "opening_sha256": "43eb15c46c07fa5e5f1463cabe1ab6e0ddc90857db41dae922c716ea894ff4f7",
+        "section_sha256": "5a9784c62674b89b7627e89985ed61b7280da7169232d20ad71e4ded8fb32a0c",
+        "manual_sha256": "1f693f6274716edc8bce47050a4075667cae37a474cde9506d788dbcb4d93e64",
+        "workflow": {
+          "calls": 3,
+          "characters": 3932,
+          "utf8_bytes": 6432
+        }
+      },
+      "reduction_pct": {
+        "calls": 25.0,
+        "characters": 46.81,
+        "utf8_bytes": 43.72
+      }
+    },
+    "vic2_map": {
+      "before": {
+        "game": "Victoria 2",
+        "query": "map provinces.bmp",
+        "path": "games/victoria-2/south-central-gang-total-conversion.md",
+        "section": {
+          "heading": "Map files (`map/`)",
+          "level": 3,
+          "start_line": 62,
+          "end_line": 75
+        },
+        "section_rank": null,
+        "matching_notes": 4,
+        "only_requested_game": false,
+        "correct_section": true,
+        "opening_sha256": "1d5b5e08538934fb052b58612dd57659ae9845791f750c7cbdf09246f72907bc",
+        "section_sha256": "f44357eaaef0babc372ac90e45b98ca55df6e07ca34a7612e8ec54853fb82aa7",
+        "manual_sha256": "2f19282510cbdba6ea3a93ee473e9831f48443155b49e04df0d04473469c2905",
+        "workflow": {
+          "calls": 4,
+          "characters": 8391,
+          "utf8_bytes": 8409
+        }
+      },
+      "after": {
+        "game": "Victoria 2",
+        "query": "map provinces.bmp",
+        "path": "games/victoria-2/south-central-gang-total-conversion.md",
+        "section": {
+          "heading": "Map files (`map/`)",
+          "level": 3,
+          "start_line": 62,
+          "end_line": 75
+        },
+        "section_rank": 1,
+        "matching_notes": 1,
+        "only_requested_game": true,
+        "correct_section": true,
+        "opening_sha256": "1d5b5e08538934fb052b58612dd57659ae9845791f750c7cbdf09246f72907bc",
+        "section_sha256": "f44357eaaef0babc372ac90e45b98ca55df6e07ca34a7612e8ec54853fb82aa7",
+        "manual_sha256": "2f19282510cbdba6ea3a93ee473e9831f48443155b49e04df0d04473469c2905",
+        "workflow": {
+          "calls": 3,
+          "characters": 5861,
+          "utf8_bytes": 5879
+        }
+      },
+      "reduction_pct": {
+        "calls": 25.0,
+        "characters": 30.15,
+        "utf8_bytes": 30.09
+      }
+    },
+    "vic2_history": {
+      "before": {
+        "game": "Victoria 2",
+        "query": "replace_path",
+        "path": "games/victoria-2/south-central-gang-total-conversion.md",
+        "section": {
+          "heading": "History loading",
+          "level": 3,
+          "start_line": 76,
+          "end_line": 83
+        },
+        "section_rank": null,
+        "matching_notes": 1,
+        "only_requested_game": true,
+        "correct_section": true,
+        "opening_sha256": "1d5b5e08538934fb052b58612dd57659ae9845791f750c7cbdf09246f72907bc",
+        "section_sha256": "6067f58d14a5380d56f4a9d774b9c731c7121f2aaffe6b4fc1c85e50b8dd77b7",
+        "manual_sha256": "2f19282510cbdba6ea3a93ee473e9831f48443155b49e04df0d04473469c2905",
+        "workflow": {
+          "calls": 4,
+          "characters": 6572,
+          "utf8_bytes": 6590
+        }
+      },
+      "after": {
+        "game": "Victoria 2",
+        "query": "replace_path",
+        "path": "games/victoria-2/south-central-gang-total-conversion.md",
+        "section": {
+          "heading": "History loading",
+          "level": 3,
+          "start_line": 76,
+          "end_line": 83
+        },
+        "section_rank": 2,
+        "matching_notes": 1,
+        "only_requested_game": true,
+        "correct_section": true,
+        "opening_sha256": "1d5b5e08538934fb052b58612dd57659ae9845791f750c7cbdf09246f72907bc",
+        "section_sha256": "6067f58d14a5380d56f4a9d774b9c731c7121f2aaffe6b4fc1c85e50b8dd77b7",
+        "manual_sha256": "2f19282510cbdba6ea3a93ee473e9831f48443155b49e04df0d04473469c2905",
+        "workflow": {
+          "calls": 3,
+          "characters": 5472,
+          "utf8_bytes": 5490
+        }
+      },
+      "reduction_pct": {
+        "calls": 25.0,
+        "characters": 16.74,
+        "utf8_bytes": 16.69
+      }
+    },
+    "vic2_localization": {
+      "before": {
+        "game": "Victoria 2",
+        "query": "localisation cp1252",
+        "path": "games/victoria-2/south-central-gang-total-conversion.md",
+        "section": {
+          "heading": "Build steps",
+          "level": 2,
+          "start_line": 133,
+          "end_line": 156
+        },
+        "section_rank": null,
+        "matching_notes": 1,
+        "only_requested_game": true,
+        "correct_section": true,
+        "opening_sha256": "1d5b5e08538934fb052b58612dd57659ae9845791f750c7cbdf09246f72907bc",
+        "section_sha256": "d0602b9cce94306c93b163918b43a9de5414e07b2b82a12de42b27a6784f4e22",
+        "manual_sha256": "2f19282510cbdba6ea3a93ee473e9831f48443155b49e04df0d04473469c2905",
+        "workflow": {
+          "calls": 4,
+          "characters": 7449,
+          "utf8_bytes": 7470
+        }
+      },
+      "after": {
+        "game": "Victoria 2",
+        "query": "localisation cp1252",
+        "path": "games/victoria-2/south-central-gang-total-conversion.md",
+        "section": {
+          "heading": "Build steps",
+          "level": 2,
+          "start_line": 133,
+          "end_line": 156
+        },
+        "section_rank": 1,
+        "matching_notes": 1,
+        "only_requested_game": true,
+        "correct_section": true,
+        "opening_sha256": "1d5b5e08538934fb052b58612dd57659ae9845791f750c7cbdf09246f72907bc",
+        "section_sha256": "d0602b9cce94306c93b163918b43a9de5414e07b2b82a12de42b27a6784f4e22",
+        "manual_sha256": "2f19282510cbdba6ea3a93ee473e9831f48443155b49e04df0d04473469c2905",
+        "workflow": {
+          "calls": 3,
+          "characters": 6335,
+          "utf8_bytes": 6356
+        }
+      },
+      "reduction_pct": {
+        "calls": 25.0,
+        "characters": 14.96,
+        "utf8_bytes": 14.91
+      }
+    }
+  },
+  "catalog": {
+    "before": {
+      "characters": 43474,
+      "utf8_bytes": 43474,
+      "tools": 24
+    },
+    "after": {
+      "characters": 43946,
+      "utf8_bytes": 43946,
+      "tools": 24
+    }
+  },
+  "scope": "Fixed tool workflows, JSON TextContent counted once. No model usage, autonomous success rate or end-to-end timing measured.",
+  "diagnostics": {
+    "before": {
+      "workflow": {
+        "calls": 11,
+        "characters": 189362,
+        "utf8_bytes": 189362
+      },
+      "counts": {
+        "warning": 500,
+        "fatal": 1
+      },
+      "total": 501,
+      "passed": false,
+      "fatal_sha256": "f388c85ea007a0122b7d739513b70ee7e4f533384f9a8499d2995c9294574b09",
+      "default_result_sha256": "21d14732bbdd3104eb837324b465950762a092606498937a5adcc01faed5b43b"
+    },
+    "after": {
+      "workflow": {
+        "calls": 1,
+        "characters": 1038,
+        "utf8_bytes": 1038
+      },
+      "counts": {
+        "warning": 500,
+        "fatal": 1
+      },
+      "total": 501,
+      "passed": false,
+      "fatal_sha256": "f388c85ea007a0122b7d739513b70ee7e4f533384f9a8499d2995c9294574b09",
+      "default_result_sha256": "21d14732bbdd3104eb837324b465950762a092606498937a5adcc01faed5b43b"
+    },
+    "reduction_pct": {
+      "calls": 90.91,
+      "characters": 99.45,
+      "utf8_bytes": 99.45
+    }
+  },
+  "query_totals": {
+    "before": {
+      "calls": 24,
+      "characters": 44461,
+      "utf8_bytes": 55840
+    },
+    "after": {
+      "calls": 18,
+      "characters": 29604,
+      "utf8_bytes": 37337
+    }
+  },
+  "query_total_reduction_pct": {
+    "calls": 25.0,
+    "characters": 33.42,
+    "utf8_bytes": 33.14
+  },
+  "catalog_growth_pct": 1.09,
+  "changed_tool_schemas": [
+    "knowledge_search",
+    "ck3_check"
+  ],
+  "targets": {
+    "six_correct_sections_in_top_two": true,
+    "game_filter_isolates_each_task": true,
+    "median_query_calls_at_least_25_pct_less": true,
+    "fatal_retrieved_in_one_call": true,
+    "diagnostic_volume_at_least_80_pct_less": true,
+    "same_default_tools": true,
+    "unrelated_tool_schemas_unchanged": true,
+    "fixed_context_unchanged": true
+  }
+}
