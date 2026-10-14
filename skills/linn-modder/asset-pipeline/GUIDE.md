@@ -21,7 +21,8 @@ scale; painted art can use smooth fitting.
 | Measure formats or inspect the result | [Target contract](references/target-format.md) |
 | Cutout, crop, alpha, palettes, animation frames or sprite sheets | [2D sprites](references/sprites.md) |
 | Blender cameras, headings and animation rendering | [3D to sprites](references/3d-to-sprites.md) |
-| Tiling, PBR channel packing or DDS | [Materials](references/materials.md) |
+| Tiling or PBR channel packing | [Materials](references/materials.md) |
+| DDS reference inspection, conversion and read-back | [DDS](references/dds.md) |
 | MCP operations versus CLI-only commands | [Tool interfaces](../references/tools.md) |
 
 Output: converted assets, a reproducible recipe and the validation level reached.

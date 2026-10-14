@@ -11,6 +11,9 @@ Before converting anything, open two or three of the game's own assets and write
 - **Style:** palette size and outline (dark 1-2 px outline in most pixel-art games).
 - **Format:** PNG, DDS BC1/BC3/BC7, XNB, SLD, atlas + JSON...
 
+For DDS, also inspect header compatibility, mip levels, color space and each
+channel's meaning; use the [DDS recipe](dds.md) for the concrete checks.
+
 The draw code is the final authority. In Terraria, NPC frame height = texture height / `Main.npcFrameCount`,
 so any consistent frame size works.
 

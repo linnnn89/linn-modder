@@ -133,12 +133,12 @@ class Service:
         # Index validates each visited entry before descent or binary reads.
         return Result(True, scan.scan(str(target)))
 
-    def knowledge_search(self, query: str, limit: int = 10) -> Result:
-        """Search bundled field notes offline; no network synchronization occurs."""
+    def knowledge_search(self, query: str, limit: int = 10, game: str = "") -> Result:
+        """Search notes offline by topic; optional game uses the recorded name (e.g. Victoria 2). Results include version and section lines; read opening evidence once."""
         from um import kb, resources
         if not 1 <= limit <= 50:
             raise ToolError("invalid_limit", "Limit must be 1..50.")
-        return Result(True, {"matches": kb.search(resources.root("knowledge"), query.split(), limit=limit)})
+        return Result(True, {"matches": kb.search(resources.root("knowledge"), query.split(), game=game, limit=limit)})
 
     def manual_read(self, collection: str, path: str, start_line: int = 1, max_lines: int = 0,
                     outline: bool = False) -> Result:
@@ -183,10 +183,11 @@ class Service:
         data = projects.prepare_image(src, dst, width, height, mode, anchor)
         return Result(True, data, [self._artifact(dst)])
 
-    def ck3_check(self, source: str, tiger_report: str = "", limit: int = 50, offset: int = 0) -> Result:
+    def ck3_check(self, source: str, tiger_report: str = "", limit: int = 50, offset: int = 0,
+                  min_severity: str = "") -> Result:
         """Check a CK3 content directory's descriptor/localization; optionally read existing Tiger JSON. Inspect data.passed and data.next_offset; no game or validator is run."""
         from um.editors.ck3 import check
-        return Result(True, check.check(self.workspace, source, tiger_report, limit, offset))
+        return Result(True, check.check(self.workspace, source, tiger_report, limit, offset, min_severity))
 
     def backup_create(self, source: str, name: str, note: str = "") -> Result:
         """Snapshot a bounded source folder into workspace/.um/backups with a manifest."""

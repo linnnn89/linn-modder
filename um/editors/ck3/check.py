@@ -13,6 +13,7 @@ from um.workspace import is_link
 MAX_FILE = 16 * 1024 * 1024
 MAX_TOTAL = 128 * 1024 * 1024
 MAX_ENTRIES = 10000
+SEVERITIES = ("tips", "untidy", "warning", "error", "fatal")
 
 
 def input_hints() -> dict:
@@ -21,6 +22,8 @@ def input_hints() -> dict:
         "tiger_report": {"description": "Optional existing UTF-8 JSON array from ck3-tiger --json. Paths in it are labels only; freshness/version are not verified."},
         "limit": {"minimum": 1, "maximum": 100},
         "offset": {"minimum": 0},
+        "min_severity": {"enum": ["", *SEVERITIES],
+                         "description": "Filter displayed diagnostics at this level or higher (error includes fatal); empty shows all. Global passed/counts/total never change; offsets page the filtered matches."},
     }
 
 
@@ -69,7 +72,7 @@ def _tiger_reports(raw: bytes) -> list[dict]:
         result = []
         for report in reports:
             severity = report["severity"]
-            if severity not in ("fatal", "error", "warning", "untidy", "tips"):
+            if severity not in SEVERITIES:
                 raise ValueError("unknown severity")
             if not all(isinstance(report[key], str) for key in ("key", "message")):
                 raise ValueError("expected key/message strings")
@@ -95,9 +98,11 @@ def _tiger_reports(raw: bytes) -> list[dict]:
         raise ToolError("invalid_tiger_report", f"Expected a UTF-8 ck3-tiger --json report array: {exc}") from exc
 
 
-def check(ws, source: str, tiger_report: str, limit: int, offset: int) -> dict:
+def check(ws, source: str, tiger_report: str, limit: int, offset: int, min_severity: str = "") -> dict:
     if not 1 <= limit <= 100 or offset < 0:
         raise ToolError("invalid_page", "limit must be 1..100; offset must be >=0.")
+    if min_severity not in ("", *SEVERITIES):
+        raise ToolError("invalid_severity", "min_severity must be empty, tips, untidy, warning, error or fatal.")
     root = ws.path(source, exists=True)
     if not root.is_dir():
         raise ToolError("invalid_path", "source must be the CK3 content directory containing descriptor.mod.")
@@ -155,10 +160,17 @@ def check(ws, source: str, tiger_report: str, limit: int, offset: int) -> dict:
         diagnostics.extend(_tiger_reports(raw))
         tiger.update(status="imported", path=str(report_path), sha256=hashlib.sha256(raw).hexdigest())
     counts = dict(Counter(item["severity"] for item in diagnostics))
-    end = min(offset + limit, len(diagnostics))
-    return {"source": str(root), "passed": not any(counts.get(s) for s in ("error", "fatal")),
+    matches = diagnostics
+    if min_severity:
+        levels = SEVERITIES[SEVERITIES.index(min_severity):]
+        matches = [item for item in diagnostics if item["severity"] in levels]
+    end = min(offset + limit, len(matches))
+    data = {"source": str(root), "passed": not any(counts.get(s) for s in ("error", "fatal")),
             "verification": "not-tested-in-game", "files_checked": checked,
             "checks": ["descriptor_presence_utf8_nonempty", "localization_filename_bom_header"],
             "not_checked": ["descriptor_syntax_and_registration", "script_semantics", "runtime_behavior"],
             "tiger": tiger, "counts": counts, "total": len(diagnostics),
-            "diagnostics": diagnostics[offset:end], "next_offset": end if end < len(diagnostics) else None}
+            "diagnostics": matches[offset:end], "next_offset": end if end < len(matches) else None}
+    if min_severity:
+        data.update(min_severity=min_severity, matched_total=len(matches))
+    return data
