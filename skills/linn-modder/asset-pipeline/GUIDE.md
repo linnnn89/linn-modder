@@ -20,6 +20,7 @@ scale; painted art can use smooth fitting.
 | Menus, HUD, skins or fonts | [UI MOD](../ui-mod/GUIDE.md) |
 | Measure formats or inspect the result | [Target contract](references/target-format.md) |
 | Cutout, crop, alpha, palettes, animation frames or sprite sheets | [2D sprites](references/sprites.md) |
+| SAM 3/3.1 local cutout with existing ComfyUI / 本地 AI 抠图、框选与 FP8 兼容 | [SAM cutout runbook](references/sam3-local-cutout.md) |
 | Blender cameras, headings and animation rendering | [3D to sprites](references/3d-to-sprites.md) |
 | Tiling or PBR channel packing | [Materials](references/materials.md) |
 | DDS reference inspection, conversion and read-back | [DDS](references/dds.md) |
