@@ -21,6 +21,7 @@ Game roots stay read-only; use a generation provider only when requested and con
 | Task | Read |
 |---|---|
 | New CK3 feature or uncertain implementation route | [CK3 workflow](references/ck3-design.md) |
+| Simulation lag, repeated maintenance, native alternatives or activity lifecycle / 卡顿、维护与活动优化 | [Runtime and activity design](references/ck3-runtime-performance.md) |
 | Official references, GPT Image character bases or layered PSD | [Sourcing and PSD](../asset-pipeline/references/sourcing-and-psd.md) |
 | Choose CK3, Victoria II or a Koei edition/route | [Target games](references/targets.md) |
 | Character identity, crops, flags, provenance or a first slice | [Cast and assets](references/cast-and-assets.md) |
@@ -29,6 +30,7 @@ Game roots stay read-only; use a generation provider only when requested and con
 | Encoding, asset-format or runtime checks | [Verification](references/verification.md) |
 | CK3 descriptor/localization format or existing Tiger diagnostics | [CK3 check operation](references/ck3-check.md) |
 | CK3 loading screen stalls; repeated triggered_desc parser errors / 启动卡死案例 | [Dynamic-description loading failure](references/ck3-dynamic-description-loading-failure.md) |
+| CK3 startup access violation in decision widget; explicit controller / 决议控件启动崩溃 | [Decision widget controller](references/ck3-decision-widget-startup-crash.md) |
 | Read, modify and repack a version-specific game container | [Archive round trips](../reverse-engineering/references/archive-roundtrip.md) |
 | Tool parameters or MCP-only access | [Tool interfaces](../references/tools.md) |
 
