@@ -2,6 +2,10 @@
 
 Read when cutting out, fitting, pixelating or packing 2D images. Follow the user's requested scope and validation level.
 
+For complex backgrounds or selecting one character with an existing local SAM 3/3.1 model,
+use the [SAM cutout runbook](sam3-local-cutout.md) and its bundled runner. It covers the actual
+ComfyUI interpreter, FP8 storage/FP16 compute, text versus box selection and mandatory visual checks.
+
 ## 2D pipeline
 ```bash
 um sprite info raw.png                                    # size, alpha coverage, corner colour
