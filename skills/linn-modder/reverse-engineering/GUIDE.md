@@ -15,6 +15,8 @@ bypass protections or publish decompiled source/assets. Do not treat a guessed o
 |---|---|
 | Decompiler, debugger, live state or GPU inspection | [Code and runtime](references/code-and-runtime.md) |
 | Archive/data readers and encoder round trips | [File formats](references/file-formats.md) |
+| Select a game-specific archive tool; UE3 compressed packages | [Container tools](references/container-tools.md) |
+| Replace Wwise voice/music; select a compatible bank writer | [Wwise audio](references/wwise-audio.md) |
 | Known configuration, data or localization edits | [File modification](../file-mod/GUIDE.md) |
 | Modify data inside a container and repack it | [Archive round trips](references/archive-roundtrip.md) |
 | Replay comparisons and evidence journaling | [Evidence](references/evidence.md) |

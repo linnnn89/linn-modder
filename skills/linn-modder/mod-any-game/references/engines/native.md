@@ -4,6 +4,15 @@ Use this when `um scan` says "unknown native engine" or the loader can't reach y
 and it's where agents and reverse-engineering MCPs pay off the most. Single-player/offline only; never on
 anti-cheat-protected games (see safety.md).
 
+## Kenshi: data first, native code only when necessary
+
+For stats, factions and dialogue, inspect the game's Forgotten Construction Set (FCS)
+and a separate `.mod` project first; preserve record IDs and dependencies. Asset overrides
+must match the game's paths and formats. FCS being managed does not make the game a .NET
+target. For a feature outside FCS, investigate [RE_Kenshi](https://github.com/BFrizzleFoShizzle/RE_Kenshi)
+against the exact installed build and its current plugin requirements. Neither scanning
+OGRE DLLs nor finding an editor establishes working native hooks or save compatibility.
+
 ## 1. Get code into the process
 - **Proxy DLL:** drop a DLL named like one the game loads from its own folder (`version.dll`,
   `dinput8.dll`, `winmm.dll`, `dxgi.dll`, `d3d9.dll`, `xinput1_3.dll`). It forwards the real exports and

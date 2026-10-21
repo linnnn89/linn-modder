@@ -13,7 +13,9 @@
 | TKEditor 数据库检索、安全编辑与新增外部头像选项 | [TKEditor Agent 接口](references/tkeditor.md) |
 | JSON、CSV、YAML、INI、XML、脚本和本地化 | [文本与数据](references/text-and-data.md) |
 | 纹理、音频、模型、二进制、归档和存档 | [二进制与资源](references/binary-and-assets.md) |
+| Wwise BNK/WEM 语音或音效替换 | [音频版本与引用](../reverse-engineering/references/wwise-audio.md) |
 | 未知格式/不确定能否写回 | [逆向调查](../reverse-engineering/GUIDE.md) |
+| 游戏更新后迁移已有 MOD、旧 ID 或资源映射 | [保真迁移](../mod-any-game/references/mod-migration.md) |
 | 官方工具/格式规范 | [免费文件资料](../mod-research/references/engine-and-file-sources.md) |
 
 本工具包没有通用游戏文件写入/回封接口；用当前环境真实存在的编辑能力，不编造服务工具。三次失败的修改验证后停止盲改，重新收集证据。
