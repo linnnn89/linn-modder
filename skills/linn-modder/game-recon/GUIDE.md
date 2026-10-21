@@ -15,6 +15,7 @@ for repository or code-only work. Do not inspect protected online clients with l
 | Task | Read |
 |---|---|
 | Discovery commands, ambiguous fingerprints or community research | [Inspection](references/inspection.md) |
+| Existing mod needs a new game build or loader | [Migration](../mod-any-game/references/mod-migration.md) |
 | Installed Steam mod is missing from the game folder | [Workshop and local mod paths](references/steam-workshop.md) |
 | Route choice and the plan template | [Plan](references/plan.md) |
 | Engine details | The playbook named by the scan under `../mod-any-game/references/engines/` |
