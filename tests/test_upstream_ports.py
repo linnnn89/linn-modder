@@ -64,10 +64,16 @@ def test_steam_registry_discovery_under_wsl(monkeypatch):
 
 
 @pytest.mark.parametrize('name, playbook', [('Slay the Spire', 'misc-engines.md'),
-                                          ('Slay the Spire 2', 'godot.md')])
+                                          ('Slay the Spire 2', 'godot.md'),
+                                          ('Mount & Blade II: Bannerlord', 'bannerlord.md'),
+                                          ('Kenshi', 'native.md'),
+                                          ('Mindustry', 'misc-engines.md'),
+                                          ('Dwarf Fortress', 'misc-engines.md'),
+                                          ('The Binding of Isaac: Rebirth', 'misc-engines.md')])
 def test_specific_game_routes(tmp_path, monkeypatch, name, playbook):
-    game = tmp_path / name; game.mkdir()
-    monkeypatch.setattr(scan, 'all_games', lambda: [])
+    game = tmp_path / 'install'; game.mkdir()
+    # Store titles can contain ':' even though Windows folder names cannot.
+    monkeypatch.setattr(scan, 'all_games', lambda: [{'name': name, 'path': str(game)}])
     assert scan.scan(str(game))['routes'][0]['playbook'] == playbook
 
 

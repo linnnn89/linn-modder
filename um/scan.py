@@ -16,6 +16,7 @@ import re
 import struct
 import subprocess
 import time
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from um.common import die, is_mac, is_windows, is_wsl, ps_exe, to_posix
@@ -371,8 +372,37 @@ LOADERS = [
 
 MOD_DIRS = ["mods", "mod", "addons", "plugins", "custom", "workshop", "usermods", "~mods", "content/paks/~mods", "data/scripts", "bepinex/plugins"]
 
+# Auxiliary binaries are evidence about tools, not the game's execution model.
+_AUX_DIRS = {"redist", "commonredist", "vcredist", "directx", "installer", "installers", "support", "tools"}
+_AUX_NAME = re.compile(r"construction.?set|\bfcs\b|mod.?tool|mod.?manager|\bkmm\b|launcher|editor|setup|installer|^unins")
+MAX_PE_PROBES = 12
+BANNERLORD_ROUTE = "official Modules/<id>/SubModule.xml + ModuleData XML and C# MBSubModuleBase; match the installed TaleWorlds assemblies before building"
+
+
+def _auxiliary_binary(path: str) -> bool:
+    return (any(part.lstrip("_") in _AUX_DIRS for part in path.split("/")[:-1])
+            or bool(_AUX_NAME.search(Path(path).stem)))
+
+
+def executable_facts(ix: Index) -> dict:
+    """Probe only indexed paths, with game candidates ahead of auxiliary tools."""
+    candidates = sorted((p for p in ix.files if p.endswith(".exe")),
+                        key=lambda p: (_auxiliary_binary(p), p.count("/"), p))
+    exes = {}
+    for path in candidates[:MAX_PE_PROBES]:
+        info = pe_info(ix.path(path))
+        if info is not None:
+            exes[path] = info
+    return {"executables": exes, "executable_probe_truncated": len(candidates) > MAX_PE_PROBES}
+
 # known games: better routes than the engine default
 KNOWN = {
+    "mount & blade ii: bannerlord": (BANNERLORD_ROUTE, "bannerlord.md"),
+    "mount & blade ii bannerlord": (BANNERLORD_ROUTE, "bannerlord.md"),
+    "kenshi": ("FCS data mods and asset overrides; inspect native game versus managed editor separately; RE_Kenshi only for code changes", "native.md"),
+    "mindustry": ("built-in mod loader: mod.hjson/mod.json, content/, sprites/ and scripts/main.js; match the game build", "misc-engines.md"),
+    "dwarf fortress": ("version-specific raw mods with info.txt, objects/ and graphics/; verify world creation and save compatibility before loading", "misc-engines.md"),
+    "the binding of isaac: rebirth": ("version-specific Lua main.lua, content XML and resources overrides; confirm DLC and optional REPENTOGON requirements", "misc-engines.md"),
     "terraria": ("tModLoader (free Steam app 1281930): C# ModItem/ModNPC/ModProjectile/ModSystem, hot reload from ModSources", "dotnet-xna.md"),
     "stardew valley": ("SMAPI + Content Patcher (JSON content packs) or C# SMAPI mods with Harmony", "dotnet-xna.md"),
     "celeste": ("Everest + Olympus; C# code mods with MonoMod hooks, maps with Lönn/Ahorn", "dotnet-xna.md"),
@@ -434,6 +464,10 @@ def online_only(name: str) -> str | None:
 
 ENGINES = {
     # key: (label, playbook, route)
+    "bannerlord": ("Bannerlord (native engine + managed modules)", "bannerlord.md", BANNERLORD_ROUTE),
+    "zengin": ("ZenGin (Gothic 1/2)", "zengin.md", "version-matched Daedalus scripts and .mod/.vdf assets; check build compatibility before selecting Union plugins"),
+    "mt-framework": ("Capcom MT Framework", "big-frameworks.md", "game-specific ARCtool unpack/repack of native*/*.arc; prove a no-change round trip before replacement"),
+    "hedgehog": ("Hedgehog Engine", "big-frameworks.md", "title-specific Hedge Mod Manager loader and mod.ini loose replacements; verify the installed game build"),
     "unity-mono": ("Unity (Mono)", "unity.md", "BepInEx 5 (or MelonLoader) plugin in C# with HarmonyX patches; read Managed/Assembly-CSharp.dll with ILSpy; assets via AssetRipper/UABEA"),
     "unity-il2cpp": ("Unity (IL2CPP)", "unity.md", "BepInEx 6 (IL2CPP) or MelonLoader; recover types with Cpp2IL / Il2CppDumper, patch through Il2CppInterop"),
     "unreal": ("Unreal Engine", "unreal.md", "UE4SS (Lua/C++ hooks, live property viewer) and/or pak mods in Content/Paks/~mods (FModel to browse, retoc/repak to pack)"),
@@ -472,10 +506,38 @@ ENGINES = {
 def detect(ix: Index) -> tuple[list[tuple[str, int, list[str], dict]], dict]:
     """-> [(engine_key, score, evidence, details)], extra facts"""
     hits: list[tuple[str, int, list[str], dict]] = []
-    facts: dict = {}
+    facts = executable_facts(ix)
 
     def add(key, score, ev, **det):
         hits.append((key, score, ev, det))
+
+    # Require the runtime assembly AND native module, not a managed launcher alone.
+    for directory in ("win64_shipping_client", "gaming.desktop.x64_shipping_client", "win64_shipping_weditor"):
+        dll = f"bin/{directory}/taleworlds.mountandblade.dll"
+        if dll not in ix.files or "modules/native/submodule.xml" not in ix.files:
+            continue
+        details = {"product": "Mount & Blade II: Bannerlord"}
+        version_path = f"bin/{directory}/version.xml"
+        if version_path in ix.files:
+            try:
+                # Version metadata is optional and bounded, never a reason to lose a route.
+                with ix.path(version_path).open("rb") as stream:
+                    data = stream.read(65537)
+                if len(data) <= 65536:
+                    version = ET.fromstring(data)
+                    singleplayer = version.find("Singleplayer")
+                    value = version.get("Value") or (singleplayer.get("Value") if singleplayer is not None else None)
+                    if value and value.strip():
+                        details.update(version=value.strip(), version_file=version_path)
+            except (OSError, ET.ParseError, ValueError):
+                pass
+        add("bannerlord", 100, [dll, "modules/native/submodule.xml"], **details)
+        break
+
+    gothic = ix.find("system/gothic.exe", "system/gothic1.exe", "system/gothic2.exe")
+    volumes = ix.find("data/*.vdf")
+    if volumes and (gothic or ix.has("system/vdfs32g.dll", "system/vdfs32.dll")):
+        add("zengin", 95, (gothic or ix.find("system/vdfs*.dll"))[:1] + volumes[:1])
 
     # Unity
     data_dirs = [d for d in {"/".join(f.split("/")[:-1]) for f in ix.find("*_data/globalgamemanagers", "*_data/data.unity3d", "*_data/maindata")}]
@@ -555,18 +617,26 @@ def detect(ix: Index) -> tuple[list[tuple[str, int, list[str], dict]], dict]:
 
     # XNA / FNA / MonoGame / .NET
     xna = ix.find("fna.dll", "monogame.framework.dll", "microsoft.xna.framework*.dll", "*/fna.dll")
-    exes = [f for f in ix.files if f.endswith(".exe") and "/" not in f][:12]
-    managed = []
-    for e in exes:
-        info = pe_info(ix.path(e))
-        if info:
-            facts.setdefault("executables", {})[e] = info
-            if info["managed"]:
-                managed.append(e)
+    candidates = {p: info for p, info in facts["executables"].items() if not _auxiliary_binary(p)}
+    # An apphost is a native PE paired with its own runtime configuration and assembly.
+    apphosts = [p for p in candidates if p[:-4] + ".runtimeconfig.json" in ix.files
+                and p[:-4] + ".dll" in ix.files]
+    managed = [p for p, info in candidates.items() if info["managed"] or p in apphosts]
+    native = [p for p in candidates if p not in managed]
+    # Framework-dependent apps may have no .exe; a loose config alone is not proof.
+    configs = [p for p in ix.find("*.runtimeconfig.json")
+               if not _auxiliary_binary(p.removesuffix(".runtimeconfig.json") + ".exe")
+               and p.removesuffix(".runtimeconfig.json") + ".dll" in ix.files]
     if xna or ix.has("content/*.xnb"):
         add("xna-fna", 95, (xna or ["Content/*.xnb"])[:2] + managed[:1])
-    elif managed or ix.find("*.runtimeconfig.json"):
-        add("dotnet", 70, (managed or ix.find("*.runtimeconfig.json"))[:2])
+    elif managed or configs:
+        add("dotnet", 35 if native else 70, (managed or configs)[:2])
+        if native:
+            add("native", 35, native[:2])
+            facts["warnings"] = ["both native and managed game candidates exist; confirm the actual game process before choosing a code loader"]
+
+    if ix.has("*ogremain*.dll"):
+        add("native", 55, ix.find("*ogremain*.dll")[:2], note="OGRE runtime; managed editors do not establish a managed game")
 
     # Source / Source 2
     if ix.has("*/gameinfo.gi") or ix.has("game/bin/win64/engine2.dll"):
@@ -596,6 +666,14 @@ def detect(ix: Index) -> tuple[list[tuple[str, int, list[str], dict]], dict]:
     # RE Engine
     if ix.has("re_chunk_000.pak", "re_chunk_000.pak.*"):
         add("re-engine", 100, ["re_chunk_000.pak"])
+
+    arcs = ix.find("native*/*.arc")
+    if arcs:
+        add("mt-framework", 85, arcs[:2])
+    sonic = ix.find("unleashedrecomp.exe", "sonicgenerations.exe", "slw.exe", "sonic forces.exe",
+                    "sonicfrontiers.exe", "sonic_x_shadow_generations.exe")
+    if sonic or (ix.has("*.arl") and ix.has("*.ar", "*.ar.??")):
+        add("hedgehog", 90, sonic[:1] + ix.find("*.arl")[:1])
 
     # FromSoftware
     if ix.has("eldenring.exe", "game/eldenring.exe", "darksoulsiii.exe", "game/darksoulsiii.exe", "sekiro.exe", "armoredcore6.exe", "game/armoredcore6.exe", "nightreign.exe", "game/nightreign.exe") or ix.has("*/regulation.bin", "regulation.bin"):
@@ -629,7 +707,7 @@ def detect(ix: Index) -> tuple[list[tuple[str, int, list[str], dict]], dict]:
     # LÖVE, Java, Defold, Cocos, Haxe
     if ix.has("love.dll", "*.love", "lovec.exe"):
         add("love2d", 95, ix.find("love.dll", "*.love")[:1])
-    jars = ix.find("*.jar")
+    jars = [p for p in ix.find("*.jar") if not _auxiliary_binary(p)]
     if jars and (ix.has_dir("jre", "jre/*", "jdk*", "java*") or len(jars) <= 5):
         add("java", 60, jars[:2])
     if ix.has("game.dmanifest", "game.arcd"):
@@ -701,7 +779,9 @@ def scan(query: str) -> dict:
         routes.append(dict(route=route, playbook=playbook, why=f"engine: {label}"))
     if key not in ("native",):
         routes.append(dict(route=ENGINES["native"][2], playbook="native.md", why="fallback when no loader reaches what you need"))
-    warnings = []
+    warnings = list(facts.get("warnings", []))
+    if facts["executable_probe_truncated"]:
+        warnings.append(f"PE inspection limited to {MAX_PE_PROBES} executables; executable metadata is incomplete")
     if len(ix.files) < 5:
         warnings.append("the install folder is (nearly) empty: the game is not fully installed, or lives elsewhere")
     if anti:
@@ -718,6 +798,7 @@ def scan(query: str) -> dict:
         anti_cheat=anti, mod_loaders_installed=loaders, mod_folders=moddirs,
         workshop=game.get("workshop"), saves=save_hints(name, det),
         executables=facts.get("executables", {}), routes=routes, warnings=warnings,
+        executable_probe_truncated=facts["executable_probe_truncated"],
         playbook=f"skills/linn-modder/mod-any-game/references/engines/{routes[0]['playbook']}",
         files_indexed=len(ix.files), index_truncated=ix.truncated,
         index_truncation_reasons=sorted(ix.truncation_reasons), entries_visited=ix.entries_visited,

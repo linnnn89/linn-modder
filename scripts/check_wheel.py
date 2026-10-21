@@ -35,6 +35,11 @@ def main():
         exported = service.invoke("manuals_export", {"destination": "manuals"})
         assert exported.ok, exported.to_dict()
         for relative in ("linn-modder/mod-research/references/art-and-ui-sources.md",
+                         "linn-modder/mod-any-game/references/mod-migration.md",
+                         "linn-modder/mod-any-game/references/engines/bannerlord.md",
+                         "linn-modder/mod-any-game/references/engines/zengin.md",
+                         "linn-modder/reverse-engineering/references/container-tools.md",
+                         "linn-modder/reverse-engineering/references/wwise-audio.md",
                          "linn-modder/ui-mod/references/fonts-and-localization.md",
                          "linn-modder/file-mod/references/text-and-data.md",
                          "linn-modder/file-mod/references/tkeditor.md",
