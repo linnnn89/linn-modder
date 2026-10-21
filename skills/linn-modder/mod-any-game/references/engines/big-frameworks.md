@@ -16,6 +16,18 @@ reinvent it. Check each one's GitHub/Nexus page for the version matching the gam
 - Online components (SF6 ranked, MH lobbies): cosmetic-only local mods are the norm. Never gameplay-affecting
   mods online.
 
+## MT Framework and Hedgehog Engine
+
+- **MT Framework:** `native*/*.arc` is a family clue, not proof of an exact format revision.
+  Select the title-specific ARCtool variant; prove an unchanged archive round trip before
+  replacing one asset. RE Engine PAK tools are not substitutes. See [container selection](../../../reverse-engineering/references/container-tools.md).
+- **Hedgehog:** named Sonic executables or paired ARL/AR archives guide discovery.
+  Check [Hedge Mod Manager](https://github.com/thesupersonic16/HedgeModManager) for the
+  specific title and loader, then stage `mod.ini` and loose-file replacements using its
+  documented layout. Do not infer compatibility across HE1/HE2 from the family name.
+
+These routes do not add archive writers or installation operations to Linn Modder.
+
 ## FromSoftware (Elden Ring, Dark Souls, Sekiro, Armored Core 6, Nightreign)
 - **Loaders:** ModEngine2 (archived but widely used) or its successor **me3**. They load mods from a folder
   and launch the game **offline with EAC off**. That is the only acceptable way; never online.
