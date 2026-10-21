@@ -20,10 +20,15 @@ a real game installation, gameplay test or showcase is required only when reques
 - Keep evidence/unknowns in `MODLOG.md` for mod work; distinguish prepared art, format validation and game verification.
 - Keep MCP/JSON stdout clean and operational errors structured. State unsupported formats honestly.
 
+## 验证范围与预算
+
+- 局部修改只验证受影响文件、直接调用链及相关测试；生成、打包、安装、交付各阶段不得反复全项目枚举、读取、哈希或比对。
+- 默认使用写入路径白名单、变更清单、受影响文件备份及安装前后定向核对。不得为证明无关文件未变，或因现有脚本默认全量校验而扩大范围，应改用定向入口。
+- 仅用户明确要求全项目审计，或具体异常无法定向定位时扩大范围；同一未变化状态最多建立一次必要全量基线并复用。
+- 相关内容未变且无新失败证据时，不重复已通过检查。保留任务要求的存档保护核对，但不扩大为全项目核对。
+
 ## Harness compatibility
 
-`AGENTS.md` is canonical. Codex/plugin and other client entry formats are documented
-in `docs/setup.md`; keep shared workflows in `skills/`, not duplicated per harness.
-On Windows a `../skills` text pointer is not an auto-discovered skill directory.
-Use the existing plugin, MCP manual reads or exported real directories. Preserve
-compatibility manifests; do not create empty platform skill directories.
+`AGENTS.md` 为规范入口；客户端格式见 `docs/setup.md`，共享流程放在 `skills/`，不按客户端重复。
+Windows 的 `../skills` 文本指针不能自动发现技能；复用现有插件、MCP 手册读取或导出的实体目录。
+保留兼容清单，不创建空的平台技能目录。

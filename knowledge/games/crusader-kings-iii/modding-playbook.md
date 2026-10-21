@@ -3,7 +3,7 @@ kind: game
 title: "CK3 MOD 制作技巧：脚本、角色、立绘、存档与兼容排错"
 game: "Crusader Kings III"
 games_also: []
-game_version: "1.20.0.4 (Crozier), Steam; observations from 2026-10-09 to 2026-10-11"
+game_version: "1.20.0.4 (Crozier), Steam; 1.20.1.1 decision-widget crash supplement, 2026-10-17"
 platform: windows
 engine: clausewitz
 route: data
@@ -12,7 +12,7 @@ anti_cheat: "Offline single-player modding; no protection changes"
 status: in-progress
 agents: ["Codex"]
 humans: []
-date: 2026-10-11
+date: 2026-10-17
 links:
   - "https://forum.paradoxplaza.com/forum/developer-diary/ck3-dev-diary-37-making-mods.1410656/"
   - "https://github.com/amtep/tiger"
@@ -25,7 +25,7 @@ tags: [CK3, 十字军之王3, 萌战, scripting, scopes, events, localization, p
 
 从萌战 MOD 最初三人原型到大规模角色迁移、婚姻与轮回、文化宗教、作弊菜单和 DLC 兼容的实际工作中提炼。本文整理的是可复用做法，不是功能宣传或旧故障待办。依据包括六条开发对话、当时日志和存档调查、当前生成器与产物，以及下方列出的作者资料。
 
-**适用基线为 CK3 1.20.0.4。** “日志确认”“用户实测”“代码检查”“设计约定”分别说明依据；旧版修复不能自动算作新版全量验收。`status: in-progress` 表示部分玩法与组合尚未完成运行验收，不表示本篇仍是空白计划。
+**基础经验基线为 CK3 1.20.0.4；第27项为2026-10-17补录的1.20.1.1决议控件崩溃。** “日志确认”“用户实测”“代码检查”“设计约定”分别说明依据；旧版修复不能自动算作新版全量验收。`status: in-progress` 表示部分玩法与组合尚未完成运行验收，不表示本篇仍是空白计划。
 
 ## 按问题读取
 
@@ -38,6 +38,7 @@ tags: [CK3, 十字军之王3, 萌战, scripting, scopes, events, localization, p
 | 多婚、天朝、侧室、孕期、生父 | Gotchas 16–18 |
 | 宗教分支、文化改革、DLC 作弊、救灾、宣战 | Gotchas 19–22 |
 | 并行修改、生成覆盖、旧档、测试与玩家文案 | Gotchas 23–26、Verification |
+| 启动访问冲突、决议 widget 缺少 controller | Gotcha 27 |
 | 项目约定、外部工具和经验来源 | Project conventions、Sources |
 
 ## Setup：先确认正在改哪一份
@@ -197,6 +198,8 @@ tags: [CK3, 十字军之王3, 萌战, scripting, scopes, events, localization, p
 
 主立绘、头部头像、肩部控件和预览图分别定义用途，保留原始素材与裁框。检查目标遮罩和实际渲染尺寸，不把某一次用过的 `256×320` 当作所有 CK3 图片的硬性规格。原画的眼饰/符纸等遮挡不等于裁切失败，除非用户要求不要擅自重画。
 
+**2026-10-17 制作参考补充：** 已将二向箔安装包教程、GENSEKI 日文立绘规范、Konado 素材/锚点文档及 Ren'Py 等比缩放说明汇入 [CK3 二维立绘与独立小头像参考](../../../skills/linn-modder/anime-strategy-mod/references/cast-and-assets.md#ck3-二维立绘与独立小头像制作及审查参考)。二向箔当前默认 mesh 的参考焦点约为画布 `(0.5W, 0.2H)`，其作者脚本使用 `ground_joint`；`contain/top` 只保证等比容纳，并不保证人脸落在这个焦点。小头像要另外检查实际遮罩与底部数值条。外部服务的画布、半身范围和建议比例不能当 CK3 通用限制；离线预览和接线检查仍不等于当前版本游戏验收。
+
 ### 15. ACG 路人与自创人物失去原生 3D 外貌
 
 **当前代码确认的根因：** 把文化默认 ethnicity 全部设为 `anime_ethnicity`，导致没有专用画像映射的新生、随机和自创人物也进入纸片人路径。
@@ -296,6 +299,16 @@ CB 要同时维护显示/可用条件、代价、胜利与失败、目标集合�
 剧情随机化保留相同结算路径，只换已确认的叙事分支。外部模型润色时保留本地化键、变量占位符、语法与目标关系；没有真实调用指定模型，就不声称已由其审稿。
 
 README 放当前用法，MODLOG 放当前证据与历史索引，素材表放来源与身份待确认记录。已解决的凉宫婚约等个案移出当前待办，提炼方法后归档；仍未识别的素材不能作为“冗余”删掉。上传人数和功能从清单/脚本核对，并保持 Markdown 与 Steam BBCode 同文。
+
+### 27. 决议 widget 的控制器必须显式初始化
+
+**1.20.1.1转储确认：** 2026-10-17萌战启动崩溃的致命线程指向竞技场 `mz_ar_host_decision`／`mz_ar_planner`，控制器指针为0，引擎读取空地址而触发 `C0000005`。错误结构为 `widget = { gui = "mz_ar_planner" }`；温泉筹备决议也有相同遗漏。
+
+**正确方式：** 普通自定义筹备界面写 `widget = { controller = default gui = "mz_ar_planner" }`，对应 `gui/decision_view_widgets/mz_ar_planner.gui`。需要专用控制器的界面按同版原生合同显式声明相应类型，不一律改成default。虽然本机 `_decisions.info` 写着默认值default，本次省略字段后对象仍未初始化；不要仅凭文档默认值省略声明。
+
+**维护约定：** 同步修生成源、生成结果与安装副本，并检查具体widget块。启动会加载决议，不能以“尚未点击”为隔离措施；日志最后一条警告也不能替代崩溃栈证据。完整原因、错误/正确示例和防回归方法见[决议控制器启动崩溃案例](../../../skills/linn-modder/anime-strategy-mod/references/ck3-decision-widget-startup-crash.md)。
+
+**验证边界：** 两份决议已修复安装，7项静态检查通过、20存档哈希不变；用户随后确认成功进入游戏并开始游玩，启动及进入游玩已获用户确认。竞技场/温泉筹备UI和完整活动流程尚未单独验收。不把本例推广成所有版本的崩溃原因。
 
 ## Project conventions：萌战项目约定，不推广成引擎规则
 

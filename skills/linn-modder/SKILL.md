@@ -31,6 +31,20 @@ prepared files, format checks and in-game verification are separate outcomes.
 
 Research unfamiliar tools/formats and version changes first. Distribute mod files only.
 
+## Runtime design and verification
+
+- Prefer native rules, then lifecycle callbacks and bounded sets; poll only for
+  demonstrated coverage gaps. Preserve gameplay and the scope of each effect.
+- Give each state change one owner. Deduplicate requests before side effects,
+  apply only changed state, and make completion/cancellation safe to repeat.
+- Trace frequency × fan-out × nested work. Retire obsolete repairs within the
+  requested compatibility scope; retain necessary recovery.
+- Verify changed files and direct callers using an explicit manifest. Do not
+  repeatedly scan/hash the whole project during delivery; preserve required save
+  protection. Script counts are not measured game speed.
+
+For CK3 maintenance and activities, read the [focused guide](anime-strategy-mod/references/ck3-runtime-performance.md).
+
 Resolve links from this file's directory. MCP `um://guide` and `um://workflow` return
 this entry; `manual_read` uses collection `skills` and path `linn-modder/<topic>/GUIDE.md`.
 Tools, knowledge and installation: [interfaces](references/tools.md).
