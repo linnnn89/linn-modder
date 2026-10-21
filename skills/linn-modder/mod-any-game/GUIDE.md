@@ -20,6 +20,7 @@ Never bypass protections, modify protected online clients or distribute game ass
 |---|---|
 | Intake, unknown engine or route | [Planning](references/planning.md), then [game-recon](../game-recon/GUIDE.md) if needed |
 | Workspace, saves and recovery | [Workspace](references/workspace.md) |
+| Upgrade an existing mod or change its loader while preserving behavior | [Faithful migration](references/mod-migration.md) |
 | Internals or first feature | [Implementation](references/implementation.md) |
 | Asset integration or evidence | [Verification](references/verification.md) |
 | Video, package or field note requested | [Delivery](references/delivery.md), then the matching topic guide |

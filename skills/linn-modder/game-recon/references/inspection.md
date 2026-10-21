@@ -23,6 +23,17 @@ The scan can't see everything, so check these by hand:
 - **Game not in a store library** (GOG, itch, a standalone folder): pass the folder path.
 - **Several engines' signals:** launchers and web helpers are common. The top score wins, but read the
   "also" line.
+- **Managed editor beside a native game:** executable metadata includes auxiliary tools, but
+  their CLR headers do not select the game's .NET route. Name/path classification is heuristic;
+  confirm the executable actually launched. A framework-dependent .NET app needs its paired
+  assembly and runtime config; a native apphost is not automatically a native engine.
+- **Probe limits:** `executable_probe_truncated` means only the first 12 PE candidates were
+  inspected (non-tool paths first, then shallowest paths). This is independent of
+  `index_truncated` and `index_truncation_reasons`; neither missing metadata nor a low score
+  proves absence. Mixed managed/native candidates retain a warning instead of a size-based guess.
+- **Specific signatures:** Bannerlord needs its runtime assembly and Native module together;
+  Gothic needs a system executable/runtime and VDF volumes. Routes identify a research starting
+  point, not an installed editor, compatible writer, or tested game support.
 - **Anti-cheat installed elsewhere:** kernel drivers (Vanguard's `vgk.sys`) and launcher-level protection
   don't live in the game folder. Search "<game> anti-cheat".
 - **Online-only or live-service games:** treat them as protected even if nothing was detected.

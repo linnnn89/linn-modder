@@ -48,7 +48,7 @@
   "title": "CK3 MOD \u5236\u4f5c\u6280\u5de7\uff1a\u811a\u672c\u3001\u89d2\u8272\u3001\u7acb\u7ed8\u3001\u5b58\u6863\u4e0e\u517c\u5bb9\u6392\u9519",
   "game": "Crusader Kings III",
   "games_also": [],
-  "game_version": "1.20.0.4 (Crozier), Steam; observations from 2026-10-09 to 2026-10-11",
+  "game_version": "1.20.0.4 (Crozier), Steam; 1.20.1.1 decision-widget crash supplement, 2026-10-17",
   "platform": "windows",
   "engine": "clausewitz",
   "route": "data",
@@ -65,7 +65,7 @@
    "Codex"
   ],
   "humans": [],
-  "date": "2026-10-11",
+  "date": "2026-10-17",
   "links": [
    "https://forum.paradoxplaza.com/forum/developer-diary/ck3-dev-diary-37-making-mods.1410656/",
    "https://github.com/amtep/tiger",
