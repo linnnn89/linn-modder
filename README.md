@@ -46,6 +46,8 @@ um tool list --workspace $ModWorkspace
 ## 当前可以做什么
 
 - 同一服务提供严格参数校验、结构化错误和带 hash 的文件产物。
+- 扫描区分游戏候选与启动器/编辑器，提供 Bannerlord、ZenGin、MT Framework、Hedgehog 路线；混合证据与 PE 检查预算单独报告，识别不等于支持回封或安装。
+- [旧 MOD 保真迁移](skills/linn-modder/mod-any-game/references/mod-migration.md)衔接版本、稳定 ID、资源映射与验证；[容器选型](skills/linn-modder/reverse-engineering/references/container-tools.md)和 [Wwise 音频](skills/linn-modder/reverse-engineering/references/wwise-audio.md)按需读取。
 - 离线读取技能/知识库、创建项目、裁切透明 PNG、备份及预览恢复。
 - Windows 窗口发现与捕获；输入控制需要明确启用和用户授权。
 - 原有素材生成、精灵处理、3D 转帧和视频工具保留为 CLI 命令。

@@ -1,5 +1,19 @@
 # Other engines, quick routes
 
+## Games with their own content interfaces
+
+Prefer these over generic native hooks when the named game is confirmed. A folder name
+is only a hint; verify its build and installed DLC before selecting the route.
+
+| Game | First route | Compatibility check |
+|---|---|---|
+| Mindustry | `mod.hjson`/`mod.json`, `content/`, `sprites/`, `scripts/main.js`; [official modding guide](https://mindustrygame.github.io/wiki/modding/1-modding/) | Match content/API names to the installed version; start with one content definition |
+| Dwarf Fortress | `info.txt`, `objects/`, `graphics/` raws | Determine whether changes apply at world creation or can affect an existing world; never test migration on the only save |
+| The Binding of Isaac: Rebirth | DLC-specific Lua `main.lua`, content XML and resource overrides | Confirm mod-enabled DLC and optional REPENTOGON dependencies; script compilation alone does not prove the callback runs |
+
+For an existing mod moving versions, follow [faithful migration](../mod-migration.md).
+These are route recommendations, not new toolkit builders or installed dependencies.
+
 ## GameMaker (`data.win`, `game.unx`)
 
 A GEN8 bytecode version does not prove editable GML. Before selecting a code-editing

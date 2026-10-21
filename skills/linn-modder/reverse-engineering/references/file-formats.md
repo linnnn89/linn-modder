@@ -6,6 +6,9 @@ For modifications inside containers, follow the [archive workflow](archive-round
 source backup, explicit read/write capabilities, no-change repack, isolated modification,
 validated output and a recovery manifest.
 
+For per-game unpackers and compressed UE3 packages, read [container tools](container-tools.md).
+For BNK/WEM audio, read [Wwise version and reference checks](wwise-audio.md).
+
 ## Data files and asset formats
 Use the community tool first:
 - Unity: UABEA, AssetRipper
