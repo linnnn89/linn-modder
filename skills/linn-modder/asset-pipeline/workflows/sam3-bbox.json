@@ -1,0 +1,592 @@
+{
+  "id": "1d367ebe-cf07-4c87-b73a-db40277e6d53",
+  "revision": 1,
+  "last_node_id": 116,
+  "last_link_id": 301,
+  "nodes": [
+    {
+      "id": 106,
+      "type": "SaveImage",
+      "pos": [
+        1510,
+        240
+      ],
+      "size": [
+        350,
+        390
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 281
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage",
+        "cnr_id": "comfy-core"
+      },
+      "title": "保存透明 PNG",
+      "widgets_values": [
+        "LinnModder/SAM3_FP8/cutout"
+      ],
+      "widgets_values_named": {
+        "filename_prefix": "LinnModder/SAM3_FP8/cutout"
+      }
+    },
+    {
+      "id": 79,
+      "type": "LoadImage",
+      "pos": [
+        0,
+        60
+      ],
+      "size": [
+        380,
+        340
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            241,
+            282
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage",
+        "cnr_id": "comfy-core",
+        "ver": "0.19.3",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65
+      },
+      "widgets_values": [
+        "linnmodder_sam3_neon_guitarist.png",
+        "image"
+      ],
+      "widgets_values_named": {
+        "image": "linnmodder_sam3_neon_guitarist.png",
+        "upload": "image"
+      },
+      "title": "原图 · 运行前确认主体框"
+    },
+    {
+      "id": 114,
+      "type": "InvertMask",
+      "pos": [
+        920,
+        480
+      ],
+      "size": [
+        210,
+        30
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 285
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            284
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "InvertMask",
+        "cnr_id": "comfy-core",
+        "ver": "0.19.3"
+      }
+    },
+    {
+      "id": 111,
+      "type": "JoinImageWithAlpha",
+      "pos": [
+        1210,
+        400
+      ],
+      "size": [
+        230,
+        80
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 282
+        },
+        {
+          "name": "alpha",
+          "type": "MASK",
+          "link": 284
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            281
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "JoinImageWithAlpha",
+        "cnr_id": "comfy-core",
+        "ver": "0.19.3",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65
+      }
+    },
+    {
+      "id": 99,
+      "type": "SAM3_Detect",
+      "pos": [
+        500,
+        140
+      ],
+      "size": [
+        270,
+        260
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "model",
+          "localized_name": "model",
+          "name": "model",
+          "type": "MODEL",
+          "link": 300
+        },
+        {
+          "label": "image",
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 241
+        },
+        {
+          "label": "conditioning",
+          "localized_name": "conditioning",
+          "name": "conditioning",
+          "shape": 7,
+          "type": "CONDITIONING",
+          "link": null
+        },
+        {
+          "label": "bboxes",
+          "localized_name": "bboxes",
+          "name": "bboxes",
+          "shape": 7,
+          "type": "BOUNDING_BOX",
+          "link": 301
+        },
+        {
+          "label": "positive_coords",
+          "localized_name": "positive_coords",
+          "name": "positive_coords",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "label": "negative_coords",
+          "localized_name": "negative_coords",
+          "name": "negative_coords",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "localized_name": "threshold",
+          "name": "threshold",
+          "type": "FLOAT",
+          "widget": {
+            "name": "threshold"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "refine_iterations",
+          "name": "refine_iterations",
+          "type": "INT",
+          "widget": {
+            "name": "refine_iterations"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "individual_masks",
+          "name": "individual_masks",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "individual_masks"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "masks",
+          "name": "masks",
+          "type": "MASK",
+          "links": [
+            242
+          ]
+        },
+        {
+          "localized_name": "bboxes",
+          "name": "bboxes",
+          "type": "BOUNDING_BOX",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SAM3_Detect",
+        "cnr_id": "comfy-core",
+        "ver": "0.19.3",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65
+      },
+      "widgets_values": [
+        0.5,
+        2,
+        false
+      ],
+      "widgets_values_named": {
+        "threshold": 0.5,
+        "refine_iterations": 2,
+        "individual_masks": false
+      },
+      "title": "SAM3.1 · 纯 Bbox（conditioning 留空）"
+    },
+    {
+      "id": 95,
+      "type": "MaskPreview",
+      "pos": [
+        920,
+        40
+      ],
+      "size": [
+        310,
+        390
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 242
+        }
+      ],
+      "outputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "links": [
+            285
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MaskPreview",
+        "cnr_id": "comfy-core",
+        "ver": "0.19.3",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65
+      }
+    },
+    {
+      "id": 112,
+      "type": "MarkdownNote",
+      "pos": [
+        0,
+        760
+      ],
+      "size": [
+        440,
+        330
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "默认纯 Bbox：选择图片后，先按原图像素修改主体框 x、y、width、height。\n\n示例框仅适用于附带的 2048×2048 吉他手样例；新图必须重设，包含头发、耳朵、手、尾巴、武器等全部所需内容。\n\nBbox → SAM3_Detect.bboxes；conditioning 留空，不连接 CLIPTextEncode。\n保留 FP8 权重，使用 --fp16-unet 计算。输出到 ComfyUI/output/LinnModder/SAM3_FP8/。"
+      ],
+      "widgets_values_named": {
+        "text": "使用本机已有 FP8 权重：sam3.1_multiplex_fp8_e4m3fn.safetensors\n\n基于 Comfy-Org 官方 utility_image_segment_sam3 工作流。\n选择图片，将 object 改为 person 或目标的简短英文描述，运行后保存透明 PNG。\n输出目录：ComfyUI/output/LinnModder/SAM3_FP8/\n\n分割蒙版不是精细透明度；检查发丝、饰品和镂空边缘。\n\n本机兼容要求：通过 run_sam3_fp8.bat 启动，使用 --fp16-unet。保留 FP8 文件，按 FP16 执行运算。"
+      },
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 113,
+      "type": "MarkdownNote",
+      "pos": [
+        500,
+        760
+      ],
+      "size": [
+        480,
+        330
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "检查与非方图处理",
+      "properties": {},
+      "widgets_values": [
+        "先看蒙版和透明 PNG，再判断主体及配件是否完整；框选不是裁图，也不保证精细半透明边缘。\n\n此原生 GUI 链仍直接由 SAM 缩放输入。非方图优先使用 comfy_sam3_cutout.py --box X1 Y1 X2 Y2：脚本自动补白保比例并还原原尺寸。\n\nGUI 框是 x/y/宽/高；CLI 框是 X1/Y1/X2/Y2。需要文字对照时另用 CLI 显式 --prompt person。"
+      ],
+      "widgets_values_named": {
+        "text": "Max tokens for this model is only 32, to separately prompt multiple subjects you can separate prompts with comma, and set the max amount of objects detected for each prompt with :N\n\nFor example above test prompt finds 2 cakes, one apron, 4 window panels\n\n```\neye:2, window panels:4\n```\n\n\n\n"
+      },
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 115,
+      "type": "CheckpointLoaderSimple",
+      "pos": [
+        0,
+        -180
+      ],
+      "size": [
+        330,
+        140
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "ckpt_name",
+          "name": "ckpt_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "ckpt_name"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "MODEL",
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            300
+          ]
+        },
+        {
+          "localized_name": "CLIP",
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": null
+        },
+        {
+          "localized_name": "VAE",
+          "name": "VAE",
+          "type": "VAE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CheckpointLoaderSimple",
+        "cnr_id": "comfy-core",
+        "ver": "0.19.3",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65
+      },
+      "widgets_values": [
+        "sam3.1_multiplex_fp8_e4m3fn.safetensors"
+      ],
+      "widgets_values_named": {
+        "ckpt_name": "sam3.1_multiplex_fp8_e4m3fn.safetensors"
+      },
+      "title": "本机已有 SAM3.1 权重"
+    },
+    {
+      "id": 116,
+      "type": "PrimitiveBoundingBox",
+      "pos": [
+        0,
+        450
+      ],
+      "size": [
+        330,
+        180
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "title": "主体框 · 原图 x / y / width / height",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "BOUNDING_BOX",
+          "type": "BOUNDING_BOX",
+          "links": [
+            301
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PrimitiveBoundingBox",
+        "cnr_id": "comfy-core"
+      },
+      "widgets_values": [
+        100,
+        120,
+        1860,
+        1928
+      ]
+    }
+  ],
+  "links": [
+    [
+      241,
+      79,
+      0,
+      99,
+      1,
+      "IMAGE"
+    ],
+    [
+      242,
+      99,
+      0,
+      95,
+      0,
+      "MASK"
+    ],
+    [
+      281,
+      111,
+      0,
+      106,
+      0,
+      "IMAGE"
+    ],
+    [
+      282,
+      79,
+      0,
+      111,
+      0,
+      "IMAGE"
+    ],
+    [
+      284,
+      114,
+      0,
+      111,
+      1,
+      "MASK"
+    ],
+    [
+      285,
+      95,
+      0,
+      114,
+      0,
+      "MASK"
+    ],
+    [
+      300,
+      115,
+      0,
+      99,
+      0,
+      "MODEL"
+    ],
+    [
+      301,
+      116,
+      0,
+      99,
+      3,
+      "BOUNDING_BOX"
+    ]
+  ],
+  "groups": [],
+  "definitions": {
+    "subgraphs": []
+  },
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.65,
+      "offset": [
+        120,
+        230
+      ]
+    },
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true,
+    "frontendVersion": "1.57.0"
+  },
+  "version": 0.4
+}
