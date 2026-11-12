@@ -1,88 +1,71 @@
-# Strategy-mod verification
+# 策略游戏 MOD 的验证与交付
 
-Read when checking prepared assets, formats or runtime results. Follow the user's requested scope and validation level.
+按本轮行为选择检查，不把素材准备、格式通过、安装落位和游戏表现合成一个“验证成功”。本文适用于 CK3 等策略 MOD；各游戏的接口与格式仍查对应参考。规划中的 profile 不等于已有可用加载器。
 
-## Verification
+## 先明确证据能说明什么
 
-Offline checks can establish file dimensions, alpha, encoding, manifest integrity,
-descriptor structure and deterministic conversion round trips. Record those checks
-in MODLOG.md. Record runtime verification separately; if no game was run, retain
-`not-tested-in-game`. Never imply that a planning-only profile is a working loader.
-
-## CK3 checks at completion
-
-Use [`ck3_check`](ck3-check.md) for descriptor presence/UTF-8/nonempty and localization
-filename/BOM/header checks, or to read an existing Tiger JSON report. It returns file/line
-diagnostics; `data.passed` is separate from operation success and in-game verification.
-Choose it only when that input scope is needed: `ck3_check` walks the localization
-tree, so a one-file script patch does not automatically require this operation.
-
-Choose checks for the changed behavior, not a fixed full-game checklist:
-
-| Change | Offline evidence | Runtime evidence, when requested |
+| 已获得的证据 | 可以说明 | 仍不能说明 |
 |---|---|---|
-| Script/interaction | Defined IDs, correct scope, dependencies, one settlement path | Same target before/after; failure/cancel path if changed |
-| History/lifecycle | Stable identities, family/employer/liege dates, shared generation source | New start or affected save migration; one rebuild without duplicates |
-| Localization | UTF-8 BOM, matching filename/header, keys and placeholders | Actual language, tooltip and target context |
-| 2D portraits/GUI | Identity mapping, actual widget references, crops/masks, override owners | A registered character and the affected ordinary/third-party branch |
-| Dependency/DLC | Exact versions, load order and overridden objects | Only the supported combinations affected by this change |
+| 清单关联、SQL 已同步、路径存在 | 资料与已索引来源一致，文件可定位 | 图片边缘合格、来源工艺属实或游戏已使用该文件 |
+| 编码、结构、引用、生成结果检查 | 本轮静态约束通过 | 引擎接受语法、scope 正确执行或玩法完成 |
+| 受影响文件安装哈希一致 | 候选文件已写到指定副本 | 播放集确实启用、当前进程已重新加载 |
+| 新会话日志、主菜单或用户启动反馈 | 该版本与组合在所述阶段成功 | 活动结算、AI、画像、旧档等其他流程通过 |
+| 实际操作前后结果、截图或存档字段 | 对应人物、界面与状态变化 | 未测试的 DLC、角色或存档同样兼容 |
 
-For a local patch, start with affected files, direct callers and relevant tests.
-Use an explicit delivery manifest and affected-file backups; do not repeatedly
-inventory/hash unrelated files to prove they did not change. Required original-save
-protection is separate from MOD-wide verification. Reuse passing checks unless the
-relevant content changes or new evidence justifies another run.
+记录受检对象和文件版本。哈希绑定的是具体文件；把旧检查或历史日志导入索引，不会产生一次新验收。用户反馈只覆盖其描述或截图中的流程。没有运行游戏时保留 `not-tested-in-game` 或项目既有的 `runtime_verified=false`。
 
-If a broader Tiger check is warranted by the task or a specific unresolved fault,
-use the actual mod descriptor and target-version dependencies. Its configuration
-can load parent mods via `load_mod`; a missing
-dependency is not proof that all its references are wrong. Record tool/game versions.
-An existing JSON baseline can focus the final check on new reports:
+## 选择最小的相关检查
+
+| 本轮变更 | 离线重点 | 需要运行验收时看什么 |
+|---|---|---|
+| 脚本、按钮或互动 | 定义、scope、依赖、费用与唯一结算入口 | 指定目标前后值；涉及的失败、取消或重复路径 |
+| 分封、首府、法理或书签 | 目标日期有效状态、人物全部相关封地、恢复日期与生成来源 | 对应新开局的实际玩家、宗主链、首府和地图 |
+| 轮回或持久状态 | 稳定身份、当前化身、队列及配置来源 | 一次死亡至重建；涉及的关系、重复与存读档 |
+| 本地化 | BOM、文件名、语言头、键、占位符与覆盖文件 | 实际语言下的目标控件及上下文 |
+| 2D 画像或衣柜 | 身份路由、选择器、默认闸门、素材版本与裁框 | 出问题的控件；相关换装及普通／第三方分支 |
+| 规则、define、DLC 或 GUI 覆盖 | 精确版本、生效对象、共享参数、索引范围与覆盖来源 | 受支持组合及受影响入口；GUI 隐藏不等于 AI 禁用 |
+| 回退 | 旧键和参数、生成源、恢复与移除清单、共享文件差异 | 原受支持流程；涉及旧档时实际加载验证 |
+
+可复现故障优先用原操作验收；回归检查针对根因，不只统计括号或字符串是否出现。生成器变更应在临时输出中实际运行对应入口，避免为几行补丁重建全部人物。已有检查通过且相关内容未变时复用，不在打包和安装阶段再重复一套全项目检查。
+
+## 格式检查与 Tiger
+
+[`ck3_check`](ck3-check.md) 检查 descriptor 存在、UTF-8 可读和非空，以及本地化文件名、BOM 和语言头，也能读取已有 Tiger JSON。操作完成看 `ok`，发现错误与否看 `data.passed`；两者都不代表实机通过。它会遍历本地化目录，单文件脚本补丁不自动需要运行这项操作。
+
+需要更广的脚本诊断且已有 Tiger 时，再使用实际 descriptor 和目标版本依赖。`load_mod` 等配置应保留父 MOD 上下文；缺少依赖不证明所有引用都写错。记录工具与游戏版本，版本滞后和误报按本轮相关对象核对，不为全绿而屏蔽整类问题。既有基线可用于聚焦新增诊断：
 
 ```powershell
 ck3-tiger --suppress baseline.json "path/to/your/descriptor.mod"
 ```
 
-`--suppress` filters diagnostics; it does not turn validation into a changed-file scan.
-Do not widen the verification scope merely because an existing tool defaults to it.
-Keep that baseline tied to its original revision. Review remaining relevant warnings;
-do not generate a new baseline from broken output just to hide it. Tiger may lag game
-updates or report false positives. It complements the target version's scripts/logs.
-It is optional; this toolkit does not install or invoke it automatically. Existing JSON
-output can be passed to `ck3_check` with `tiger_report`; importing does not verify freshness.
+`--suppress` 只过滤诊断，不会缩小底层扫描。基线须对应原修订，不能从错误产物重新建立基线以藏掉问题。工具默认全量检查也不是扩大本轮范围的理由。Linn Modder 不自动安装或调用 Tiger；导入已有 JSON 的 `tiger_report` 也不验证其时效。
 
-For performance work, distinguish static complexity estimates, executed-script
-operation counts and engine timing. A reduced command count can support a design
-improvement without proving that a user's lag is fixed. Scenario interpreters must
-model native operators/scopes from evidence and reject unsupported instructions;
-their passing results do not validate native scheduling, travel, AI or save reload.
-See [maintenance/activity scenarios and evidence limits](ck3-runtime-performance.md).
+性能工作区分静态复杂度、固定场景命令计数和引擎计时。减少写入可以支持实现上的改进，不能证明玩家卡顿已消失。场景解释器按已有依据模拟 scope 和操作符，拒绝未知命令；其通过不证明原生调度、旅行、AI 或读档。详见[运行维护与活动优化](ck3-runtime-performance.md)。
+
+## 定向交付与回退
+
+从变更清单确定生成源、MOD 产物、安装目标和必要删除项。生成、打包、安装沿用同一范围，不为证明无关文件未变反复全项目枚举或哈希。受影响文件先备份；任务要求的原存档与配置保护单独保留。
+
+安装前核实外部 `.mod` 路径、内部 `descriptor.mod` 与实际播放集，按用户授权处理游戏操作。提交共享文件前重新核对前态；工作区与安装副本各有其他修改时，分别合并本轮键或语法块。前态改变就停止该次写入并重新合并，不能拿旧快照覆盖。安装后按清单回读；新增目录或文件也应纳入失败恢复。
+
+回退除恢复旧内容，还要确认本功能新增且不再需要的覆盖文件已退出。规则键、持久字段与延迟事件引用属于兼容接口，恢复数字或删除入口不能代替迁移设计。只按来源明确的清单移除文件，不删除不明素材或其他任务内容。
+
+最后报告修改范围、实际检查及结果、安装状态和未验收行为。存档哈希未变说明没有改写存档，不保证旧档能加载，也不使历史修改自动作用于旧档。启动、推进、载入存档和发布是不同操作，按任务范围完成即可。
 
 ## CK3 author sources
 
-Read on **2026-10-12**, pinned for reproducibility; no third-party code was copied:
+以下作者资料于 **2026-10-12** 阅读，保留当时修订以便追溯；本次整理未重新联网核验，也未复制第三方代码：
 
 - [Tiger author README](https://github.com/amtep/tiger/blob/9e3d3b25c7524cdcc86d5f4190f3f8cffbc4d630/README.md)
   and [configuration](https://github.com/amtep/tiger/blob/9e3d3b25c7524cdcc86d5f4190f3f8cffbc4d630/ck3-tiger.conf):
-  scope/reference/history checks, parent-mod context and report baselines. These are
-  tool capabilities, not proof of this project's runtime compatibility.
+  用于理解作用域、引用、历史关系、父 MOD 上下文与诊断基线；工具能力不能代替项目的运行验收。
 - [Paradox Modding Toolkit author README](https://github.com/JDeffner/paradox-modding-toolkit/blob/d71163c4285267fa88c81e730dc8b9c3c2704432/README.md):
-  preserve comments/source formatting, align localization filename/header/BOM,
-  inspect dependency overrides and measure image requirements. Its compatibility
-  migrations are marked experimental; no automatic migration is adopted here.
+  参考其注释和源格式保留、本地化文件名／语言头／BOM 一致、依赖覆盖检查与图片规格测量。其兼容迁移当时标为实验性，本项目未采用自动迁移。
 
-The Paradox forum diary and CK3 Wiki could not be read in this session; their search
-snippets were not treated as verified syntax. Engine-specific project findings remain
-in `knowledge/games/crusader-kings-iii/modding-playbook.md` with their original evidence
-and version limits. No game or third-party validator was run for this documentation work.
+2026-10-12 的这轮核对未能读取 Paradox 论坛开发日志和 CK3 Wiki，未以搜索摘要确认语法；其他日期的查阅记录保留在各自参考中。项目经验位于 `knowledge/games/crusader-kings-iii/modding-playbook.md`，各节说明版本与证据范围。2026-11-12 的文档整理没有运行游戏或第三方脚本验证器。
 
-## CK3 dynamic-description warning
+## 启动故障按原流程复验
 
-For event descriptions or a startup stall, read the verified
-[CK3 1.20.0.4 loading failure](ck3-dynamic-description-loading-failure.md).
-In that build, `triggered_desc` accepts only `trigger` and `desc` as direct
-children. A direct `first_valid` child caused repeated parser errors and blocked
-startup despite passing brace, reference and package checks. Check the generated
-event files as well as the generator; confirm that the actual game reaches its
-main menu before marking startup verified. Main-menu success does not validate
-the event's in-game display or gameplay effects.
+[1.20.0.4 动态描述故障](ck3-dynamic-description-loading-failure.md)中，`triggered_desc` 内直接放入 `first_valid`，即使括号、引用和包检查通过，仍造成重复解析错误并阻塞启动。[1.20.1.1 决议控件故障](ck3-decision-widget-startup-crash.md)则来自未显式初始化控制器。两例都应同步修生成源和实际产物，并沿原启用组合确认启动结果，不能凭最后一条日志猜根因。
+
+这些是特定版本的已记录案例，不是所有启动异常的统一诊断。确认到达主菜单之后，事件显示、筹备界面及活动流程仍各自验收。

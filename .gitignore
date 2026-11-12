@@ -10,6 +10,8 @@ dist/
 *.mkv
 *.audio.raw
 /scratch/
+/backups/
+/temp/
 .pytest_cache/
 .um/
 # the parent repo ignores bin/ (build output); the CLI launcher lives here
