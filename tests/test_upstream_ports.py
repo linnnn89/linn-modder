@@ -116,3 +116,23 @@ def test_backup_roundtrip_with_old_file_timestamp(tmp_path):
     assert backup.verify_snapshot(snapshot)['files']['save.dat']['size'] == len(b'old fixture')
     with zipfile.ZipFile(snapshot) as archive:
         assert archive.read('save.dat') == b'old fixture'
+
+
+def test_kb_check_requires_notes(tmp_path, capsys):
+    for root, reason in [(tmp_path / 'missing', 'not a knowledge folder'),
+                         (tmp_path, 'no notes to check')]:
+        with pytest.raises(SystemExit) as result:
+            kb.main(SimpleNamespace(cmd='check', root=str(root), paths=[], index=False))
+        assert result.value.code != 0
+        assert reason in capsys.readouterr().err
+
+
+@pytest.mark.parametrize('filename, expected', [
+    ('.ENV.local', 1), ('.env.production', 1), ('.env.example', 0), ('config.env.sample', 0),
+])
+def test_publish_env_files_and_templates(tmp_path, filename, expected):
+    (tmp_path / filename).write_text('LABEL=demo', encoding='utf-8')
+    assert publish.check(str(tmp_path)) == expected
+    if expected == 0:
+        (tmp_path / filename).write_text('github_pat_' + 'x' * 65, encoding='utf-8')
+        assert publish.check(str(tmp_path)) == 1

@@ -43,6 +43,32 @@
   ]
  },
  {
+  "path": "games/cities-skylines/read-only-city-dashboard.md",
+  "kind": "game",
+  "game": "Cities: Skylines",
+  "games_also": [],
+  "game_version": "1.21.1-f9, Steam build 22724702, native Linux, Unity 5.6.7f1",
+  "platform": "linux",
+  "engine": "unity-mono",
+  "route": "loader-api",
+  "status": "in-progress",
+  "date": "2026-10-11",
+  "agents": [
+   "Claude Code (Opus 5.5)"
+  ],
+  "humans": [],
+  "title": "\u57ce\u5e02\uff1a\u5929\u9645\u7ebf\u4e00\u4ee3\u7684\u53ea\u8bfb\u57ce\u5e02\u9762\u677f",
+  "tags": [
+   "\u90fd\u5e02\u5929\u9645\u7ebf",
+   "\u4eea\u8868\u677f",
+   "\u53ea\u8bfb",
+   "\u672c\u5730\u5316"
+  ],
+  "links": [
+   "https://github.com/rehan-remade/universal-modder/blob/a34eae75732d7fd5e7810abde188063e72829525/knowledge/games/cities-skylines/read-only-live-city-dashboard-for-cities-skylines-1-an-http-.md"
+  ]
+ },
+ {
   "path": "games/crusader-kings-iii/modding-playbook.md",
   "kind": "game",
   "title": "CK3 MOD \u5236\u4f5c\u6280\u5de7\uff1a\u811a\u672c\u3001\u89d2\u8272\u3001\u7acb\u7ed8\u3001\u5b58\u6863\u4e0e\u517c\u5bb9\u6392\u9519",
@@ -94,6 +120,38 @@
   ]
  },
  {
+  "path": "games/fantasy-maiden-wars-dream-of-the-stray-dreamer/seeded-roster.md",
+  "kind": "game",
+  "game": "Fantasy Maiden Wars Dream of the Stray Dreamer",
+  "games_also": [
+   "Fantasy Maiden Wars DoSD",
+   "\u5e7b\u60f3\u5c11\u5973\u5927\u6226"
+  ],
+  "game_version": "Steam 3575980, build 25976175, fmw_dosd.exe 1.1.0.0 (x64), as of 2026-11-09",
+  "platform": "windows",
+  "engine": "gamemaker",
+  "route": "managed-patch",
+  "status": "in-progress",
+  "date": "2026-11-15",
+  "agents": [
+   "Claude Code (Opus 5.5)"
+  ],
+  "humans": [
+   "SophiaUrabe"
+  ],
+  "title": "\u5e7b\u60f3\u5c11\u5973\u5927\u6218\uff1a\u53ef\u590d\u73b0\u7684\u968f\u673a\u9635\u5bb9",
+  "tags": [
+   "SRPG",
+   "\u4e8c\u6b21\u5143",
+   "\u79cd\u5b50",
+   "\u968f\u673a\u5f00\u5c40",
+   "\u9635\u5bb9"
+  ],
+  "links": [
+   "https://github.com/rehan-remade/universal-modder/blob/a34eae75732d7fd5e7810abde188063e72829525/knowledge/games/fantasy-maiden-wars-dream-of-the-stray-dreamer/randomizer-mode-gml-via-undertalemodtool-cli-run-with-game-s.md"
+  ]
+ },
+ {
   "path": "games/gta-v/minecraft-passthrough.md",
   "kind": "game",
   "title": "Minecraft inside GTA V (passthrough mod)",
@@ -138,6 +196,124 @@
    "reprojection",
    "camera-sync",
    "director"
+  ]
+ },
+ {
+  "path": "games/hearts-of-iron-iv/albania-national-focus.md",
+  "kind": "game",
+  "game": "Hearts of Iron IV",
+  "game_version": "1.19.3",
+  "platform": "windows",
+  "engine": "clausewitz",
+  "route": "data",
+  "status": "in-progress",
+  "date": "2026-10-08",
+  "agents": [
+   "Codex (gpt-6)"
+  ],
+  "title": "\u94a2\u94c1\u96c4\u5fc3 IV\uff1a\u963f\u5c14\u5df4\u5c3c\u4e9a\u7684\u6700\u5c0f\u56fd\u7b56\u6811",
+  "tags": [
+   "HOI4",
+   "\u56fd\u7b56\u6811",
+   "\u56fd\u5bb6\u9009\u62e9",
+   "\u672c\u5730\u5316"
+  ],
+  "links": [
+   "https://github.com/rehan-remade/universal-modder/blob/a34eae75732d7fd5e7810abde188063e72829525/knowledge/games/hearts-of-iron-iv/creating-a-national-focus-for-albania.md"
+  ]
+ },
+ {
+  "path": "games/outer-wilds/portal-assets-and-loop.md",
+  "kind": "game",
+  "game": "Outer Wilds",
+  "games_also": [
+   "Portal 2"
+  ],
+  "game_version": "1.1.16.1372 (Steam 753640, buildid 20230391), Unity 2019.4.39f1 Mono, Echoes of the Eye installed",
+  "platform": "windows",
+  "engine": "unity-mono",
+  "route": "loader-api",
+  "status": "working",
+  "date": "2026-10-10",
+  "agents": [
+   "Claude Code (Opus 5.5)"
+  ],
+  "humans": [
+   "charlystereo"
+  ],
+  "title": "\u661f\u9645\u62d3\u8352 \u00d7 \u4f20\u9001\u95e8 2\uff1a\u8de8\u6e38\u620f\u7d20\u6750\u3001\u79fb\u52a8\u4e0e\u5faa\u73af\u91cd\u7f6e",
+  "tags": [
+   "Outer Wilds",
+   "Portal 2",
+   "\u661f\u9645\u62d3\u8352",
+   "\u7d20\u6750\u8f6c\u6362",
+   "\u5faa\u73af"
+  ],
+  "links": [
+   "https://github.com/rehan-remade/universal-modder/blob/a34eae75732d7fd5e7810abde188063e72829525/knowledge/games/outer-wilds/portal-2-portal-gun-in-outer-wilds-1-1-16-owml-see-through-p.md"
+  ]
+ },
+ {
+  "path": "games/stellaris/anime-species-portraits.md",
+  "kind": "game",
+  "title": "\u7fa4\u661f\u840c\u5316 MOD\uff1a\u65b0\u5efa\u4e8c\u6b21\u5143\u7269\u79cd\u7acb\u7ed8\u5305\uff0c\u6216\u66ff\u6362\u539f\u7248\u5916\u89c2",
+  "game": "Stellaris",
+  "game_version": "3.12 \u7acb\u7ed8\u6ce8\u518c\u6539\u7248\uff0c4.2.4 \u9759\u6001\u6837\u4f8b\uff0c4.3 \u7cfb\u5217\u5916\u89c2\u66ff\u6362\u7cfb\u7edf\uff1b\u76ee\u6807 4.6 \u5f85\u6e38\u620f\u9a8c\u8bc1",
+  "platform": "windows",
+  "engine": "clausewitz",
+  "route": "data",
+  "status": "in-progress",
+  "date": "2026-11-23",
+  "agents": [
+   "Codex"
+  ],
+  "tags": [
+   "\u7fa4\u661f",
+   "\u840c\u5316",
+   "\u4e8c\u6b21\u5143",
+   "\u7269\u79cd",
+   "\u9886\u8896",
+   "\u8096\u50cf",
+   "\u9759\u6001\u7acb\u7ed8",
+   "DDS",
+   "portrait_sets",
+   "portrait_categories"
+  ],
+  "links": [
+   "https://store.steampowered.com/news/app/281990/view/5766372999943272862",
+   "https://forum.paradoxplaza.com/forum/developer-diary/stellaris-dev-diary-414b-portrait-substitution-system.1915204/",
+   "https://github.com/Xen-Shuto/species_portrait_template/tree/c84a397599ea57a65b62bdecbd19fa6dbe49b36f",
+   "https://steamcommunity.com/sharedfiles/filedetails/?id=3241789640",
+   "https://store.steampowered.com/news/app/281990/view/1849827110441822"
+  ]
+ },
+ {
+  "path": "games/sword-art-online-hollow-realization/cpk-roundtrip.md",
+  "kind": "game",
+  "game": "Sword Art Online: Hollow Realization Deluxe Edition",
+  "games_also": [],
+  "game_version": "Steam app 607890, sao_hr.exe PE timestamp 0x59DF33EF, SizeOfImage 0x10A2000, SHA-256 1923F0D8D2CAD559D6AD6E001AF54EA5EA5AA70171323F42D4E1FA3D63699E43; Windows 11 Pro 26100",
+  "platform": "windows",
+  "engine": "native",
+  "route": "data",
+  "status": "working",
+  "date": "2026-11-10",
+  "agents": [
+   "Claude Code (Opus 5.5)"
+  ],
+  "humans": [
+   "BinaryNull"
+  ],
+  "title": "\u5200\u5251\u795e\u57df\uff1a\u865a\u7a7a\u5e7b\u754c\u7684\u5927\u578b CPK \u4fee\u6539\u4e0e\u56de\u9000",
+  "tags": [
+   "SAO",
+   "\u5c01\u5305",
+   "\u56de\u5c01",
+   "\u7ecf\u9a8c\u503c",
+   "\u5378\u8f7d"
+  ],
+  "links": [
+   "https://github.com/rehan-remade/universal-modder/blob/a34eae75732d7fd5e7810abde188063e72829525/knowledge/games/sword-art-online-hollow-realization/zero-exp-patcher-cri-cpk-append.md"
   ]
  },
  {
@@ -218,6 +394,60 @@
    "explosions",
    "camera",
    "showcase-video"
+  ]
+ },
+ {
+  "path": "games/total-war-shogun-2/france-faction-port.md",
+  "kind": "game",
+  "game": "Total War: SHOGUN 2",
+  "games_also": [
+   "Napoleon: Total War"
+  ],
+  "game_version": "Shogun 2 build 6262 (v1.1.0) with Fall of the Samurai and the Otomo DLC, Steam, Windows 11; Napoleon: Total War (Steam, Napoleon.exe of 2026-10-15)",
+  "platform": "windows",
+  "engine": "native",
+  "route": "data",
+  "status": "working",
+  "date": "2026-10-26",
+  "agents": [
+   "Claude Code (Opus 5.5)"
+  ],
+  "humans": [],
+  "title": "\u5e55\u5e9c\u5c06\u519b 2 \u00d7 \u62ff\u7834\u4ed1\uff1a\u628a\u6cd5\u56fd\u52bf\u529b\u79fb\u5165\u6218\u5f79",
+  "tags": [
+   "\u52bf\u529b\u79fb\u690d",
+   "\u5355\u4f4d\u5361",
+   "\u65d7\u5e1c",
+   "\u5f00\u5c40"
+  ],
+  "links": [
+   "https://github.com/rehan-remade/universal-modder/blob/a34eae75732d7fd5e7810abde188063e72829525/knowledge/games/total-war-shogun-2/shogun-2-napoleon-france-faction-port.md"
+  ]
+ },
+ {
+  "path": "games/total-war-warhammer-iii/valkia-subjugation.md",
+  "kind": "game",
+  "game": "Total War: WARHAMMER III",
+  "games_also": [],
+  "game_version": "9.0.4.0 (Warhammer3.exe), Steam build 25961564, Immortal Empires",
+  "platform": "windows",
+  "engine": "native",
+  "route": "loader-api",
+  "status": "working",
+  "date": "2026-10-20",
+  "agents": [
+   "Claude Code (Opus 5.5)"
+  ],
+  "humans": [],
+  "title": "\u6218\u9524 3\uff1a\u590d\u7528\u539f\u7248\u6289\u62e9\u62db\u964d\u9886\u4e3b",
+  "tags": [
+   "\u9635\u8425",
+   "\u62db\u52df",
+   "\u9644\u5eb8",
+   "\u4e8b\u4ef6"
+  ],
+  "links": [
+   "https://github.com/rehan-remade/universal-modder/blob/a34eae75732d7fd5e7810abde188063e72829525/knowledge/games/total-war-warhammer-iii/valkia-khorne-subjugation-reusing-archaon-dilemmas.md"
   ]
  },
  {
@@ -452,5 +682,25 @@
    "@rehan_shei"
   ],
   "links": []
+ },
+ {
+  "path": "techniques/upstream-game-examples.md",
+  "kind": "technique",
+  "title": "\u6309\u5236\u4f5c\u95ee\u9898\u67e5\u627e\u4e0a\u6e38\u7684 11 \u4e2a\u6e38\u620f\u793a\u4f8b\u5de5\u7a0b",
+  "date": "2026-11-23",
+  "agents": [
+   "Codex"
+  ],
+  "tags": [
+   "examples",
+   "\u793a\u4f8b\u5de5\u7a0b",
+   "\u6848\u4f8b",
+   "\u53c2\u8003\u6e38\u620f",
+   "\u8de8\u6e38\u620f",
+   "\u4e0a\u6e38"
+  ],
+  "links": [
+   "https://github.com/rehan-remade/universal-modder/tree/a34eae75732d7fd5e7810abde188063e72829525/examples"
+  ]
  }
 ]

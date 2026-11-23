@@ -1,6 +1,6 @@
 # CK3 与二次元策略游戏 MOD
 
-新做 CK3 功能或尚未确定实现路线时，先读[设计与实现](references/ck3-design.md)。已有工程的局部维护直接选下表，不必重建脚手架，也不必为脚本修改进入素材流程。Victoria II、光荣系列等游戏先查[目标游戏](references/targets.md)，不套用 CK3 接口。
+新做 CK3 功能或尚未确定实现路线时，先读[设计与实现](references/ck3-design.md)。已有工程的局部维护直接选下表，不必重建脚手架，也不必为脚本修改进入素材流程。群星立绘、Victoria II 与光荣系列先查[目标游戏](references/targets.md)，不套用 CK3 接口。
 
 ## 开始与收尾
 

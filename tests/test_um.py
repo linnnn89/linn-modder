@@ -36,10 +36,11 @@ def test_unity_mono_and_version(tmp_path):
     key, det = engine_of(tmp_path, {
         "UnityPlayer.dll": b"MZ", "Game_Data/Managed/Assembly-CSharp.dll": b"MZ",
         "Game_Data/globalgamemanagers": b"\0" * 20 + b"2022.3.21f1\0" + b"\0" * 100,
-        "Game_Data/app.info": "Studio\nCoolGame",
+        "Game_Data/app.info": "制作组\n幻想游戏".encode("utf-8-sig"),
     })
     assert key == "unity-mono"
-    assert det["version"] == "2022.3.21f1" and det["product"] == "CoolGame"
+    assert det["version"] == "2022.3.21f1"
+    assert (det["company"], det["product"]) == ("制作组", "幻想游戏")
 
 
 def test_unity_il2cpp(tmp_path):
@@ -65,7 +66,8 @@ def test_gamemaker_and_rpgmaker(tmp_path):
     assert engine_of(tmp_path / "b", {"www/js/rpg_core.js": "//", "Game.exe": b"MZ"})[0] == "rpgmaker-mvmz"
 
 
-def test_managed_pe(tmp_path):
+@pytest.mark.parametrize("directory_count,is_managed", [(16, True), (14, False)])
+def test_managed_pe(tmp_path, directory_count, is_managed):
     # minimal PE32 with a CLR header directory entry
     pe = bytearray(1024)
     pe[0:2] = b"MZ"
@@ -73,11 +75,13 @@ def test_managed_pe(tmp_path):
     pe[0x80:0x84] = b"PE\0\0"
     struct.pack_into("<H", pe, 0x84, 0x14C)
     opt = 0x80 + 24
+    struct.pack_into("<H", pe, 0x94, 224)
     struct.pack_into("<H", pe, opt, 0x10B)
+    struct.pack_into("<I", pe, opt + 92, directory_count)
     struct.pack_into("<I", pe, opt + 96 + 14 * 8, 0x2000)
     p = tmp_path / "Game.exe"
     p.write_bytes(bytes(pe))
-    assert scan.pe_info(p) == {"arch": "x86", "managed": True}
+    assert scan.pe_info(p) == {"arch": "x86", "managed": is_managed}
 
 
 def test_vdf():

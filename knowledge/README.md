@@ -8,6 +8,8 @@ and symptom → cause → fix gotchas. Read the relevant note rather than every 
 | Find prior work | [INDEX.md](INDEX.md), `index.json`, or `um kb search "<game>"` |
 | Write or update a note | [share-field-notes](../skills/linn-modder/share-field-notes/GUIDE.md) |
 | Contribution rules | [Shared contribution reference](../skills/linn-modder/share-field-notes/references/contributing.md) |
+| Browse the 11 upstream example projects by task | [Game examples](techniques/upstream-game-examples.md) |
+| Make an anime portrait pack for Stellaris | [群星萌化：物种与领袖立绘](games/stellaris/anime-species-portraits.md) |
 | Engine-specific routes/tools | The matching playbook under `skills/linn-modder/mod-any-game/references/engines/` |
 | Cross-game content design | [Resource layers, stable IDs and delivery boundaries](techniques/content-mod-design.md) |
 

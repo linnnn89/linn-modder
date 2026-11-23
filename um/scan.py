@@ -148,7 +148,7 @@ def epic_games() -> list[dict]:
     if base:
         for item in (base / "Epic/EpicGamesLauncher/Data/Manifests").glob("*.item"):
             try:
-                d = json.loads(item.read_text(errors="replace"))
+                d = json.loads(item.read_text(encoding="utf-8-sig", errors="replace"))
             except (json.JSONDecodeError, OSError):
                 continue
             p = to_posix(d.get("InstallLocation", ""))
@@ -266,13 +266,21 @@ def pe_info(path: Path) -> dict | None:
     if head[:2] != b"MZ" or len(head) < 0x40:
         return None
     off = struct.unpack_from("<I", head, 0x3C)[0]
-    if off + 0x100 > len(head) or head[off:off + 4] != b"PE\0\0":
+    if off + 26 > len(head) or head[off:off + 4] != b"PE\0\0":
         return None
     machine = struct.unpack_from("<H", head, off + 4)[0]
     opt = off + 24
     magic = struct.unpack_from("<H", head, opt)[0]
+    if magic not in (0x10B, 0x20B):
+        return None
     dd = opt + (96 if magic == 0x10B else 112)
-    clr_rva = struct.unpack_from("<I", head, dd + 14 * 8)[0] if dd + 15 * 8 <= len(head) else 0
+    opt_size = struct.unpack_from("<H", head, off + 20)[0]
+    opt_end = min(opt + opt_size, len(head))
+    clr_rva = 0
+    if dd + 15 * 8 <= opt_end:
+        num_dirs = struct.unpack_from("<I", head, dd - 4)[0]
+        if num_dirs > 14:
+            clr_rva = struct.unpack_from("<I", head, dd + 14 * 8)[0]
     return dict(arch={0x14C: "x86", 0x8664: "x64", 0xAA64: "arm64"}.get(machine, hex(machine)), managed=clr_rva != 0)
 
 
@@ -548,7 +556,7 @@ def detect(ix: Index) -> tuple[list[tuple[str, int, list[str], dict]], dict]:
         info = f"{dd}/app.info" if dd else None
         if info and info in ix.files:
             try:
-                company, product = (ix.path(info).read_text(errors="replace").splitlines() + ["", ""])[:2]
+                company, product = (ix.path(info).read_text(encoding="utf-8-sig", errors="replace").splitlines() + ["", ""])[:2]
                 det.update(company=company, product=product)
             except OSError:
                 pass

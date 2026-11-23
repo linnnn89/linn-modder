@@ -27,3 +27,18 @@ Search `knowledge_search` for `Victoria 2` or `South Central`, then read
 The imported upstream report covers HoD 3.04 map formats, non-recursive
 `replace_path`, event pictures and icon strips. Preserve its version and original
 verification context; it does not establish compatibility for another build.
+
+## 群星与其他游戏案例
+
+《群星》萌化物种、领袖或原版头像：用 `manual_read(collection="knowledge", path="games/stellaris/anime-species-portraits.md")` 读取 DDS、立绘组、物种集合与建国器分类的对应关系。
+
+在 `knowledge_search` 中按下表搜索；返回的 `path` 可交给 `manual_read` 离线读取。
+
+| 当前任务 | 搜索词 |
+|---|---|
+| 从另一部作品移入完整势力 | 幕府将军 2 |
+| 用原版战役抉择招募其他势力领主 | 战锤 3 招降 |
+| 跨作品角色随机开局与章节平衡 | 幻想少女大战 |
+| 大型 CPK 修改、回封与卸载回退 | 虚空幻界 |
+| 阵营专属国策与本地化 | 阿尔巴尼亚 |
+| 浏览全部 11 个上游示例工程 | 示例工程 |
