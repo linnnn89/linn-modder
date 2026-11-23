@@ -41,6 +41,11 @@ SKIP_DIRS = {".git", ".venv", "venv", "node_modules", "__pycache__", ".pytest_ca
 TEXT_EXT = {".cs", ".c", ".cpp", ".h", ".hpp", ".py", ".lua", ".js", ".ts", ".json", ".toml", ".ini", ".cfg", ".txt", ".md", ".xml",
             ".yaml", ".yml", ".rs", ".java", ".kt", ".gd", ".rpy", ".psc", ".sh", ".ps1", ".bat", ".gml", ".hlsl", ".glsl", ".env"}
 ARCHIVE_EXT = {".pak", ".utoc", ".ucas", ".bsa", ".ba2", ".vpk", ".rpf", ".pck", ".assets", ".bundle", ".sga", ".big", ".wad", ".bdt", ".archive"}
+ENV_TEMPLATE_SUFFIXES = {".example", ".sample", ".dist", ".template"}
+
+
+def _env_name(name: str) -> bool:
+    return name.endswith(".env") or name.startswith(".env.")
 
 
 def _sha1(p: Path) -> str:
@@ -78,11 +83,14 @@ def check(mod: str, game: str | None = None) -> int:
                     break
     for f in files:
         rel = f.relative_to(root).as_posix()
-        if f.name == ".env" or f.name.endswith(".env"):
+        name = f.name.lower()
+        env = _env_name(name)
+        template = f.suffix.lower() in ENV_TEMPLATE_SUFFIXES and _env_name(f.stem.lower())
+        if env and not template:
             fails.append(f"env file (secrets?): {rel}")
         if f.suffix.lower() in ARCHIVE_EXT and f.stat().st_size > 5 << 20:
             warns.append(f"large engine archive ({f.stat().st_size >> 20} MB): {rel} - make sure it holds only your own assets")
-        if f.suffix.lower() in TEXT_EXT or f.name in (".env",):
+        if f.suffix.lower() in TEXT_EXT or env or template or name == ".envrc":
             try:
                 txt = f.read_text(errors="replace")
             except OSError:

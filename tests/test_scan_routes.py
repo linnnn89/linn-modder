@@ -13,7 +13,9 @@ def pe(managed=False):
     struct.pack_into('<I', data, 0x3C, 0x80)
     data[0x80:0x84] = b'PE\0\0'
     struct.pack_into('<H', data, 0x84, 0x14C)
+    struct.pack_into('<H', data, 0x94, 224)
     struct.pack_into('<H', data, 0x98, 0x10B)
+    struct.pack_into('<I', data, 0x98 + 92, 16)
     struct.pack_into('<I', data, 0x98 + 96 + 14 * 8, 0x2000 if managed else 0)
     return bytes(data)
 

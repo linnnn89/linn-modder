@@ -232,12 +232,17 @@ def check_note(path: Path, root: Path | None = None) -> tuple[list[str], list[st
         from um.scan import ENGINES
         if meta.get("engine") and meta["engine"] not in ENGINES and meta["engine"] != "unknown":
             warns.append(f"engine {meta['engine']!r} isn't one of um scan's keys ({', '.join(sorted(ENGINES))}, unknown)")
-        heads = [h.lower() for h in re.findall(r"^##\s+(.+)$", body, re.M)]
+        from um.resources import outline
+        sections = [s for s in outline(body) if s["level"] == 2]
+        heads = [s["heading"].lower() for s in sections]
         for s in GAME_SECTIONS:
             if not any(h.startswith(s) for h in heads):
                 fails.append(f"missing section: ## {s.capitalize()}...")
-        if "gotchas" in " ".join(heads) and not re.search(r"^##\s+Gotchas.*?\n(?:.*\n)*?\s*1\.", body, re.M | re.I):
-            warns.append("Gotchas section has no numbered items")
+        for section in sections:
+            if section["heading"].lower().startswith("gotchas"):
+                lines = body.splitlines()[section["start_line"]:section["end_line"]]
+                if not any(re.match(r"^\s*(?:#{3,6}\s+)?1\.\s+", line) for line in lines):
+                    warns.append("Gotchas section has no numbered items")
     if meta.get("status") and meta["status"] not in STATUSES:
         fails.append(f"status {meta['status']!r} not one of: {', '.join(STATUSES)}")
     d = meta.get("date")
@@ -434,7 +439,13 @@ def main(a):
         return
     if c == "check":
         root = Path(a.root) if a.root else local_root()
-        paths = [Path(x) for x in a.paths] or ([p for p, _, _ in notes(root)] if root else [])
+        if root is not None and not root.is_dir():
+            die(f"not a knowledge folder: {root}")
+        if root is None and not a.paths:
+            die("no local knowledge folder; pass --root or a note path")
+        paths = [Path(x) for x in a.paths] or [p for p, _, _ in notes(root)]
+        if not paths:
+            die(f"no notes to check in {root}")
         bad = 0
         for p in paths:
             fails, warns = check_note(p, root)
