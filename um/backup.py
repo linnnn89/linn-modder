@@ -20,6 +20,7 @@ import os
 import stat
 import shutil
 import tempfile
+from collections import defaultdict
 from contextlib import ExitStack
 from datetime import datetime
 import zipfile
@@ -203,12 +204,62 @@ def _target(value: str) -> Path:
     return t
 
 
+def _file_id(path: Path) -> tuple[int, int]:
+    info = path.stat()
+    if not info.st_ino:
+        raise OSError(f'Filesystem did not return a file identity for {path}')
+    return info.st_dev, info.st_ino
+
+
+def _match_target_files(target: Path, wanted: dict, current: dict) -> dict[str, str]:
+    """Pair manifest paths with the actual spellings enumerated in the target."""
+    matches = {rel: rel for rel in wanted.keys() & current.keys()}
+    used = set(matches.values())
+    missing_entries = set()
+    entries = None
+    for rel in wanted.keys() - matches.keys():
+        path = target / rel
+        try:
+            identity = _file_id(path)
+        except FileNotFoundError:
+            # Two spellings of an existing parent can name the same missing leaf.
+            try:
+                slot = (_file_id(path.parent), path.name)
+            except FileNotFoundError:
+                continue
+            if slot in missing_entries:
+                raise ToolError('invalid_target', f'Multiple restore paths name the same target entry: {rel}')
+            missing_entries.add(slot)
+            continue
+
+        # A different spelling resolved on this filesystem. Index *all* names,
+        # including exact matches, so hard links cannot become false aliases.
+        if entries is None:
+            entries = defaultdict(list)
+            for name in current:
+                actual = target / name
+                entries[_file_id(actual.parent), _file_id(actual)].append(name)
+        candidates = entries.get((_file_id(path.parent), identity), [])
+        if len(candidates) > 1:
+            # Directory spelling alone can differ while the leaf matches exactly.
+            candidates = [name for name in candidates if Path(name).name == path.name]
+        if len(candidates) != 1 or candidates[0] in used:
+            raise ToolError('invalid_target', f'Cannot uniquely match restore path to a target entry: {rel}')
+        matches[rel] = candidates[0]
+        used.add(candidates[0])
+    return matches
+
+
 def _diff(zp: Path, m: dict, t: Path) -> dict:
     now = _scan(t) if t.is_dir() else {}
     old = m['files']
+    try:
+        matches = _match_target_files(t, old, now)
+    except OSError as exc:
+        raise ToolError('invalid_target', f'Cannot identify restore target entries: {exc}') from exc
     return dict(snapshot=str(zp), target=str(t),
-                added=sorted(set(now) - set(old)), removed=sorted(set(old) - set(now)),
-                changed=sorted(k for k in set(now) & set(old) if now[k]['sha1'] != old[k]['sha1']))
+                added=sorted(now.keys() - matches.values()), removed=sorted(old.keys() - matches.keys()),
+                changed=sorted(rel for rel, name in matches.items() if now[name]['sha1'] != old[rel]['sha1']))
 
 
 def diff(name: str, target: str | None = None, snapshot: str | None = None, *, store: Path | None = None) -> dict:
@@ -238,9 +289,12 @@ def restore(name: str, to: str | None = None, snapshot: str | None = None, clean
             die('re-run with --yes to do it')
         undo = create(str(t), name[:52] + '-pre-restore', note=f'automatic, before restoring {zp.name}', store=store, quiet=quiet) if t.is_dir() else None
         t.mkdir(parents=True, exist_ok=True)
+        missing = set(d['removed'])
         try:
             for rel in m['files']:
                 p = t / rel
+                if rel in missing and p.exists():
+                    raise OSError(f'Expected a missing restore entry, but it now exists: {rel}')
                 p.parent.mkdir(parents=True, exist_ok=True)
                 # Same-directory replace avoids truncating an existing file on a failed copy.
                 with tempfile.NamedTemporaryFile(dir=p.parent, delete=False, prefix='.um-restore-') as tmp:
@@ -250,7 +304,15 @@ def restore(name: str, to: str | None = None, snapshot: str | None = None, clean
                     os.replace(temporary, p)
                 finally:
                     temporary.unlink(missing_ok=True)
-            if clean:
+            if clean and d['added']:
+                # Replacements have new identities. Check the whole deletion
+                # plan before the first unlink, even if the diff missed an alias.
+                restored = {_file_id(t / rel) for rel in m['files']}
+                if len(restored) != len(m['files']):
+                    raise OSError('Restored paths do not identify distinct files; cleanup stopped.')
+                for rel in d['added']:
+                    if _file_id(t / rel) in restored:
+                        raise OSError(f'Cleanup entry identifies a restored file: {rel}')
                 for rel in d['added']:
                     (t / rel).unlink()
         except OSError as exc:

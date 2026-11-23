@@ -1,6 +1,7 @@
 """Snapshot round trips and invalid archives; no game files or desktop control."""
 import hashlib
 import json
+import os
 import stat
 import subprocess
 import sys
@@ -180,3 +181,143 @@ def test_filesystem_failure_reports_a_verified_undo_snapshot(tmp_path, monkeypat
         assert z.read('a.dat') == b'current-a'
         assert z.read('b.dat') == b'current-b'
     assert not list(target.glob('.um-restore-*'))
+
+
+@pytest.mark.parametrize('clean', [False, True])
+@pytest.mark.parametrize('previous', [b'snapshot', b'edited'])
+def test_restore_nested_spelling_uses_target_filesystem(tmp_path, previous, clean):
+    source = tmp_path / 'source/Profiles'
+    target = tmp_path / 'target'
+    original = target / 'profiles/save.dat'
+    desired = target / 'Profiles/Save.dat'
+    extra = target / 'extra.dat'
+    source.mkdir(parents=True)
+    (source / 'Save.dat').write_bytes(b'snapshot')
+    original.parent.mkdir(parents=True)
+    original.write_bytes(previous)
+    extra.write_bytes(b'extra')
+    aliases = desired.exists() and desired.samefile(original)
+    service = Service(tmp_path)
+    assert service.invoke('backup_create', {'name': 'fixture', 'source': 'source'}).ok
+    args = {'name': 'fixture', 'target': 'target', 'clean': clean}
+    preview = service.invoke('backup_restore', args)
+    assert preview.ok, preview.to_dict()
+    assert preview.data['added'] == (['extra.dat'] if aliases else ['extra.dat', 'profiles/save.dat'])
+    assert preview.data['removed'] == ([] if aliases else ['Profiles/Save.dat'])
+    assert preview.data['changed'] == (['Profiles/Save.dat'] if aliases and previous != b'snapshot' else [])
+    assert original.read_bytes() == previous and extra.is_file()
+
+    result = service.invoke('backup_restore', args | {'apply': True})
+    assert result.ok, result.to_dict()
+    for key in ('added', 'removed', 'changed'):
+        assert result.data[key] == preview.data[key]
+    assert desired.read_bytes() == b'snapshot'
+    assert extra.exists() == (not clean)
+    if not aliases:
+        assert original.exists() == (not clean)
+        if not clean:
+            assert original.read_bytes() == previous
+    if clean:
+        undo = service.invoke('backup_restore', args | {'apply': True, 'name': 'fixture-pre-restore',
+                                                        'snapshot': result.data['undo_snapshot']})
+        assert undo.ok, undo.to_dict()
+        assert original.read_bytes() == previous
+        assert extra.read_bytes() == b'extra'
+        if not aliases:
+            assert not desired.exists()
+
+
+def test_restore_clean_removes_independent_hard_link(tmp_path):
+    target = tmp_path / 'target'
+    target.mkdir()
+    saved = target / 'Save.dat'
+    extra = target / 'copy.dat'
+    saved.write_bytes(b'edited')
+    os.link(saved, extra)
+    snapshot = archive(tmp_path / 'fixture.zip', target, {'Save.dat': b'snapshot'})
+    result = backup.restore('fixture', str(target), str(snapshot), clean=True, yes=True,
+                            store=tmp_path / 'store', quiet=True)
+    assert result['added'] == ['copy.dat']
+    assert result['changed'] == ['Save.dat']
+    assert saved.read_bytes() == b'snapshot'
+    assert not extra.exists()
+
+
+def test_restore_rejects_ambiguous_alias_with_hard_links(tmp_path):
+    target = tmp_path / 'target'
+    target.mkdir()
+    saved = target / 'save.dat'
+    saved.write_bytes(b'edited')
+    if not (target / 'Save.dat').exists():
+        pytest.skip('requires a case-insensitive target directory')
+    os.link(saved, target / 'copy.dat')
+    snapshot = archive(tmp_path / 'fixture.zip', target, {'Save.dat': b'snapshot'})
+    with pytest.raises(ToolError, match='uniquely match'):
+        backup.restore('fixture', str(target), str(snapshot), clean=True, yes=True,
+                       store=tmp_path / 'store', quiet=True)
+    assert saved.read_bytes() == b'edited'
+    assert saved.samefile(target / 'copy.dat')
+    assert not (tmp_path / 'store').exists()
+
+
+@pytest.mark.parametrize('existing', [False, True])
+def test_two_snapshot_paths_cannot_claim_one_target_entry(tmp_path, monkeypatch, existing):
+    target = tmp_path / 'target'
+    first, second = target / 'first', target / 'second'
+    first.mkdir(parents=True)
+    second.mkdir()
+    saved = first / 'save.dat'
+    if existing:
+        saved.write_bytes(b'current')
+    snapshot = archive(tmp_path / 'fixture.zip', target,
+                       {'first/save.dat': b'one', 'second/save.dat': b'two'})
+    file_id = backup._file_id
+
+    def lookup(path):
+        # Model a native lookup where both parent spellings resolve to 'first'.
+        if path.is_relative_to(second):
+            path = first / path.relative_to(second)
+        return file_id(path)
+
+    monkeypatch.setattr(backup, '_file_id', lookup)
+    store = tmp_path / 'store'
+    for operation in (backup.diff, backup.restore):
+        args = {'clean': True, 'yes': True, 'quiet': True} if operation is backup.restore else {}
+        with pytest.raises(ToolError) as error:
+            operation('fixture', str(target), str(snapshot), store=store, **args)
+        assert error.value.code == 'invalid_target'
+        assert not store.exists()
+        if existing:
+            assert saved.read_bytes() == b'current'
+        else:
+            assert not saved.exists()
+
+
+@pytest.mark.parametrize('fault', ['alias', 'unavailable'])
+def test_cleanup_checks_every_candidate_before_unlink(tmp_path, monkeypatch, fault):
+    target = tmp_path / 'target'
+    target.mkdir()
+    for name in ('keep.dat', 'a-extra.dat', 'z-extra.dat'):
+        (target / name).write_bytes(b'current')
+    snapshot = archive(tmp_path / 'fixture.zip', target, {'keep.dat': b'snapshot'})
+    file_id = backup._file_id
+
+    def lookup(path):
+        if path.name == 'z-extra.dat':
+            if fault == 'unavailable':
+                raise OSError('file identity unavailable')
+            return file_id(target / 'keep.dat')
+        return file_id(path)
+
+    monkeypatch.setattr(backup, '_file_id', lookup)
+    store = tmp_path / 'store'
+    with pytest.raises(ToolError, match='undo snapshot') as error:
+        backup.restore('fixture', str(target), str(snapshot), clean=True, yes=True, store=store, quiet=True)
+    assert error.value.code == 'restore_failed'
+    assert (target / 'keep.dat').read_bytes() == b'snapshot'
+    for name in ('a-extra.dat', 'z-extra.dat'):
+        assert (target / name).read_bytes() == b'current'
+    undo, = backup.snapshots('fixture-pre-restore', store=store)
+    assert str(undo) in str(error.value)
+    with zipfile.ZipFile(undo) as z:
+        assert z.read('keep.dat') == b'current'
