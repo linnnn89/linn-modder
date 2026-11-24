@@ -40,26 +40,29 @@ python -m um tool call tk_query --workspace $TkWorkspace --game-root $TkModSourc
 ## MCP 使用
 
 复用现有 `um mcp serve`。每个游戏/工坊目录用重复 `--game-root` 显式允许读取；
-工具不会自行查找账户或改安装设置。可用工具筛选减少 schema 上下文：
+工具不会自行查找账户或改安装设置。可用工具筛选减少 schema 上下文。
 
-仅新增头像（4 个工具）：将输入 PNG 放在 `$TkWorkspace` 中，无须允许读取游戏目录。
-建议使用专用工作区，避免既有 `default` 索引触发与本任务无关的冲突校验。
+### 按任务精简工具集
+
+- **仅新增头像（4 个工具）**：将输入 PNG 放在 `$TkWorkspace` 中，无须允许读取游戏目录。建议使用专用工作区，避免既有 `default` 索引触发与本任务无关的冲突校验。
 
 ```powershell
 python -m um mcp serve --workspace $TkWorkspace --enable-tool manual_read --enable-tool tk_portraits --enable-tool tk_portrait_options --enable-tool tk_portrait_register
 ```
 
-数据检索与安全编辑（7 个工具）：
+- **数据检索与安全编辑（7 个工具）**：
 
 ```powershell
 python -m um mcp serve --workspace $TkWorkspace --game-root $TkModSource --enable-tool manual_read --enable-tool tk_index --enable-tool tk_tables --enable-tool tk_query --enable-tool tk_read_field --enable-tool tk_project --enable-tool tk_patch
 ```
 
-需要替换旧武将头像或混合任务时，使用完整 TKEditor 配置（10 个工具）：
+- **替换旧武将头像或混合任务（完整 TKEditor 配置，10 个工具）**：
 
 ```powershell
 python -m um mcp serve --workspace $TkWorkspace --game-root $TkModSource --enable-tool manual_read --enable-tool tk_index --enable-tool tk_tables --enable-tool tk_query --enable-tool tk_read_field --enable-tool tk_project --enable-tool tk_patch --enable-tool tk_portraits --enable-tool tk_portrait_options --enable-tool tk_portrait_register
 ```
+
+### MCP-only 首次读取流程
 
 MCP-only Agent 先调用：
 
@@ -74,12 +77,11 @@ MCP-only Agent 先调用：
 如果正在运行已安装的旧 wheel，需要更新到含本次代码的版本并重新启动对应 MCP；
 本次开发不会自动覆盖客户端安装或配置。
 
-MCP Schema 声明头像模式枚举、分页范围、索引名称规则和关键参数描述；
-后端仍进行严格校验，CLI、MCP 和 Python `Service.invoke` 均不自动转换错误类型。
-确定的恢复动作位于 `data.recovery`，包含 `tool` 与 `arguments`；索引过期、未知表和
-修改确认值错误另外返回 `available`，表示恢复工具是否被当前服务启用。
-`available:false` 时需要调整接入配置，不能绕过白名单。恢复动作只供调用方选择执行，
-不会自动运行，也不会自动应用修改。无法确认来源的缺失/损坏索引不猜测重建路径。
+### 校验与恢复契约
+
+- MCP Schema 声明头像模式枚举、分页范围、索引名称规则和关键参数描述；后端仍进行严格校验，CLI、MCP 和 Python `Service.invoke` 均不自动转换错误类型。
+- 确定的恢复动作位于 `data.recovery`，包含 `tool` 与 `arguments`；索引过期、未知表和修改确认值错误另外返回 `available`，表示恢复工具是否被当前服务启用。`available:false` 时需要调整接入配置，不能绕过白名单。
+- 恢复动作只供调用方选择执行，不会自动运行，也不会自动应用修改。无法确认来源的缺失/损坏索引不猜测重建路径。
 
 ## 验证范围
 

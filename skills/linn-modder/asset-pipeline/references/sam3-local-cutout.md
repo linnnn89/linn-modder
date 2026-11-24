@@ -175,14 +175,17 @@ if ($LASTEXITCODE -ne 0) { throw '输入登记失败；检查文件来源，不�
 
 - **输出目录各任务独立，且每轮用新目录。** `mkdir(exist_ok=False)` 原子占用，争用同一路径只允许一个进程写入；不会自动覆盖或猜另一个皮肤目录。`job.json` 记录 job ID、输入身份、`claimed/waiting/running/processing/completed/rejected/failed`；失败目录保留诊断，重试选新目录，不删别人的目录。
 - **SAM 在导入 Torch、加载模型前 FIFO 排队。** 工作区和全局技能副本共用 `%USERPROFILE%/.linn-modder/sam3-queue/session-<Windows会话号>/queue.json`；放在 AppData 外，避免 MSIX 客户端虚拟化后与 OpenCode 分成不同队列。按登记顺序一次只放行一个 GPU 推理。推理完成并清理显存后释放，再做 CPU matting/保存。无需复制多个模型或 ComfyUI 环境。`result.json.gpu_queue` 记录序号与等待秒数，等待只由本地脚本完成，不反复调用 Agent 重试。
+- **推理异常或正常取消也在锁内清理。** `run_sam` 先执行模型卸载；runner 再清除异常链中已退出调用帧的局部引用，执行垃圾回收，并在 CUDA 已初始化时清理空闲缓存，最后才释放 GPU 名额。保留异常类型、消息和堆栈位置，输出失败回执；不能把失败结果继续当成可用蒙版。强制结束进程不保证执行这段清理，仍按下一条的进程存活规则处理。
 - **等待默认900秒。** 可用 `--gpu-wait-seconds <秒>` 调整；只限制排队，不中断已获准的推理。超时/正常取消移除自己的票据，崩溃由后续任务根据 PID＋进程创建时间清理；不会因运行时间长就踢掉活进程，不杀其他任务。队列损坏时停止并保留证据，不清空来强行抢跑。
 - **`--mask` 路线完全绕过 GPU 队列。** 不加载 SAM/显卡，可并行修不同图片；输入、trimap、输出各任务独立。仍共享 CPU/RAM，机器资源不足时减少并发，不能承诺无限开不会变慢。
 
-排队范围是同一 Windows 用户/会话中使用此新版 runner 的进程；旧脚本、ComfyUI GUI、其他 GPU 程序及其他登录会话不受它调度。此版本 GPU 排队只支持 Windows，CPU mask 修边不受这一限制。共享锁不能替代输入配对与输出目录隔离。
+#### 排队边界与底层依据
 
-实现参考本项目衣柜提交的原子票据模式；Windows mutex 本身不保证 FIFO，顺序由票据控制；持有者崩溃会产生 abandoned mutex，仍需核对记录一致性。[Microsoft mutex 说明](https://learn.microsoft.com/en-us/windows/win32/sync/mutex-objects)、[等待返回值](https://learn.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-waitforsingleobject)。
-
-本机还验证了两个 Windows 边界：MSIX 可将 AppData 文件访问重定向到应用私有目录，因此不能只把环境变量换成 AppData 绝对路径；读状态文件时未允许 delete sharing 会短暂阻止原子重命名，写入端仅对这类 Windows 错误有界重试2秒，始终保留旧完整 JSON，不原地截断。依据：[MSIX 文件虚拟化](https://learn.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-behind-the-scenes)、[CreateFile 共享模式](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea)。
+- **调度范围**：仅覆盖同一 Windows 用户/会话中使用此新版 runner 的进程；旧脚本、ComfyUI GUI、其他 GPU 程序及其他登录会话不受它调度。此版本 GPU 排队只支持 Windows，CPU mask 修边不受这一限制。共享锁不能替代输入配对与输出目录隔离。
+- **验证边界**：工作区/全局副本和不同 `LOCALAPPDATA` 的队列验证来自同一 Codex 环境启动的子进程，不能写成已通过真实 OpenCode／DeepSeek 客户端联跑。异常回归用真实 Windows 队列验证“清理时下一进程仍被阻挡、清理后可以进入”；本机另以小型真实 CUDA 张量注入异常，确认局部引用与分配器缓存在释放名额前清理。未故意触发模型 OOM、驱动故障；实际跨客户端调度与 ComfyUI GUI 调度不在这项证据内。
+- **清理顺序依据**：Python 的 [traceback.clear_frames](https://docs.python.org/3.13/library/traceback.html#traceback.clear_frames) 清除调用帧局部引用；PyTorch 的 [empty_cache](https://docs.pytorch.org/docs/2.9/generated/torch.cuda.memory.empty_cache.html) 只能释放未使用的缓存，不能释放仍被异常引用的活张量。不能只在退出锁后调用 `empty_cache()`。
+- **互斥与票据依据**：实现参考本项目衣柜提交的原子票据模式；Windows mutex 本身不保证 FIFO，顺序由票据控制；持有者崩溃会产生 abandoned mutex，仍需核对记录一致性。[Microsoft mutex 说明](https://learn.microsoft.com/en-us/windows/win32/sync/mutex-objects)、[等待返回值](https://learn.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-waitforsingleobject)。
+- **Windows 边界依据**：MSIX 可将 AppData 文件访问重定向到应用私有目录，因此不能只把环境变量换成 AppData 绝对路径；读状态文件时未允许 delete sharing 会短暂阻止原子重命名，写入端仅对这类 Windows 错误有界重试2秒，始终保留旧完整 JSON，不原地截断。依据：[MSIX 文件虚拟化](https://learn.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-behind-the-scenes)、[CreateFile 共享模式](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea)。
 
 ## 5. 必须打开结果，不能只看退出码
 
@@ -252,14 +255,17 @@ SAM 输出是分割蒙版，不是真实半透明抠图。细发丝、薄纱、�
 
 ## 8. 交付格式
 
-交付必须包含：透明 PNG 的可点击路径、白/深底预览、采用文字还是框选、原图是否保持、是否修边，以及具体仍未解决的位置。
-将 `result.json` 与原始蒙版保留在同一输出目录；不要把自动字段 pending 改成 passed 来代替看图。
-耗时与显存只代表本次图片/版本/参数，不能推广为全项目效率或量化精度保证。
+- 交付必须包含：透明 PNG 的可点击路径、白/深底预览、采用文字还是框选、原图是否保持、是否修边，以及具体仍未解决的位置。
+- 将 `result.json` 与原始蒙版保留在同一输出目录；不要把自动字段 pending 改成 passed 来代替看图。
+- 耗时与显存只代表本次图片/版本/参数，不能推广为全项目效率或量化精度保证。
 
-2026-10-21 本地验证：RTX 5070 Ti，ComfyUI `88ab4a0656`，Python 3.13.6，PyTorch 2.9.1+cu130；FP8/FP16 混合 safetensors 权重以 FP16 计算。
-官方吉他样例和用户提供的二次元人物图已分别执行文字/框选；框选改善了该人物的轮廓，原始输出仍有少量边缘残色。浏览器界面及游戏内未验证。
-托尔白底竖图曾在旧流程直接拉伸时严重碎裂：FP8 默认细化前景仅 20.06%，0 次仅 13.70%；改用 FP32 计算或关闭细化未解决。官方 FP16 权重直接拉伸同样失败（前景 18.00%）。
-同图先补白保比例后，FP8/官方 FP16 均恢复基本完整主体，按原画布计算覆盖率约 55.73%/55.75%，两版蒙版 IoU 99.66%。因此本例优先修正输入几何处理，不能把它归因于小权重质量；这些数值不是通用精度保证。正式脚本已默认接入该处理，细发丝仍需目视验收。
-版本变化时重新检查实际节点，不把这一快照当作所有系统的兼容承诺。
+### 本地验证记录（2026-10-21）
 
-参考：[ComfyUI 官方教程](https://docs.comfy.org/tutorials/utility/video-segment-sam3)、[原生节点](https://github.com/Comfy-Org/ComfyUI/blob/master/comfy_extras/nodes_sam3.py)、[Comfy-Org 权重说明](https://huggingface.co/Comfy-Org/sam3.1)。官方 FP16 对照权重经用户单独授权下载；日常仍可使用已有 FP8。本脚本不下载权重，不安装新依赖。
+- **环境**：RTX 5070 Ti，ComfyUI `88ab4a0656`，Python 3.13.6，PyTorch 2.9.1+cu130；FP8/FP16 混合 safetensors 权重以 FP16 计算。
+- **样例结果**：官方吉他样例和用户提供的二次元人物图已分别执行文字/框选；框选改善了该人物的轮廓，原始输出仍有少量边缘残色。浏览器界面及游戏内未验证。
+- **几何补边对照**：托尔白底竖图曾在旧流程直接拉伸时严重碎裂：FP8 默认细化前景仅 20.06%，0 次仅 13.70%；改用 FP32 计算或关闭细化未解决；官方 FP16 权重直接拉伸同样失败（前景 18.00%）。同图先补白保比例后，FP8/官方 FP16 均恢复基本完整主体，按原画布计算覆盖率约 55.73%/55.75%，两版蒙版 IoU 99.66%。因此本例优先修正输入几何处理，不能把它归因于小权重质量；这些数值不是通用精度保证。正式脚本已默认接入该处理，细发丝仍需目视验收。
+- **兼容边界**：版本变化时重新检查实际节点，不把这一快照当作所有系统的兼容承诺。
+
+### 参考资料
+
+[ComfyUI 官方教程](https://docs.comfy.org/tutorials/utility/video-segment-sam3)、[原生节点](https://github.com/Comfy-Org/ComfyUI/blob/master/comfy_extras/nodes_sam3.py)、[Comfy-Org 权重说明](https://huggingface.co/Comfy-Org/sam3.1)。官方 FP16 对照权重经用户单独授权下载；日常仍可使用已有 FP8。本脚本不下载权重，不安装新依赖。

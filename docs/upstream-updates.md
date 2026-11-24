@@ -1,59 +1,75 @@
-# Selected upstream updates — 2026-10-07
+# Upstream integration
 
-Source: [rehan-remade/universal-modder](https://github.com/rehan-remade/universal-modder),
-MIT-licensed, pinned at `baff1e5d01f63ae7cc81a049b6f4cf60e6c91dec`.
-Fork baseline: `5dd45036fce2121af63834e5656dc58e4cd0e386`.
-The changes are selective ports into Linn Modder's existing shared service and
-single-entry manuals. No new runtime dependency or default MCP tool is needed.
+Linn Modder incorporates selected fixes and field notes from
+[universal-modder](https://github.com/rehan-remade/universal-modder), under the
+repository's MIT license. The current reference is
+[`3c4ac6c` (2026-11-06)](https://github.com/rehan-remade/universal-modder/tree/3c4ac6c38e411b8c543bce217eae197039516bfc).
+Changes are adapted to the shared service and single-entry manuals rather than
+merged as a replacement directory tree.
 
-## Runtime fixes
+## Reliability and retrieval
 
-| Source commit | Port |
-|---|---|
-| [00b071a](https://github.com/rehan-remade/universal-modder/commit/00b071a) | Preserve RGBA when fitting, sheeting and placing animation frames; keep the deliberate hard-alpha pixelation mode |
-| [d649151](https://github.com/rehan-remade/universal-modder/commit/d649151) | Shared PowerShell locator with a SystemRoot/WSL fallback, also used by diagnostics and WSL ffmpeg discovery; existing `um.win.ps_exe` import remains usable |
-| [cbffa12](https://github.com/rehan-remade/universal-modder/commit/cbffa12) | Read Steam's installation directory from Windows registry, including WSL discovery |
-| [89f4f09](https://github.com/rehan-remade/universal-modder/commit/89f4f09), [3437c20](https://github.com/rehan-remade/universal-modder/commit/3437c20) | Prefer specific game-name routes; distinguish Slay the Spire 2 |
-| [3611eb8](https://github.com/rehan-remade/universal-modder/commit/3611eb8) | Match online-only games by normalized whole names; knowledge searches avoid `rust` matching `trust` |
-| [63f2f77](https://github.com/rehan-remade/universal-modder/commit/63f2f77) | Report impossible YAML dates as invalid frontmatter rather than crashing |
-| [ec9c8df](https://github.com/rehan-remade/universal-modder/commit/ec9c8df) | Recognize current OpenAI key and GitHub fine-grained token formats in existing publish checks |
-| [6e023ce](https://github.com/rehan-remade/universal-modder/commit/6e023ce) | ZIP backups accept pre-1980 source timestamps; existing exclusive snapshot creation and restore checks remain |
+Knowledge sync now downloads a single revision into a separate staging directory.
+It rejects an empty or truncated tree and keeps the previous cache when a request
+fails. Downloads use at most eight workers, with a 20-second timeout per request;
+progress is written to stderr. Cache replacement can roll back if publication
+fails. Checkout notes and the wheel's offline snapshot remain the default sources.
 
-The bounded streaming scan, staged TKEditor edits and snapshot verification stay
-in place. The upstream same-second backup repair is already covered by our existing
-microsecond names and exclusive creation, so that implementation was not replaced.
+Knowledge checks reject missing folders, empty collections and missing note files.
+Numbered Gotchas subheadings count as numbered entries. Quoted CLI topics can match
+the exact phrase or all of its words in one note, while separate arguments remain
+alternatives. Results retain Linn Modder's game filters, version metadata and exact
+section ranges; the structured query interface keeps its existing keyword semantics.
 
-## On-demand reports and research
+The PE reader checks the declared data-directory count before interpreting a CLR
+entry. Section-table bytes no longer turn a native executable into a false .NET match.
 
-- [Victoria II total conversion](../knowledge/games/victoria-2/south-central-gang-total-conversion.md):
-  map formats, `replace_path`, events and icons for HoD 3.04.
-- [GameMaker VM versus YYC](../knowledge/techniques/gamemaker-yyc-vs-vm-check-the-code-chunks-before-trusting-th.md):
-  confirm CODE chunks before selecting a GML editing route.
-- [Bannerlord asset packages](../knowledge/techniques/editor-free-bannerlord-assets.md):
-  version-specific packing, skeleton and animation observations, including unfinished work.
-- [Workshop version evidence](../knowledge/techniques/checking-steam-workshop-mods-against-a-game-version.md):
-  distinguish metadata dates from actual compatibility evidence.
-- [Archived-source research](../skills/linn-modder/mod-research/references/archived-sources.md):
-  a reference under the existing research topic, rather than another discoverable skill.
+The source changes are
+[cache sync](https://github.com/rehan-remade/universal-modder/commit/0d65ff96d3d519263355366adf0899acd5cb76bf),
+[empty checks](https://github.com/rehan-remade/universal-modder/commit/54c5cc23ba2394074b6007cf91d705dc11aeccb1),
+[Gotchas headings](https://github.com/rehan-remade/universal-modder/commit/de4d1dcd3f48948913c10e761a88cacabb2d6007),
+[topic queries](https://github.com/rehan-remade/universal-modder/commit/c6cc16b1044aea22835f8b737bd74b9b2da771bb)
+and [PE directories](https://github.com/rehan-remade/universal-modder/commit/0e0fc3ea31cc9023eff6908d9f8568f59970da52).
 
-Imported reports retain the original authors, dates, status and per-game verification
-claims, with a pinned source link. Those game conclusions were not independently
-reproduced here. No game files or images were imported.
+## Field-note collection
 
-ComfyUI, fal changes, HDR/recording changes and the rest of the upstream knowledge
-collection are deferred. A future port should be driven by a concrete task.
+The collection contains 359 notes: 346 newly imported reports, 11 refreshed upstream
+reports, and two local references retained unchanged. Game investigations live under
+`knowledge/games/`; cross-game methods live under `knowledge/techniques/`. The existing
+[knowledge entry](../knowledge/README.md) and regenerated [index](../knowledge/INDEX.md)
+provide one route into the collection, without adding discoverable skills.
 
-## Acceptance and rollback
+Original authors, dates, statuses, game versions and verification limits are retained.
+Each upstream note has a pinned `upstream` source in its metadata. Five screenshots
+remain with the reports they support. Links use local knowledge or existing skill
+routes where available; upstream examples remain links to the pinned source instead
+of implying that their code ships here. The shared MIT notice is retained in
+[LICENSE](../LICENSE).
 
-Local acceptance: 127 tests passed, two native Windows checks skipped. Documentation,
-12-note knowledge index, publish checks, distribution build and independent installed-wheel
-checks passed. No real games were installed or tested.
+These are the original authors' findings, not new game acceptance by Linn Modder.
+A report may use a command or engine label that this fork does not implement. In
+particular, the four IW-engine reports are useful reference material, not a claim
+that the scanner supports IW. Existing project workflows take precedence over a
+report's choice of generation provider, segmentation method or agent arrangement.
+No game installation, extracted assets, model weights or upstream executables are
+included in this import.
 
-Focused synthetic fixtures cover
-alpha values, discovery fallbacks, name routing, search, date errors, key matching
-and old-timestamp backup round trips. Wheel checks cover the imported offline note
-and archived-source reference. Real games are not required for this iteration.
+The generated JSON index is larger than a single manual. Its read limit is 1 MiB;
+individual manuals retain their 256 KiB limit and existing paging behavior.
 
-Remote branch [backup/pre-upstream-20261007](https://github.com/linnnn89/linn-modder/tree/backup/pre-upstream-20261007)
-preserves the baseline. To undo the whole port after merging, revert its squash
-commit and push normally. No project-data migration or harness-argument change is needed.
+## Earlier ports
+
+The 2026-10-07 integration used upstream `baff1e5`. It preserved partial alpha,
+shared PowerShell and Steam-registry discovery, improved game-name routing and
+word-start search, reported invalid YAML dates, expanded key-pattern checks, and
+accepted pre-1980 backup timestamps. Those changes remain in place. Same-second
+snapshot protection, restore validation and bounded scanning use this fork's own
+implementations.
+
+The recorded acceptance for that integration was 127 passing tests and two skipped
+native Windows checks, plus documentation, knowledge-index, publish, build and
+installed-wheel checks. Those figures describe the earlier integration only.
+
+Current checks cover cache failure and replacement, bounded downloads, native and
+managed PE fixtures, knowledge validation, query ranking, section reads and installed
+resources. They use synthetic inputs; imported game behavior has not been replayed.

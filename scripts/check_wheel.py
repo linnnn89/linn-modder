@@ -27,6 +27,11 @@ def main():
         service = Service(directory)
         assert len(service.invoke("game_profiles").data["profiles"]) == 4
         assert service.invoke("knowledge_search", {"query": "terraria"}).data["matches"]
+        imported = service.invoke("knowledge_search", {"query": "Papyrus", "game": "Skyrim Special Edition"})
+        assert imported.ok and imported.data["matches"]
+        assert imported.data["matches"][0]["sections"]
+        index_page = service.invoke("manual_read", {"collection": "knowledge", "path": "index.json", "max_lines": 20})
+        assert index_page.ok and index_page.data["next_line"] == 21
         args = {"collection": "knowledge", "path": "games/gta-v/minecraft-passthrough.md"}
         first = service.invoke("manual_read", args | {"max_lines": 40})
         assert first.ok and first.data["next_line"] == 41

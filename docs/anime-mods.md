@@ -3,6 +3,8 @@
 CK3 的玩法、脚本、画像与旧档设计从 [CK3 设计工作流](../skills/linn-modder/anime-strategy-mod/references/ck3-design.md) 进入。
 具体工程约定保留在各自的项目内，公共知识库只收录可复用的方法。
 
+## 支持概览
+
 第一阶段目标是让不同 agent 可以重用项目结构、角色素材和游戏约束。
 脚手架及图片处理可以用模拟数据验证；游戏导入效果仍需要后续单独验证。
 
@@ -69,6 +71,8 @@ um tool call project_create --args-file create-project.json
 新项目会复制该流程为 `ASSET_WORKFLOW.md`，初始参考清单为空，创建项目不会自动联网、生成图片或制造 PSD。
 GPT Image 接入来自 harness 的图像工具；仓库当前没有原生 GPT Image API 客户端、图片下载器或 PSD 组装器。
 
-CK3 的 3D 人物方向需要进一步记录骨骼、blendshape、材质插槽和动画兼容性。
-Victoria 2 的旗帜应覆盖目标版本要求的政治体制变体。光荣系列优先采用作品自身
-支持的头像导入/编辑器；专有归档回写须有相应版本的样本和 round-trip 测试。
+## 按游戏方向的后续注意点
+
+- **CK3**：3D 人物方向需要进一步记录骨骼、blendshape、材质插槽和动画兼容性。
+- **Victoria II**：旗帜应覆盖目标版本要求的政治体制变体。
+- **光荣系列**：优先采用作品自身支持的头像导入/编辑器；专有归档回写须有相应版本的样本和 round-trip 测试。

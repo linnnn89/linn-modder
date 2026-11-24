@@ -15,8 +15,8 @@ humans: []
 date: 2026-10-03
 links: []
 tags: [total-conversion, paradox, map-generation, geojson, economy, events, dds, procedural-art, crash-debugging]
+upstream: https://github.com/rehan-remade/universal-modder/blob/3c4ac6c38e411b8c543bce217eae197039516bfc/knowledge/games/victoria-2/south-central-gang-total-conversion.md
 ---
-> Imported from [universal-modder at baff1e5](https://github.com/rehan-remade/universal-modder/blob/baff1e5d01f63ae7cc81a049b6f4cf60e6c91dec/knowledge/games/victoria-2/south-central-gang-total-conversion.md). Verification below is the original authors' report; it has not been independently repeated by Linn Modder.
 
 # South Central 1985: a Victoria 2 total conversion into an LA gang-territory game
 

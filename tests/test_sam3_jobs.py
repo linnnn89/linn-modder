@@ -1,6 +1,7 @@
 """Real process scenarios for input provenance, FIFO GPU admission and CPU isolation."""
 import hashlib
 import importlib.util
+import gc
 import json
 import os
 from pathlib import Path
@@ -9,8 +10,11 @@ import sys
 import tempfile
 from threading import Event, Thread
 import time
+import traceback
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
+import weakref
 
 import numpy as np
 from PIL import Image
@@ -73,6 +77,88 @@ def command(root, output):
 
 
 class SamJobTests(unittest.TestCase):
+    @unittest.skipUnless(os.name == 'nt', 'Windows GPU queue')
+    def test_failed_inference_clears_frames_before_releasing_gpu_admission(self):
+        import comfy_sam3_cutout as runner
+        import sam3_job
+        native_turn, native_write = sam3_job.gpu_turn, sam3_job.write_json
+        child = '''
+import pathlib,sys
+sys.path.insert(0,sys.argv[1])
+from sam3_job import gpu_turn
+root=pathlib.Path(sys.argv[2])
+try:
+    with gpu_turn(sys.argv[3],root/'other-output',.15,root=root):
+        print('admitted')
+except TimeoutError:
+    sys.exit(3)
+'''
+
+        class InferenceLocal:
+            pass
+
+        for kind in ('chained_failure', 'cancel'):
+            with self.subTest(kind=kind), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                source = root/'source.png'
+                Image.new('RGB', (8, 8), 'white').save(source)
+                opts = SimpleNamespace(image=source, output=root/'result', mask=None, trimap=None,
+                                       bind_inputs=None, input_manifest=None, box=[1, 1, 7, 7],
+                                       matting='off', matting_roi=None, gpu_wait_seconds=5)
+                refs, events = [], []
+
+                def fail_inner():
+                    activation = InferenceLocal()
+                    refs.append(weakref.ref(activation))
+                    raise ValueError('inner inference failure')
+
+                def fail_sam(*args):
+                    activation = InferenceLocal()
+                    refs.append(weakref.ref(activation))
+                    if kind == 'cancel':
+                        raise KeyboardInterrupt('cancel inference')
+                    try:
+                        fail_inner()
+                    except ValueError as exc:
+                        raise RuntimeError('outer inference failure') from exc
+
+                def try_admission(label):
+                    return subprocess.run([sys.executable, '-B', '-s', '-c', child, str(SCRIPTS),
+                                           str(root/'queue'), label], capture_output=True, text=True, timeout=10)
+
+                def empty_cache():
+                    gc.collect()
+                    events.append(dict(stage='cleanup', live=any(ref() is not None for ref in refs),
+                                       other_exit=try_admission('during-cleanup').returncode))
+
+                def observed_write(path, value, **kwargs):
+                    if path.name == 'job.json' and value.get('status') == 'failed':
+                        gc.collect()
+                        events.append(dict(stage='error-receipt', live=any(ref() is not None for ref in refs),
+                                           other_exit=try_admission('after-cleanup').returncode))
+                    return native_write(path, value, **kwargs)
+
+                fake_torch = SimpleNamespace(cuda=SimpleNamespace(is_initialized=lambda: True, empty_cache=empty_cache))
+                with patch.object(runner, 'parse_args', return_value=opts), patch.object(runner, 'run_sam', fail_sam), \
+                     patch.object(sam3_job, 'write_json', observed_write), \
+                     patch.object(sam3_job, 'gpu_turn', side_effect=lambda *a, **k: native_turn(*a, **k, root=root/'queue')), \
+                     patch.dict(sys.modules, {'torch': fake_torch}):
+                    try:
+                        runner.main()
+                    except (RuntimeError, KeyboardInterrupt) as exc:
+                        error_name, error_message = type(exc).__name__, str(exc)
+                        if kind == 'chained_failure':
+                            self.assertEqual(str(exc.__cause__), 'inner inference failure')
+                            self.assertIn('fail_inner', [frame.name for frame in traceback.extract_tb(exc.__cause__.__traceback__)])
+                    else:
+                        self.fail('Injected inference failure was swallowed')
+                self.assertEqual(events, [dict(stage='cleanup', live=False, other_exit=3),
+                                          dict(stage='error-receipt', live=False, other_exit=0)])
+                receipt = json.loads((root/'result/error.json').read_text())
+                self.assertEqual((receipt['error'], receipt['message']), (error_name, error_message))
+                self.assertFalse((root/'result/result.json').exists())
+                self.assertEqual(json.loads((root/'queue/queue.json').read_text())['tickets'], [])
+
     def test_binding_rejects_same_size_swaps_and_retains_snapshot_identity(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

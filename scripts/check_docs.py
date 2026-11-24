@@ -16,6 +16,8 @@ def links(path: Path):
             continue
         if fence is not None:
             continue
+        # Expressions such as `array[k](arg)` are code, not Markdown links.
+        line = re.sub(r'(`+).*?\1', '', line)
         for match in re.finditer(r'\[[^\]\n]*\]\((<[^>]+>|[^)\s]+)(?:\s+"[^"]*")?\)', line):
             target = match.group(1).strip('<>')
             url = urlsplit(target)

@@ -15,9 +15,8 @@ tags:
 - scan
 - detection
 - chunk-table
+upstream: https://github.com/rehan-remade/universal-modder/blob/3c4ac6c38e411b8c543bce217eae197039516bfc/knowledge/techniques/gamemaker-yyc-vs-vm-check-the-code-chunks-before-trusting-th.md
 ---
-> Imported from [universal-modder at baff1e5](https://github.com/rehan-remade/universal-modder/blob/baff1e5d01f63ae7cc81a049b6f4cf60e6c91dec/knowledge/techniques/gamemaker-yyc-vs-vm-check-the-code-chunks-before-trusting-th.md). Verification below is the original authors' report; it has not been independently repeated by Linn Modder.
-
 # GameMaker YYC vs VM: check the code chunks before trusting the UndertaleModTool route
 
 > `um scan` reports a GameMaker bytecode version for VM and YYC builds alike, and routes both to
@@ -114,6 +113,9 @@ Measured on four GameMaker titles, 2026-10-06. All four walks completed exactly 
 
 ## Seen in
 
-No game notes yet. This note came out of a Katana ZERO x Loop Hero mashup feasibility check, where both
+- [DELTARUNE Chapter 1](../games/deltarune/jevil-practice-mod.md): VM (`CODE` present, `Is YYC - False`,
+  bytecode 17), so the UndertaleModTool route worked.
+
+This note came out of a Katana ZERO x Loop Hero mashup feasibility check, where both
 guests turned out to be YYC and the intended UndertaleModTool route was unavailable for either. Versions
 used: UndertaleModTool CLI 0.9.2.0 (Windows), GameMaker bytecode v17 across all four titles.

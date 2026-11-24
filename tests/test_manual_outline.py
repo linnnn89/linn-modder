@@ -39,6 +39,13 @@ def test_outline_selects_exact_sections_without_example_or_metadata_headings(tmp
         assert invalid.error.code == "invalid_arguments"
     escaped = service.invoke("manual_read", args | {"outline": True, "path": "../outside.md"})
     assert escaped.error.code == "invalid_resource"
+    index = tmp_path / "index.json"
+    index.write_text(json.dumps(["entry"] * 40000, indent=1), encoding="utf-8")
+    page = service.invoke("manual_read", {"collection": "knowledge", "path": "index.json", "max_lines": 20})
+    assert page.ok and page.data["next_line"] == 21
+    assert service.invoke("manual_read", {"collection": "skills", "path": "index.json"}).error.code == "resource_too_large"
+    index.write_bytes(b" " * (1024 * 1024 + 1))
+    assert service.invoke("manual_read", {"collection": "knowledge", "path": "index.json"}).error.code == "resource_too_large"
 
 
 def test_outline_empty_plain_and_unclosed_examples():

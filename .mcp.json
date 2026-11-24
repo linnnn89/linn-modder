@@ -5,7 +5,8 @@
       "url": "https://mcp.fal.ai/mcp",
       "headers": {
         "Authorization": "Bearer ${FAL_KEY}"
-      }
+      },
+      "enabled": false
     }
   }
 }

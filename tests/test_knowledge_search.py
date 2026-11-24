@@ -50,6 +50,13 @@ def test_search_uses_parent_own_text_and_keeps_headingless_notes(tmp_path):
     # Existing keys and JSON serialization still work when dates are YAML date objects.
     assert {"score", "path", "title", "game", "engine", "route", "status", "hits"} <= row.keys()
     json.dumps(row)
+    (tmp_path / "phrase.md").write_text("# Alpha shader\nexact phrase\n", encoding="utf-8")
+    (tmp_path / "words.md").write_text("# Material\nalpha stays intact in the shader\n", encoding="utf-8")
+    (tmp_path / "partial.md").write_text("# Alpha\none word alone\n", encoding="utf-8")
+    matches = kb.search(tmp_path, ["  ALPHA   shader  "])
+    assert [match["path"] for match in matches] == ["phrase.md", "words.md"]
+    assert matches[1]["sections"] == [{"heading": "Material", "level": 1, "start_line": 1, "end_line": 2}]
+    assert len(kb.search(tmp_path, ["alpha", "shader"])) == 3  # separate CLI terms remain alternatives
 
 
 def test_search_cli_and_mcp_share_filter_and_ranges(tmp_path):

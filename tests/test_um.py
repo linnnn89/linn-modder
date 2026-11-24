@@ -66,22 +66,23 @@ def test_gamemaker_and_rpgmaker(tmp_path):
     assert engine_of(tmp_path / "b", {"www/js/rpg_core.js": "//", "Game.exe": b"MZ"})[0] == "rpgmaker-mvmz"
 
 
-@pytest.mark.parametrize("directory_count,is_managed", [(16, True), (14, False)])
-def test_managed_pe(tmp_path, directory_count, is_managed):
-    # minimal PE32 with a CLR header directory entry
-    pe = bytearray(1024)
-    pe[0:2] = b"MZ"
-    struct.pack_into("<I", pe, 0x3C, 0x80)
-    pe[0x80:0x84] = b"PE\0\0"
-    struct.pack_into("<H", pe, 0x84, 0x14C)
-    opt = 0x80 + 24
-    struct.pack_into("<H", pe, 0x94, 224)
-    struct.pack_into("<H", pe, opt, 0x10B)
-    struct.pack_into("<I", pe, opt + 92, directory_count)
-    struct.pack_into("<I", pe, opt + 96 + 14 * 8, 0x2000)
-    p = tmp_path / "Game.exe"
-    p.write_bytes(bytes(pe))
-    assert scan.pe_info(p) == {"arch": "x86", "managed": is_managed}
+def test_managed_pe(tmp_path):
+    # Nonzero section-table bytes must not count as an undeclared CLR directory.
+    for magic, machine, arch, offset in [(0x10B, 0x14C, "x86", 96), (0x20B, 0x8664, "x64", 112)]:
+        pe = bytearray(1024)
+        pe[0:2] = b"MZ"
+        struct.pack_into("<I", pe, 0x3C, 0x80)
+        pe[0x80:0x84] = b"PE\0\0"
+        struct.pack_into("<H", pe, 0x84, machine)
+        opt = 0x80 + 24
+        struct.pack_into("<H", pe, 0x94, offset + 16 * 8)
+        struct.pack_into("<H", pe, opt, magic)
+        struct.pack_into("<I", pe, opt + offset + 14 * 8, 0x2000)
+        p = tmp_path / "Game.exe"
+        for count in (0, 14, 15, 16):
+            struct.pack_into("<I", pe, opt + offset - 4, count)
+            p.write_bytes(pe)
+            assert scan.pe_info(p) == {"arch": arch, "managed": count >= 15}
 
 
 def test_vdf():
@@ -230,6 +231,7 @@ def test_repo_knowledge_is_valid():
         assert not fails, (p, fails)
     idx, rows = kb.build_index(root)
     assert (root / "INDEX.md").read_text(encoding="utf-8") == idx, "run `um kb index`"
+    assert b"\r\n" not in (root / "index.json").read_bytes()
     assert len(rows) >= 7
 
 
@@ -250,6 +252,8 @@ def test_kb_new_check_search(tmp_path):
     p.write_text(good, encoding="utf-8")
     fails, _ = kb.check_note(p, root)
     assert not fails, fails
+    p.write_text(good.replace("1. **Boons", "### 1. **Boons"), encoding="utf-8")
+    assert "Gotchas section has no numbered items" not in kb.check_note(p, root)[1]
     res = kb.search(root, ["boon"])
     assert res and res[0]["path"].endswith("a-new-boon-god.md")
     assert kb.search(root, ["boon"], route="native-hook") == []

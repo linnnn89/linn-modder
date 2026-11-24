@@ -30,6 +30,11 @@ Fill in every section of the scaffold (`knowledge/TEMPLATE.md` explains each). W
 If a note for the same game and idea exists, extend it (add a Gotcha, a newer version, a correction)
 instead of writing a second one.
 
+For an imported note, retain its `upstream` source and original attribution. Keep the
+original version/evidence limits visible; add local observations with their own build
+and verification context instead of turning the original author's acceptance into a
+local claim. Commands or examples that only exist upstream should link to that source.
+
 ## GitHub-shared knowledge versus local evidence
 
 For a reusable design lesson, write a `kind: technique` note organized around decisions,

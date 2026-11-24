@@ -52,23 +52,29 @@ MCP client            Shell-capable harness          Python agent
                 existing um modules and WinDrive
 ```
 
+#### Invocation contract
+
 `Service.invoke(name, arguments)` returns `Result(ok, data, artifacts, error)`.
 The CLI prints precisely one JSON result and exits nonzero for errors. MCP tools
 use the same named parameters and result schema, set `isError` on operational
 failures, and return PNG preview content for vision-capable clients. stdout is
 reserved for the protocol; legacy diagnostics remain on stderr.
 
-FastMCP supplies named schemas and transport/lifecycle handling. Its public
-`call_tool` method is overridden to dispatch raw JSON to `Service.invoke`, keeping
-the same strict types and structured errors across CLI, SDK and MCP; this avoids
-SDK coercion and discarded unknown arguments. Schemas forbid extra properties.
-Game adapters own parameter hints; `Service.parameter_hints` exposes only real enabled
-parameters. MCP merges those hints into its generated schemas, while `um tool list --details`
-and Python expose the same guidance without requiring MCP. The default CLI listing remains
-compact. These discovery hints do not replace backend checks or change argument coercion.
-Operational `ToolError` may carry a deterministic recovery action, exposed through
-the existing `data.recovery` object with its tool, arguments and allowlist availability.
-Recovery is never executed automatically; confirmation recovery only previews.
+#### FastMCP dispatch, schemas, and recovery
+
+- FastMCP supplies named schemas and transport/lifecycle handling. Its public
+  `call_tool` method is overridden to dispatch raw JSON to `Service.invoke`, keeping
+  the same strict types and structured errors across CLI, SDK and MCP; this avoids
+  SDK coercion and discarded unknown arguments. Schemas forbid extra properties.
+- Game adapters own parameter hints; `Service.parameter_hints` exposes only real enabled
+  parameters. MCP merges those hints into its generated schemas, while `um tool list --details`
+  and Python expose the same guidance without requiring MCP. The default CLI listing remains
+  compact. These discovery hints do not replace backend checks or change argument coercion.
+- Operational `ToolError` may carry a deterministic recovery action, exposed through
+  the existing `data.recovery` object with its tool, arguments and allowlist availability.
+  Recovery is never executed automatically; confirmation recovery only previews.
+
+#### Transport and concurrency
 
 The MCP transport uses the official Python SDK, pinned to its stable 1.x API.
 It is an optional dependency: installing the CLI does not require MCP. Each server
@@ -77,23 +83,28 @@ worker thread and service calls are serialized, so legacy caches cannot race.
 Capture and input subprocess waits are bounded. This is a synchronous operation
 API, not yet a persistent job scheduler.
 
-CLI command groups and service backends load when selected. Root help uses a small
-description registry; each selected module still builds its complete parser. This
-reduces fresh-process startup work without introducing a second parser or a cache.
-An optional tool allowlist limits both discovery and `Service.invoke`; it does not
-change the default tool set or replace the separate desktop input gate. Manual
-line ranges bound returned text and expose continuation metadata, while default
-full reads retain their result shape. See [measurements and rollback](performance.md).
-`manual_read(outline=True)` exposes Markdown section line ranges without body text;
-the same range reader then retrieves a selected section. YAML and fenced examples
-are excluded from headings. No search index, game parser or additional tool is needed.
+#### Lazy loading, allowlists, and bounded reads
 
-`knowledge_search` reuses the knowledge module's optional game-name filter and returns
-version metadata plus ranked source section ranges. It scores a section's own text,
-then favors shorter reads at equal relevance; parent ranges still include children.
-This is keyword lookup, not semantic retrieval. Readers retain the opening evidence
-context and refresh positions when the manual changes. CK3 severity filtering similarly
-narrows returned diagnostics while global counts and the check result remain unchanged.
+- CLI command groups and service backends load when selected. Root help uses a small
+  description registry; each selected module still builds its complete parser. This
+  reduces fresh-process startup work without introducing a second parser or a cache.
+- An optional tool allowlist limits both discovery and `Service.invoke`; it does not
+  change the default tool set or replace the separate desktop input gate.
+- Manual line ranges bound returned text and expose continuation metadata, while default
+  full reads retain their result shape. See [measurements and rollback](performance.md).
+- `manual_read(outline=True)` exposes Markdown section line ranges without body text;
+  the same range reader then retrieves a selected section. YAML and fenced examples
+  are excluded from headings. No search index, game parser or additional tool is needed.
+
+#### Search and diagnostic filtering
+
+- `knowledge_search` reuses the knowledge module's optional game-name filter and returns
+  version metadata plus ranked source section ranges. It scores a section's own text,
+  then favors shorter reads at equal relevance; parent ranges still include children.
+  This is keyword lookup, not semantic retrieval. Readers retain the opening evidence
+  context and refresh positions when the manual changes.
+- CK3 severity filtering similarly narrows returned diagnostics while global counts and
+  the check result remain unchanged.
 
 ## Workspaces and capabilities
 
@@ -132,10 +143,11 @@ Both `um` and `linn-modder` entry points invoke the same CLI. The Windows checko
 launcher is `bin/um.cmd`; installed console entry points do not need Bash.
 Wheels bundle PowerShell helpers, fonts, profiles, skills and an offline knowledge
 snapshot. `manuals_export` copies real directories, avoiding Windows symlink
-requirements. `manual_read` exposes selected instructions to MCP-only harnesses. `um://guide`
-returns the skill router; `um://workflow` retains the compact general entry. Fixed project
-context, discovery metadata, task entries and references are separated as described in
-[skill design](skill-design.md); clients load details only for the current step.
+requirements. `manual_read` exposes selected instructions to MCP-only harnesses.
+Both `um://guide` and `um://workflow` serve the unified `skills/linn-modder/SKILL.md`
+entry. Fixed project context, discovery metadata, task entries and references are
+separated as described in [skill design](skill-design.md); clients load details
+only for the current step.
 
 MCP starts over stdio using `um mcp serve --workspace PATH`. It does not open a TCP
 listener or install a system service. A remote/cloud harness needs an explicitly
@@ -155,47 +167,63 @@ These projects informed the architecture; no implementation code was copied:
 
 ## Extension seams
 
+### Game profiles and future adapters
+
 Game profiles in `um/data/game_profiles.json` describe routes, support level,
 localization and constraints. A future game adapter should expose `inspect`,
 `validate`, `build` and `install_plan` against an explicit game build. It must not
 declare a format supported merely because a generic profile exists.
+
+### Service scope vs. CLI-only operations
 
 Current service operations cover diagnostics, profiles, scans, bundled manuals,
 project creation, 2D image preparation, backups, window discovery/capture and
 opt-in input. Rendering, recording, paid generation and publishing remain in the
 existing CLI. Before exposing them as background MCP tasks, add persistent job
 IDs, bounded concurrency, subprocess cancellation and recoverable job manifests.
-CK3's `um/editors/ck3/check.py` performs bounded, read-only descriptor/localization
-format checks and imports optional existing Tiger JSON. It does not run a validator,
-parse game script semantics or establish a report's freshness. Diagnostics share source,
-severity, code, message and locations; totals cover all findings even when the response
-is paged. `Result.ok` means the operation completed; `data.passed` reflects error/fatal
-findings, with runtime verification always separate. See [usage and scope](../skills/linn-modder/anime-strategy-mod/references/ck3-check.md).
-Task-specific [configuration examples](../skills/linn-modder/references/toolsets.md) reuse
-the existing allowlist; no runtime plugin discovery or extra configuration mechanism is added.
-TKEditor operations add per-workspace SQLite snapshots, projected paged retrieval,
-data-only staging, guarded single-record JSON edits, and an independently indexed
-external portrait library. They reuse Workspace, Result and optional MCP transport;
-SQLite accepts no caller SQL. Edits reject ambiguous IDs, require a source/change
-confirmation, preserve an original JSON backup, and only replace staged project data.
-Portrait preparation defaults to an additive, uniquely named external CG option;
-replacement requires explicit intent and a Hero ID. Game deployment and Unity
-AssetBundle compilation are not part of this adapter.
-Game-specific implementations live in `um/editors/`; TKEditor uses
-`um/editors/heroes_vow/tkeditor.py`, with `um.tkeditor` retained as a compatibility
-import. User-facing entries are grouped under [`editors/`](../editors/README.md).
-The shared Service, operation names and `.um/tkeditor/` storage layout are unchanged.
-Catalog v2 stores file size, timestamps and filesystem identity for snapshot reads;
-metadata changes and all edit previews/applies require full source hashing. V1
-catalogs remain readable with full hashing until explicitly rebuilt. Portrait packs
-are published before registration; registration failure returns a preserved output
-and recovery arguments. The recovery operation validates pack identity, fixed paths,
-PNG dimensions and checksums, then registers idempotently without changing the pack.
+
+### CK3 check adapter and task toolsets
+
+- CK3's `um/editors/ck3/check.py` performs bounded, read-only descriptor/localization
+  format checks and imports optional existing Tiger JSON. It does not run a validator,
+  parse game script semantics or establish a report's freshness. Diagnostics share source,
+  severity, code, message and locations; totals cover all findings even when the response
+  is paged. `Result.ok` means the operation completed; `data.passed` reflects error/fatal
+  findings, with runtime verification always separate. See [usage and scope](../skills/linn-modder/anime-strategy-mod/references/ck3-check.md).
+- Task-specific [configuration examples](../skills/linn-modder/references/toolsets.md) reuse
+  the existing allowlist; no runtime plugin discovery or extra configuration mechanism is added.
+
+### TKEditor adapter
+
+- Game-specific implementations live in `um/editors/`; TKEditor uses
+  `um/editors/heroes_vow/tkeditor.py`, with `um.tkeditor` retained as a compatibility
+  import. User-facing entries are grouped under [`editors/`](../editors/README.md).
+  The shared Service, operation names and `.um/tkeditor/` storage layout are unchanged.
+- TKEditor operations add per-workspace SQLite snapshots, projected paged retrieval,
+  data-only staging, guarded single-record JSON edits, and an independently indexed
+  external portrait library. They reuse Workspace, Result and optional MCP transport;
+  SQLite accepts no caller SQL. Edits reject ambiguous IDs, require a source/change
+  confirmation, preserve an original JSON backup, and only replace staged project data.
+- Portrait preparation defaults to an additive, uniquely named external CG option;
+  replacement requires explicit intent and a Hero ID. Game deployment and Unity
+  AssetBundle compilation are not part of this adapter.
+- Catalog v2 stores file size, timestamps and filesystem identity for snapshot reads;
+  metadata changes and all edit previews/applies require full source hashing. V1
+  catalogs remain readable with full hashing until explicitly rebuilt.
+- Portrait packs are published before registration; registration failure returns a
+  preserved output and recovery arguments. The recovery operation validates pack
+  identity, fixed paths, PNG dimensions and checksums, then registers idempotently
+  without changing the pack.
+
+### Archive round-trip adapters
+
 Loading/repacking Koei archives and automatic deployment are separate adapters.
 Their acceptance workflow is [inspect, extract, prove a no-change repack, edit and validate](../skills/linn-modder/reverse-engineering/references/archive-roundtrip.md).
 Adapters must report read and write capability separately for each game build and
 preserve untouched entries, original files and a recovery manifest. A recognized
 header or successful extraction alone does not establish safe repacking support.
+
+### Verification model
 
 Tests use synthetic game folders, images, saves, fake Windows backends and a real
 stdio MCP client. Windows CI additionally compiles WinDrive without opening or

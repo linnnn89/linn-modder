@@ -77,11 +77,6 @@ For TKEditor, read [the targeted reference](../file-mod/references/tkeditor.md).
 It covers independent new portrait options, explicit replacements, safe JSON edits
 and SQLite retrieval. These operations do not install game content or compile bundles.
 
-Start at `um://guide` or `um://workflow`, which return the same unified `SKILL.md`.
-Choose the task's topic `GUIDE.md`, then read the reference needed for the current
-step. Use `knowledge_search` for reusable findings and read its matching note from the
-`knowledge` collection. Current web sources are handled by the harness through `mod-research`.
-
 ## Boundaries
 
 - The workspace must already exist. Repeated `--game-root` flags add read-only directories.
@@ -97,28 +92,37 @@ step. Use `knowledge_search` for reusable findings and read its matching note fr
 
 ## Reading a long manual
 
+### 1. Direct section ranges via `knowledge_search`
+
 `knowledge_search(query, game="...")` can return matching section ranges together
 with game version/date/platform. Use a returned range directly; the full search
 contract and examples are in [knowledge lookup](../share-field-notes/references/search.md).
 Read the opening evidence context once before applying a note's advice.
 
-If the needed section is unknown, `manual_read(collection, path, outline=True)` returns
-ATX headings (`#` through `######`) with `level`, inclusive `start_line`/`end_line`,
-and `total_lines`, without the body. YAML frontmatter and fenced examples are ignored.
-Choose a section, then read with `start_line` and `max_lines=end_line-start_line+1`;
-use pages of at most 1000 lines for a larger section, stopping at its `end_line`.
-Parent ranges include child sections. Keep duplicate headings separate by line number.
-Use outline separately from range parameters; an empty outline means use normal paging.
-Check the opening version/evidence context if not already read. Reuse an outline only
-for the same installed manual version; short manuals or known line ranges need no extra call.
+### 2. Heading outline (`outline=True`)
 
-`manual_read(collection, path)` returns the full text with its existing result fields.
-For an initial bounded read, add `start_line:1,max_lines:40`. Ranged results include
-`start_line`, `end_line`, `total_lines` and `next_line`; continue with `next_line` until
-it is `null`. `max_lines` accepts 1..1000; 0 means all remaining lines. Line numbers
-start at 1. These are line limits, not token limits, and a page can cut a code block.
-Read the continuation before using an incomplete example. If the whole document is
-needed, one full read avoids repeated requests and page metadata.
+- If the needed section is unknown, `manual_read(collection, path, outline=True)` returns
+  ATX headings (`#` through `######`) with `level`, inclusive `start_line`/`end_line`,
+  and `total_lines`, without the body. YAML frontmatter and fenced examples are ignored.
+- Choose a section, then read with `start_line` and `max_lines=end_line-start_line+1`;
+  use pages of at most 1000 lines for a larger section, stopping at its `end_line`.
+- Parent ranges include child sections; keep duplicate headings separate by line number.
+- Use `outline` separately from range parameters; an empty outline means use normal paging.
+- Check the opening version/evidence context if not already read. Reuse an outline only
+  for the same installed manual version; short manuals or known line ranges need no extra call.
+
+### 3. Line-range paging and size limits
+
+- `manual_read(collection, path)` returns the full text with its existing result fields.
+  Individual manuals are limited to 256 KiB; the generated `knowledge/index.json`
+  allows 1 MiB. Search for a topic before reading the collection index in full.
+- For an initial bounded read, add `start_line:1,max_lines:40`. Ranged results include
+  `start_line`, `end_line`, `total_lines` and `next_line`; continue with `next_line` until
+  it is `null`. `max_lines` accepts 1..1000; 0 means all remaining lines. Line numbers
+  start at 1.
+- These are line limits, not token limits, and a page can cut a code block; read the
+  continuation before using an incomplete example. If the whole document is needed, one
+  full read avoids repeated requests and page metadata.
 
 ## Backups and recovery
 

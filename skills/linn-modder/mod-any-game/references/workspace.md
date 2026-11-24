@@ -2,7 +2,7 @@
 
 Read when preparing saves, configurations and a reproducible lab. Follow the user's requested scope and validation level.
 
-### Lab setup (the safety net)
+## Lab setup (the safety net)
 - Before the first modded launch, run `um backup create "<saves folder>" --name <game>-saves` (the paths come
   from `um scan`). Snapshot the config/profile folder too if you'll change settings.
 - Use a separate lab profile or save folder when the loader allows it (tModLoader

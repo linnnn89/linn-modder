@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import sys
 import time
+import traceback
 import uuid
 
 # Windows embedded Python may omit the script directory from sys.path.
@@ -195,6 +196,20 @@ def run_sam(opts, source):
         gc.collect()
 
 
+def _clear_failure_frames(error):
+    """Drop inference locals without losing exception messages or traceback locations."""
+    pending, seen = [error], set()
+    while pending:
+        current = pending.pop()
+        if id(current) in seen:
+            continue
+        seen.add(id(current))
+        traceback.clear_frames(current.__traceback__)
+        pending.extend(item for item in (current.__cause__, current.__context__)
+                       if item is not None)
+        pending.extend(getattr(current, 'exceptions', ()))  # ExceptionGroup on Python 3.11+.
+
+
 def main():
     opts = parse_args()
     os.environ['HF_HUB_OFFLINE'] = '1'
@@ -244,12 +259,19 @@ def main():
         if base is None:
             with gpu_turn(job['job_id'], opts.output, opts.gpu_wait_seconds, on_state=job_state) as admission:
                 # Import torch and load weights only after admission. CPU matting never enters this queue.
-                with redirect_stdout(sys.stderr):
-                    base, raw, sam = run_sam(opts, source)
-                # run_sam's frame and tensor references have gone before releasing the GPU slot.
-                import torch
-                gc.collect()
-                torch.cuda.empty_cache()
+                try:
+                    with redirect_stdout(sys.stderr):
+                        base, raw, sam = run_sam(opts, source)
+                except BaseException as exc:
+                    # run_sam has attempted model unload, but exception frames can still
+                    # retain activations. Clear causes/contexts too, before admitting another job.
+                    _clear_failure_frames(exc)
+                    raise
+                finally:
+                    gc.collect()
+                    torch = sys.modules.get('torch')
+                    if torch is not None and torch.cuda.is_initialized():
+                        torch.cuda.empty_cache()
                 queue = dict(admission, status='completed')
         job.update(status='processing', gpu_queue=queue)
         write_json(opts.output / 'job.json', job)

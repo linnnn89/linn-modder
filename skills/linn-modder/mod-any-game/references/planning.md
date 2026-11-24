@@ -2,16 +2,16 @@
 
 Read when planning a full mod or choosing its implementation route. Follow the user's requested scope and validation level.
 
-### Intake (keep it short)
+## Intake (keep it short)
 - Get the game, the platform and store, and the idea in one sentence ("a homing missile launcher and a nuke
   that craters the world"). Record the requested deliverable and validation level; code-only work does not require gameplay or video.
 - Settle online vs offline up front. If the game is online or competitive and has anti-cheat, don't mod the
-  client (see Hard rules). Offer offline modes, private servers the user runs, or the official tools
+  client (see [safety](safety.md)). Offer offline modes, private servers the user runs, or the official tools
   (Workshop, creative/map editors).
 - Start `MODLOG.md` in the working folder as the journal. Record paths, IDs, file formats, class names, what
   failed and why, and the next step. Anything not in the journal is lost at the next context compaction.
 
-### Recon (the game-recon topic guide does this in depth)
+## Recon (the game-recon topic guide does this in depth)
 - **Search the knowledge base first.** Run `um kb search "<game>"` and `um kb search "<engine>"`. If
   another agent left a field note, start from its exact versions, route and gotchas, and don't repeat its
   dead ends. Without `um`, read
@@ -24,7 +24,7 @@ Read when planning a full mod or choosing its implementation route. Follow the u
   If the community already has a loader (tModLoader, SMAPI, BepInEx, UE4SS, REFramework, SKSE, Fabric),
   use it.
 
-### Pick the cheapest route that reaches the idea
+## Pick the cheapest route that reaches the idea
 
 | Route | When | Examples |
 |---|---|---|

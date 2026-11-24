@@ -15,6 +15,7 @@ humans: ["@rehan_shei"]
 date: 2026-09-29
 links: ["https://github.com/rehan-remade/universal-modder/tree/main/examples/aoe2-de-civ"]
 tags: [civilization, data-mod, sld, sprite-format, reverse-engineering, 3d-to-sprite, player-colour, scenario]
+upstream: https://github.com/rehan-remade/universal-modder/blob/3c4ac6c38e411b8c543bce217eae197039516bfc/knowledge/games/age-of-empires-ii-de/san-franciscans-civ.md
 ---
 
 # San Franciscans: a new civilization for Age of Empires II DE with units rendered from 3D

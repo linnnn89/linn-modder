@@ -15,6 +15,7 @@ humans: ["@rehan_shei"]
 date: 2026-09-28
 links: ["https://github.com/rehan-remade/universal-modder/tree/main/examples/terraria-tmodloader"]
 tags: [weapons, projectiles, boss, npc-ai, sprites, explosions, camera, showcase-video]
+upstream: https://github.com/rehan-remade/universal-modder/blob/3c4ac6c38e411b8c543bce217eae197039516bfc/knowledge/games/terraria/fal-arsenal-tmodloader.md
 ---
 
 # Fal Arsenal: missiles, a tactical nuke, new enemies and a boss for Terraria

@@ -14,6 +14,8 @@ def test_skill_checker_catches_orphans_invalid_metadata_and_unspaced_entry_growt
     index.write_text("# Router\n", encoding="utf-8")
     assert any("missing from routing index" in problem for problem in check_skill_tree(tmp_path))
     index.write_text("[Sample](sample/SKILL.md)\n", encoding="utf-8")
+    with index.open('a', encoding='utf-8') as stream:
+        stream.write('Inline code `array[k](arg)` and ``array[k](arg)``.\n')
     assert check_skill_tree(tmp_path) == []
     entry.write_text(text.replace("Sample task", "界" * 512), encoding="utf-8")
     assert check_skill_tree(tmp_path) == []

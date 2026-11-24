@@ -2,7 +2,7 @@
 
 Read when integrating artwork or checking a completed slice. Follow the user's requested scope and validation level.
 
-### Assets (asset-pipeline; fal-assets when fal is selected)
+## Assets (asset-pipeline; fal-assets when fal is selected)
 Retrieve official references first, then measure the game's own asset requirements:
 size, palette, outline, camera angle, facing and frame layout. Follow
 [sourcing and PSD](../../asset-pipeline/references/sourcing-and-psd.md). Codex can use
@@ -14,7 +14,7 @@ and validate the exact engine format separately.
 - **Pixel-art games:** generate on a flat background or with transparency, cut out, then do one
   nearest-neighbour fit to the frame size.
 
-### Verify in the real game (build an oracle)
+## Verify in the real game (build an oracle)
 The running game is the oracle; your reading of the code is not.
 - Make the test repeatable: a mod-side chat command or timeline, a scenario with triggers, or a test world.
   Drive the launch → menus → scene path with `um win launch/drive`, and check it with `um win shot` plus the

@@ -37,8 +37,10 @@ def read(kind: str, name: str) -> str:
             path = candidate
     if not path.is_file():
         raise ToolError("not_found", f"Resource not found: {name}")
-    if path.stat().st_size > 256 * 1024:
-        raise ToolError("resource_too_large", "Resource exceeds 256 KiB.")
+    # The generated collection index grows with the number of notes; individual manuals stay bounded.
+    limit_kib = 1024 if kind == "knowledge" and path == base / "index.json" else 256
+    if path.stat().st_size > limit_kib * 1024:
+        raise ToolError("resource_too_large", f"Resource exceeds {limit_kib} KiB.")
     return path.read_text(encoding="utf-8")
 
 

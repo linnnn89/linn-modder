@@ -16,13 +16,17 @@ requests: that's how one agent's hard-won gotchas reach the next one. Ask your h
 from __future__ import annotations
 
 import datetime as dt
+import http.client
 import json
 import os
 import re
 import shutil
 import subprocess
+import sys
+import tempfile
 import time
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from um.common import data_dir, die
@@ -38,6 +42,8 @@ TECH_KEYS = ["kind", "title", "tags", "date", "agents"]
 GAME_SECTIONS = ["setup", "route", "verification", "gotchas"]
 MAX_BLOCK_WARN, MAX_BLOCK_FAIL = 60, 150
 MAX_NOTE_KB, MAX_MEDIA_MB = 120, 1.5
+SYNC_ERRORS = (OSError, ValueError, http.client.HTTPException)
+TEXT = {"encoding": "utf-8", "newline": "\n"}
 
 
 # --------------------------------------------------------------------------- where the notes are
@@ -57,25 +63,64 @@ def cache_root() -> Path:
     return data_dir() / "kb" / REPO.replace("/", "__") / "knowledge"
 
 
-def sync(quiet: bool = False) -> Path:
-    """Mirror knowledge/ from GitHub into the cache (git tree API + raw files; no auth needed)."""
+def _download(url: str, timeout: float) -> bytes:
+    request = urllib.request.Request(url, headers={"User-Agent": "linn-modder", "Accept": "application/vnd.github+json"})
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        return response.read()
+
+
+def sync(quiet: bool = False, *, timeout: float = 20, workers: int = 8) -> Path:
+    """Download a complete knowledge snapshot before replacing the previous cache."""
+    if timeout <= 0 or workers < 1:
+        raise ValueError("timeout and workers must be positive")
     api = f"https://api.github.com/repos/{REPO}/git/trees/{BRANCH}?recursive=1"
-    req = urllib.request.Request(api, headers={"User-Agent": "universal-modder", "Accept": "application/vnd.github+json"})
-    tree = json.load(urllib.request.urlopen(req, timeout=60))
+    tree = json.loads(_download(api, timeout))
+    if not isinstance(tree, dict) or not isinstance(tree.get("tree"), list):
+        raise ValueError("GitHub returned an invalid knowledge tree")
+    if tree.get("truncated"):
+        raise ValueError("GitHub returned an incomplete tree; the existing cache was kept")
     paths = [t["path"] for t in tree.get("tree", []) if t["type"] == "blob" and t["path"].startswith("knowledge/")
              and t["path"].endswith((".md", ".json"))]
+    if not paths:
+        raise ValueError(f"no knowledge files on {REPO}@{BRANCH}")
+    revision = tree.get("sha") or BRANCH
     root = cache_root()
-    tmp = root.with_name("knowledge.tmp")
-    shutil.rmtree(tmp, ignore_errors=True)
-    for p in paths:
-        dst = tmp / p[len("knowledge/"):]
-        dst.parent.mkdir(parents=True, exist_ok=True)
-        url = f"https://raw.githubusercontent.com/{REPO}/{BRANCH}/{p}"
-        with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "universal-modder"}), timeout=60) as r:
-            dst.write_bytes(r.read())
-    shutil.rmtree(root, ignore_errors=True)
-    tmp.rename(root)
-    (root / ".synced").write_text(str(time.time()))
+    root.parent.mkdir(parents=True, exist_ok=True)
+    if root.is_symlink():
+        raise ValueError("the knowledge cache must not be a symbolic link")
+    print(f"knowledge sync: {len(paths)} files...", file=sys.stderr)
+    with tempfile.TemporaryDirectory(prefix="knowledge-sync-", dir=root.parent) as staging:
+        tmp = Path(staging) / "knowledge"
+        tmp.mkdir()
+        destinations = {}
+        for path in paths:
+            destination = tmp / path[len("knowledge/"):]
+            if not destination.resolve().is_relative_to(tmp.resolve()):
+                raise ValueError(f"knowledge path escapes the cache: {path}")
+            destinations[path] = destination
+        pool = ThreadPoolExecutor(max_workers=min(workers, len(paths)))
+        try:
+            futures = {pool.submit(_download, f"https://raw.githubusercontent.com/{REPO}/{revision}/{path}", timeout): path
+                       for path in paths}
+            for future in as_completed(futures):
+                destination = destinations[futures[future]]
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_bytes(future.result())
+        finally:
+            pool.shutdown(wait=True, cancel_futures=True)
+        (tmp / ".synced").write_text(str(time.time()), **TEXT)
+        # Keep the rollback directory outside staging so cleanup cannot erase it if rollback itself fails.
+        previous = root.parent / (Path(staging).name + ".previous")
+        if root.exists():
+            root.rename(previous)
+        try:
+            tmp.rename(root)
+        except OSError:
+            if previous.exists():
+                previous.rename(root)
+            raise
+        if previous.exists():
+            shutil.rmtree(previous, ignore_errors=True)
     if not quiet:
         print(f"synced {len(paths)} files from github.com/{REPO} -> {root}")
     return root
@@ -95,12 +140,17 @@ def resolve_root(explicit: str | None = None, remote: bool = False) -> Path:
         return packaged
     root = cache_root()
     stamp = root / ".synced"
-    stale = not stamp.exists() or time.time() - float(stamp.read_text() or 0) > 86400
+    try:
+        stale = time.time() - float(stamp.read_text(encoding="utf-8") or 0) > 86400
+    except (OSError, ValueError):
+        stale = True
     if stale:
         try:
             return sync(quiet=True)
-        except OSError as e:
-            if not root.exists():
+        except SYNC_ERRORS as e:
+            if root.is_dir():
+                print(f"knowledge sync failed ({e}); using the stale cache {root}", file=sys.stderr)
+            else:
                 die(f"no local knowledge/ and GitHub sync failed ({e}); clone https://github.com/{REPO}")
     return root
 
@@ -143,6 +193,16 @@ def _term(t: str) -> re.Pattern:
     return re.compile((r"(?<![a-z0-9])" if t[:1].isalnum() else "") + re.escape(t))
 
 
+def _groups(args: list[str]) -> list[list[re.Pattern]]:
+    """A multi-word argument matches its phrase or all its words; separate arguments remain OR-ed."""
+    groups = []
+    for arg in args:
+        text = " ".join(arg.lower().split())
+        if text:
+            groups.append([_term(text)] + ([_term(word) for word in dict.fromkeys(text.split())] if " " in text else []))
+    return groups
+
+
 def _matched_sections(text: str, terms: list[re.Pattern]) -> tuple[list[dict], list[str]]:
     """Rank a heading's own text, not all its descendants; return original-file ranges."""
     from um.resources import outline
@@ -168,7 +228,8 @@ def _matched_sections(text: str, terms: list[re.Pattern]) -> tuple[list[dict], l
 
 
 def search(root: Path, terms: list[str], game=None, engine=None, route=None, limit=10) -> list[dict]:
-    terms = [_term(t.lower()) for t in terms if t.strip()]
+    groups = _groups(terms)
+    terms = list({term.pattern: term for group in groups for term in group}.values())
     res = []
     for p, meta, body in notes(root):
         if game and slug(game) not in slug(str(meta.get("game", ""))) + " " + " ".join(slug(g) for g in meta.get("games_also") or []):
@@ -183,6 +244,10 @@ def search(root: Path, terms: list[str], game=None, engine=None, route=None, lim
             3: " ".join(str(x) for x in [meta.get("engine", ""), meta.get("route", ""), *(meta.get("tags") or []), *(meta.get("tools") or [])]),
         }
         low = body.lower()
+        text = low + "\n" + "\n".join(field.lower() for field in fields.values())
+        if groups and not any(group[0].search(text) or (len(group) > 1 and all(term.search(text) for term in group[1:]))
+                              for group in groups):
+            continue
         score = 0
         for t in terms:
             score += sum(w for w, f in fields.items() if t.search(f.lower()))
@@ -343,7 +408,7 @@ def new_note(root: Path, game: str | None, title: str, kind: str = "game", from_
     if path.exists():
         die(f"{path} exists")
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(f"---\n{front}---\n{body}", encoding="utf-8")
+    path.write_text(f"---\n{front}---\n{body}", **TEXT)
     return path
 
 
@@ -384,8 +449,8 @@ def open_pr(path: Path, yes: bool):
     if not shutil.which("gh"):
         die("needs the GitHub CLI (gh) logged in; or push a branch and open the PR on github.com")
     idx, rows = build_index(root)
-    (root / "INDEX.md").write_text(idx, encoding="utf-8")
-    (root / "index.json").write_text(json.dumps(rows, indent=1, default=str), encoding="utf-8")
+    (root / "INDEX.md").write_text(idx, **TEXT)
+    (root / "index.json").write_text(json.dumps(rows, indent=1, default=str) + "\n", **TEXT)
     for c in cmds:
         if c[:3] == ["um", "kb", "index"]:
             continue
@@ -403,7 +468,10 @@ def open_pr(path: Path, yes: bool):
 def main(a):
     c = a.cmd
     if c == "sync":
-        sync()
+        try:
+            sync()
+        except SYNC_ERRORS as e:
+            die(f"GitHub sync failed: {e}")
         return
     if c == "search":
         root = resolve_root(a.root, a.remote)
@@ -443,9 +511,14 @@ def main(a):
             die(f"not a knowledge folder: {root}")
         if root is None and not a.paths:
             die("no local knowledge folder; pass --root or a note path")
+        if a.index and root is None:
+            die("--index needs a knowledge/ folder; run inside a checkout or pass --root")
         paths = [Path(x) for x in a.paths] or [p for p, _, _ in notes(root)]
         if not paths:
             die(f"no notes to check in {root}")
+        missing = [str(path) for path in paths if not path.is_file()]
+        if missing:
+            die("note files not found: " + ", ".join(missing))
         bad = 0
         for p in paths:
             fails, warns = check_note(p, root)
@@ -454,7 +527,7 @@ def main(a):
             for w in warns:
                 print(f"WARN {p}: {w}")
             bad += bool(fails)
-        if root and a.index and not a.paths:
+        if root and a.index:
             idx, _ = build_index(root)
             if not (root / "INDEX.md").exists() or (root / "INDEX.md").read_text(encoding="utf-8") != idx:
                 print("FAIL knowledge/INDEX.md is out of date: run `um kb index`")
@@ -466,8 +539,8 @@ def main(a):
         if not root:
             die("no local knowledge/ folder")
         idx, rows = build_index(root)
-        (root / "INDEX.md").write_text(idx, encoding="utf-8")
-        (root / "index.json").write_text(json.dumps(rows, indent=1, default=str) + "\n", encoding="utf-8")
+        (root / "INDEX.md").write_text(idx, **TEXT)
+        (root / "index.json").write_text(json.dumps(rows, indent=1, default=str) + "\n", **TEXT)
         print(f"{root / 'INDEX.md'}: {len(rows)} notes")
         return
     if c == "pr":

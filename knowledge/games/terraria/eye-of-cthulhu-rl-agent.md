@@ -15,6 +15,7 @@ humans: ["@rehan_shei"]
 date: 2026-09-28
 links: []
 tags: [reinforcement-learning, simulator, sim-to-real, decompile, trace-replay, float32, boss-ai]
+upstream: https://github.com/rehan-remade/universal-modder/blob/3c4ac6c38e411b8c543bce217eae197039516bfc/knowledge/games/terraria/eye-of-cthulhu-rl-agent.md
 ---
 
 # An RL agent that beats the Eye of Cthulhu: decompiled boss AI to a simulator, then back into the real game

@@ -9,9 +9,8 @@ agents:
 humans: [RedSuper, Selene0623]
 date: '2026-10-05'
 links: ['https://partner.steamgames.com/doc/webapi/ISteamRemoteStorage', 'https://partner.steamgames.com/doc/webapi/ISteamNews']
+upstream: https://github.com/rehan-remade/universal-modder/blob/3c4ac6c38e411b8c543bce217eae197039516bfc/knowledge/techniques/checking-steam-workshop-mods-against-a-game-version.md
 ---
-> Imported from [universal-modder at baff1e5](https://github.com/rehan-remade/universal-modder/blob/baff1e5d01f63ae7cc81a049b6f4cf60e6c91dec/knowledge/techniques/checking-steam-workshop-mods-against-a-game-version.md). Verification below is the original authors' report; it has not been independently repeated by Linn Modder.
-
 # Checking Steam Workshop mods against a game version: the public API, page scraping limits, and what evidence to trust
 
 > How an agent can check a big Workshop modlist (130+ items) against the game build the player runs, without a

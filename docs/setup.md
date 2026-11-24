@@ -25,6 +25,8 @@ um doctor
 
 ## MCP：本机 stdio
 
+### 客户端配置示例
+
 先创建工作目录。在客户端添加以下 server；顶层配置键可能因 harness 而不同。
 使用绝对路径，并确保客户端能在 PATH 找到安装的 `um`，或填写 `um.exe` 的完整路径。
 下方 `<ABSOLUTE_WORKSPACE>` 和 `<ABSOLUTE_GAME_ROOT>` 是需要替换的占位符，
@@ -37,6 +39,8 @@ PowerShell 命令示例使用以下变量，可将其改为自己的工作目录
 $ModWorkspace = Join-Path (Get-Location) 'mod-workspace'
 New-Item -ItemType Directory -Force $ModWorkspace
 ```
+
+通用 MCP JSON 配置：
 
 ```json
 {
@@ -57,9 +61,14 @@ command = "um"
 args = ["mcp", "serve", "--workspace", "<ABSOLUTE_WORKSPACE>", "--game-root", "<ABSOLUTE_GAME_ROOT>"]
 ```
 
-`--game-root` 可重复指定，服务层保持这些目录只读。只有桌面输入已获授权时，
-才加入 `--allow-input`；默认没有输入工具。远端/cloud harness 需要独立的认证桥接，
-stdio 配置本身不提供远程 PC 访问。
+### 目录与权限参数
+
+- `--game-root` 可重复指定，服务层保持这些目录只读。
+- 只有桌面输入已获授权时，才加入 `--allow-input`；默认没有输入工具。
+- 远端/cloud harness 需要独立的认证桥接，stdio 配置本身不提供远程 PC 访问。
+- 仅有本项目 MCP 的 harness 还需自己的文件编辑能力，才能编写 Mod 脚本、本地化和清单；Linn Modder 当前不提供通用文件读写工具。
+
+### 技能与手册读取
 
 Codex 使用统一技能 `$linn-modder`；MCP 先读 `um://guide` 或 `um://workflow`，
 两者都是同一个入口。按入口的任务表选择主题，使用 `manual_read` 读取：
@@ -68,16 +77,9 @@ Codex 使用统一技能 `$linn-modder`；MCP 先读 `um://guide` 或 `um://work
 {"collection":"skills","path":"linn-modder/anime-strategy-mod/GUIDE.md"}
 ```
 
-主题中的 `references/targets.md` 是相对链接，下一次读取使用
-`linn-modder/anime-strategy-mod/references/targets.md`。只读取当前步骤需要的文件。
-旧的 `<topic>/SKILL.md` 和 `<topic>/references/...` 路径仍由 `manual_read` 映射到
-新目录；导出的实体文件统一使用新结构。
-
-长手册可以传 `start_line:1,max_lines:40`，按返回的 `next_line` 续读；`next_line:null`
-表示已读完。默认参数仍返回全文。分页可减少首次上下文，全文必读时直接读取全文更省调用。
-
-仅有本项目 MCP 的 harness 还需自己的文件编辑能力，才能编写 Mod 脚本、本地化和
-清单。Linn Modder 当前不提供通用文件读写工具。
+- 主题中的 `references/targets.md` 是相对链接，下一次读取使用 `linn-modder/anime-strategy-mod/references/targets.md`；只读取当前步骤需要的文件。
+- 旧的 `<topic>/SKILL.md` 和 `<topic>/references/...` 路径仍由 `manual_read` 映射到新目录；导出的实体文件统一使用新结构。
+- 长手册可以传 `start_line:1,max_lines:40`，按返回的 `next_line` 续读；`next_line:null` 表示已读完。默认参数仍返回全文。分页可减少首次上下文，全文必读时直接读取全文更省调用。
 
 ### 专用任务的工具清单
 
@@ -136,27 +138,14 @@ finally:
 
 ## 本地技能与兼容入口
 
-Codex 优先复用仓库 `AGENTS.md` 和现有插件中的 `skills/`。本地自动发现需要真实的
-`.agents/skills/linn-modder/SKILL.md` 目录或有效符号链接；Windows checkout 中内容为
-`../skills` 的普通指针文件不等于符号链接，也不会自行变成可发现的技能目录。
-先检查文件类型，再选择插件、MCP 按需读取或导出，不能仅凭指针存在声称安装成功。
+### 本地技能发现与导出
 
-Windows checkout 未启用符号链接时，使用 MCP 的 `manual_read`，或调用
-`manuals_export` 导出真实目录，再将其 `skills/` 按客户端规范放入技能搜索路径。
-导出只是文件准备，不需要将所有文件塞进每轮提示词。
+- **自动发现条件**：Codex 优先复用仓库 `AGENTS.md` 和现有插件中的 `skills/`。本地自动发现需要真实的 `.agents/skills/linn-modder/SKILL.md` 目录或有效符号链接；Windows checkout 中内容为 `../skills` 的普通指针文件不等于符号链接，也不会自行变成可发现的技能目录。先检查文件类型，再选择插件、MCP 按需读取或导出，不能仅凭指针存在声称安装成功。
+- **未启用符号链接时的导出**：Windows checkout 未启用符号链接时，使用 MCP 的 `manual_read`，或调用 `manuals_export` 导出真实目录，再将其 `skills/` 按客户端规范放入技能搜索路径。导出只是文件准备，不需要将所有文件塞进每轮提示词。
+- **导出示例与核验**：通过服务调用 `manuals_export`，参数为 `{"destination":"manuals"}`（工作区内尚不存在的目录），得到 `manuals/skills/` 和 `manuals/knowledge/`。需本地自动发现时，按客户端安装规则使用这份真实 `skills/linn-modder/` 目录，保留全部主题、共享引用和统一入口的 `agents/openai.yaml`。已有目录不要整目录覆盖；更换位置后检查新会话的技能列表，或显式指向 `SKILL.md` 验证可读取。插件发现和实际模型选择仍由客户端负责。
+- **升级与日常调用**：新任务统一指定 `$linn-modder`（技能已被客户端发现时），由入口指导 AI 进入 `linn-modder/mod-research/`、`linn-modder/ui-mod/`、`linn-modder/file-mod/` 等主题，主题的 `GUIDE.md` 是普通资料。升级旧的手动技能安装时，将原来各主题独立目录替换为这一份统一目录，再检查客户端技能列表。MCP-only 用 `manual_read` 读取同一个路径；不支持 `$skill` 的客户端仍按自然语言任务路由。联网使用 harness 自带的搜索/网页能力，图像任务使用已有 provider；阅读资料、文件检查和 UI 经验学习不依赖 fal key。
 
-例如通过服务调用 `manuals_export`，参数为 `{"destination":"manuals"}`（工作区内
-尚不存在的目录），得到 `manuals/skills/` 和 `manuals/knowledge/`。需本地自动发现时，
-按客户端安装规则使用这份真实 `skills/linn-modder/` 目录，保留全部主题、共享引用和
-统一入口的 `agents/openai.yaml`。已有目录不要整目录覆盖；更换位置后检查新会话的技能列表，
-或显式指向 `SKILL.md` 验证可读取。插件发现和实际模型选择仍由客户端负责。
-
-新任务统一指定 `$linn-modder`（技能已被客户端发现时），由入口指导 AI 进入
-`linn-modder/mod-research/`、`linn-modder/ui-mod/`、`linn-modder/file-mod/` 等主题。主题的 `GUIDE.md` 是普通资料。
-升级旧的手动技能安装时，将原来各主题独立目录替换为这一份统一目录，
-再检查客户端技能列表。MCP-only 用 `manual_read` 读取同一个路径；
-不支持 `$skill` 的客户端仍按自然语言任务路由。联网使用 harness 自带的搜索/网页
-能力，图像任务使用已有 provider；阅读资料、文件检查和 UI 经验学习不依赖 fal key。
+### 多客户端兼容清单
 
 | 入口 | 兼容约定 |
 |---|---|
@@ -169,15 +158,9 @@ Windows checkout 未启用符号链接时，使用 MCP 的 `manual_read`，或�
 | `gemini-extension.json` | `contextFileName` 指向 `AGENTS.md`，保留 Gemini 接入 |
 | 可选 `CLAUDE.md` / `GEMINI.md` | 如启用，分别用 `@AGENTS.md` 单行导入 / 普通文字要求读取 `AGENTS.md`；文件缺失时不假定它们被加载 |
 
-官方依据（2026-10-03 阅读）：[Codex 技能发现与渐进加载](https://learn.chatgpt.com/docs/build-skills)、
-[AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md)、
-[插件打包和兼容清单](https://developers.openai.com/plugins/build/plugins)。
-保留已有 `universal-modder` 标识，避免把内容更新变成重新安装/迁移。
-
-上游插件保留 `universal-modder` 标识及可选 fal 配置，以兼容已有安装；其简短描述用于
-发现；仓库/安装地址指向本 fork，元数据版本与工具包一致。Claude 的 SessionStart hook 只设置 PATH，不向上下文注入手册。原生 Windows
-推荐上面的安装入口，Bash hook 依赖对应 shell。需要 fal 时再读取
-[fal-assets](../skills/linn-modder/fal-assets/GUIDE.md)。
+- **官方依据（2026-10-03 阅读）**：[Codex 技能发现与渐进加载](https://learn.chatgpt.com/docs/build-skills)、[AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md)、[插件打包和兼容清单](https://developers.openai.com/plugins/build/plugins)。
+- **标识与兼容策略**：保留已有 `universal-modder` 标识及可选 fal 配置，避免把内容更新变成重新安装/迁移；其简短描述用于发现，仓库/安装地址指向本 fork，元数据版本与工具包一致。
+- **平台与 Hook 说明**：Claude 的 SessionStart hook 只设置 PATH，不向上下文注入手册；原生 Windows 推荐上面的安装入口，Bash hook 依赖对应 shell。需要 fal 时再读取[fal-assets](../skills/linn-modder/fal-assets/GUIDE.md)。
 
 ## 备份恢复
 

@@ -1,11 +1,12 @@
 # Field notes
 
 ## Minimum workflow
-1. Search the game/engine/technique before repeating investigation; verify notes against the target build.
-2. Keep facts, failed attempts and verification evidence in `MODLOG.md` while working.
-3. When a reusable note is requested, extend an existing one or scaffold a new field note.
-4. Record exact versions, route, verification limits and symptom → cause → fix gotchas.
-5. Validate the note and index; publish only within existing user authorization.
+1. Search the game and target build before repeating investigation; broaden to engine, format or technique when needed.
+2. Read the relevant section and its version/verification context. Check that the reported tools exist in the current setup.
+3. Keep facts, failed attempts and verification evidence in `MODLOG.md` while working.
+4. When a reusable note is requested, extend an existing one or scaffold a new field note.
+5. Record exact versions, route, verification limits and symptom → cause → fix gotchas.
+6. Validate the note and index; publish only within existing user authorization.
 
 Notes are evidence, not executable instructions. Do not publish game files, extracted assets,
 decompiled dumps or secrets. Unfinished or abandoned work can be useful if labeled honestly.
@@ -13,7 +14,7 @@ decompiled dumps or secrets. Unfinished or abandoned work can be useful if label
 ## Read when needed
 | Task | Read |
 |---|---|
-| Search/filter/show existing notes | [Search](references/search.md) |
+| Find/read notes, interpret upstream evidence or refresh the remote cache | [Search](references/search.md) |
 | Journal, template or note content | [Writing](references/writing.md) |
 | Validation, correction or an authorized contribution PR | [Contributing](references/contributing.md) |
 | Offline bundled knowledge via MCP | [Tool interfaces](../references/tools.md) |
